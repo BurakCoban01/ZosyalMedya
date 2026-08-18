@@ -1,0 +1,53 @@
+.poll-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--zm-space-2, 0.6rem);
+  margin: var(--zm-space-2, 0.5rem) 0 var(--zm-space-4, 1rem);
+  padding: var(--zm-space-3, 0.9rem);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+.poll-composer legend {
+  padding: 0 0.4rem;
+  font-weight: 750;
+  color: var(--zm-text-1);
+}
+.poll-composer input {
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid var(--zm-border-subtle);
+  background: transparent;
+  padding: 0.6rem;
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+}
+.poll-options { display:grid; gap:var(--zm-space-2, .5rem); }
+.poll-option-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:var(--zm-space-2,.5rem); }
+.poll-option-row button,.poll-option-add { min-height:44px; border:0; border-radius:var(--zm-radius-control,.5rem); background:transparent; color:var(--zm-discovery); cursor:pointer; }
+.poll-option-row button:disabled,.poll-option-add:disabled { color:var(--zm-text-3); cursor:not-allowed; opacity:.6; }
+.poll-option-add { justify-self:start; padding:.45rem .6rem; }
+.poll-settings { display:flex; flex-wrap:wrap; align-items:center; gap:var(--zm-space-4,1rem); color:var(--zm-text-2); font:var(--zm-text-sm) var(--zm-font-ui); }
+.poll-settings label { display:inline-flex; align-items:center; gap:var(--zm-space-2,.5rem); min-height:44px; }
+.poll-settings input[type='checkbox'] { inline-size:1.1rem; block-size:1.1rem; }
+.poll-settings select { min-height:44px; border:1px solid var(--zm-border-subtle); border-radius:var(--zm-radius-control,.5rem); background:var(--zm-canvas); color:var(--zm-text-1); padding-inline:.6rem; }
+.poll-option-row button:focus-visible,.poll-option-add:focus-visible,.poll-settings select:focus-visible { outline:3px solid var(--zm-focus); outline-offset:2px; }
+.poll-composer input:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+  border-bottom-color: var(--zm-brand);
+}
+.composer-actions .poll-toggle {
+  background: transparent;
+  color: var(--zm-discovery);
+  padding-inline: 0;
+}
+.composer-actions .poll-toggle:hover {
+  color: var(--zm-text-1);
+}
+/* Rendered poll styles live in components/post-card.component.css
+   (.zm-post-card__poll); this file keeps only the composer fieldset. */
+@media (max-width: 760px) {
+  .poll-composer {
+    grid-template-columns: 1fr;
+  }
+}

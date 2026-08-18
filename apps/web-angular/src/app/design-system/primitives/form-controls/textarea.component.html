@@ -1,0 +1,43 @@
+<!--
+  ZmTextarea field shell — mirrors ZmInput without the reveal toggle.
+  Persistent <label for=id>, optional helper, error tied via aria-describedby.
+-->
+<div
+  class="zm-textarea__field"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+  [class.is-disabled]="disabled()"
+>
+  <label class="zm-textarea__label" [attr.for]="resolvedId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="zm-textarea__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <textarea
+    class="zm-textarea__input zm-feedback"
+    [id]="resolvedId()"
+    [rows]="rows()"
+    [attr.cols]="cols() ?? null"
+    [attr.maxlength]="maxlength() !== null ? maxlength() : null"
+    [attr.name]="name() && name().length > 0 ? name() : null"
+    [attr.placeholder]="placeholder() && placeholder().trim().length > 0 ? placeholder() : null"
+    [attr.resize]="resizeAttr()"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    [disabled]="disabled()"
+    [readOnly]="readonly()"
+    [required]="required()"
+    (input)="onInput($event)"
+    (focus)="focused.emit()"
+    (blur)="blurred.emit()"
+  >{{ value() }}</textarea>
+
+  @if (helper() && helper().trim().length > 0) {
+    <p class="zm-textarea__helper" [id]="helperId()">{{ helper() }}</p>
+  }
+  @if (hasError()) {
+    <p class="zm-textarea__error" [id]="errorId()">{{ error() }}</p>
+  }
+</div>

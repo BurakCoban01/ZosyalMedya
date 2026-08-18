@@ -1,0 +1,30 @@
+<button
+  type="button"
+  class="zm-button__btn zm-feedback"
+  [attr.type]="type()"
+  [attr.data-variant]="variant()"
+  [attr.data-size]="size()"
+  [class.is-block]="block()"
+  [class.is-loading]="loading()"
+  [class.is-selected]="selected()"
+  [class.is-error]="error()"
+  [class.is-high-contrast]="highContrast()"
+  [disabled]="isDisabled()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.aria-pressed]="selected() ? 'true' : null"
+  (click)="clicked.emit()"
+>
+  @if (loading()) {
+    <span class="zm-button__spinner" aria-hidden="true" role="presentation"></span>
+  }
+  <!--
+    The label span is ALWAYS rendered. Under loading it is set to opacity:0
+    (never display:none / visibility:hidden) so:
+      - its text node continues to supply the button's accessible name
+        (VAL-DS-019: stable name while loading);
+      - its box continues to occupy the same width (no layout shift; the
+        getBoundingClientRect().width delta is sub-pixel).
+    The spinner above is aria-hidden=true so it never pollutes the name.
+  -->
+  <span class="zm-button__label"><ng-content></ng-content></span>
+</button>

@@ -1,0 +1,146 @@
+<!--
+  Account control trigger (VAL-WSH-005). A real <button> so it is keyboard-
+  reachable + keyboard-activatable; aria-haspopup=menu + aria-expanded mirror
+  the popover state. The trigger carries the user's avatar (stable identity
+  fallback when no image) and, in the full desktop variant, the display name.
+  Meaning never relies on the avatar alone: the accessible name always carries
+  the user's name + "hesap menüsü".
+-->
+<button
+  type="button"
+  class="account-menu__trigger"
+  [class.account-menu__trigger--compact]="compact()"
+  (click)="toggle()"
+  [attr.aria-haspopup]="'menu'"
+  [attr.aria-expanded]="menu()?.isOpen() ?? false"
+  [attr.aria-label]="triggerLabel()"
+>
+  <zm-avatar
+    class="account-menu__avatar"
+    [name]="displayName()"
+    size="sm"
+  ></zm-avatar>
+
+  @if (!compact()) {
+    <span class="account-menu__id">
+      <span class="account-menu__name">{{ displayName() }}</span>
+      @if (handle(); as h) {
+        <span class="account-menu__handle" aria-hidden="true">@{{ h }}</span>
+      }
+    </span>
+  }
+
+  <svg
+    class="account-menu__caret"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d="M6 9l6 6 6-6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+
+<!--
+  Account popover (ZmMenu owns focus-trap + arrow nav + Escape + outside-click
+  + return-focus). role=menu with aria-label; children carry role=menuitem so
+  the walker finds them. Content:
+    1. profile header (informational; not a menuitem)
+    2. Profil e git  -> /profil
+    3. Görünüm theme group: Sistem / Açık / Koyu (checkmark + aria-checked)
+    4. Cikis yap     -> real AuthService.logout() -> /giris
+-->
+<zm-menu [label]="'Hesap menüsü'">
+  <!--
+    Profile header. Informational region (no role=menuitem) so arrow nav skips
+    it; it is reachable visually + read by AT as static text. Avatar repeats
+    the stable identity; name + handle identify the account unambiguously.
+  -->
+  <div class="account-menu__header">
+    <zm-avatar
+      class="account-menu__avatar account-menu__avatar--lg"
+      [name]="displayName()"
+      size="md"
+    ></zm-avatar>
+    <span class="account-menu__header-id">
+      <span class="account-menu__header-name">{{ displayName() }}</span>
+      @if (handle(); as h) {
+        <span class="account-menu__header-handle">@{{ h }}</span>
+      } @else {
+        <span class="account-menu__header-hint">Görünüm ve oturumu buradan yönet</span>
+      }
+    </span>
+  </div>
+
+  <div class="account-menu__separator" role="separator" aria-hidden="true"></div>
+
+  <!-- Profile navigation. -->
+  <button type="button" role="menuitem" class="account-menu__item" (click)="goProfile()">
+    <svg class="account-menu__item-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20a8 8 0 0 1 16 0"
+            fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="account-menu__item-label">Profil</span>
+  </button>
+
+  <!--
+    Theme group (VAL-WSH-006). Each option is a role=menuitem with a checkmark
+    (aria-hidden) + aria-checked reflecting the current ThemeMode. Selecting
+    one calls theme.setTheme() which applies data-theme synchronously +
+    persists; the index.html pre-paint script reapplies it on reload with no
+    flash. The group label is a non-interactive section header.
+  -->
+  <div class="account-menu__group-label" id="account-menu-theme-label">Görünüm</div>
+  @for (opt of themeOptions; track opt.value) {
+    <button
+      type="button"
+      role="menuitem"
+      class="account-menu__item account-menu__item--theme"
+      [class.is-selected]="isTheme(opt.value)"
+      [attr.aria-checked]="isTheme(opt.value) ? 'true' : 'false'"
+      (click)="chooseTheme(opt.value)"
+    >
+      <span class="account-menu__check" aria-hidden="true">
+        @if (isTheme(opt.value)) {
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 12.5l4 4 10-10"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        }
+      </span>
+      <span class="account-menu__item-label">{{ opt.label }}</span>
+      <span class="account-menu__item-hint" aria-hidden="true">{{ opt.hint }}</span>
+    </button>
+  }
+
+  <div class="account-menu__separator" role="separator" aria-hidden="true"></div>
+
+  <!--
+    Logout (VAL-WSH-005). Real AuthService.logout() (backend logout endpoint
+    revokes the refresh token + TokenVault clear) then navigate to /giris.
+    aria-busy while the call is in flight; disabled to block a double submit.
+  -->
+  <button
+    type="button"
+    role="menuitem"
+    class="account-menu__item account-menu__item--danger"
+    (click)="logout()"
+    [disabled]="loggingOut()"
+    [attr.aria-busy]="loggingOut()"
+    [attr.aria-disabled]="loggingOut() ? 'true' : null"
+  >
+    <svg class="account-menu__item-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M14 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2"
+            fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M10 12h10M17 9l3 3-3 3" fill="none" stroke="currentColor"
+            stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="account-menu__item-label">{{ loggingOut() ? 'Çıkış yapılıyor…' : 'Çıkış yap' }}</span>
+  </button>
+</zm-menu>

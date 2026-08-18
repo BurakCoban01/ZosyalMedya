@@ -1,0 +1,35 @@
+/* ============================================================================
+ * ZmNavIcon — presentational navigation icon glyph.
+ *
+ * The host reserves a square inline-size (--zm-nav-icon-size) so swapping
+ * icons never causes layout shift. The SVG fills the host and uses
+ * currentColor so the parent nav item controls the color via the surrounding
+ * `color` CSS (token-driven; no hardcoded hex). The host is aria-hidden +
+ * focusable=false so AT + iOS VoiceOver skip the SVG and read only the parent
+ * interactive element's accessible name (no double-read).
+ * ============================================================================ */
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zm-nav-icon-size, 1.5rem);
+  height: var(--zm-nav-icon-size, 1.5rem);
+  flex: none;
+  color: inherit;
+  pointer-events: none; /* the parent owns pointer/hit-testing */
+}
+
+:host svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Forced colors (Windows high-contrast) — let the SVG inherit the system
+ * CanvasText/LinkText colors the parent sets. No mapping needed here. */
+@media (forced-colors: active) {
+  :host {
+    color: inherit;
+  }
+}

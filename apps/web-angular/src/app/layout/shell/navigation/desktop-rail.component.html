@@ -1,0 +1,86 @@
+<aside class="rail" data-surface="rail">
+  <!-- Brand. Real anchor to /akis; accessible name carries the brand + intent. -->
+  <a class="rail-logo" routerLink="/akis" aria-label="Enterprise Social &amp; Community Platform ana sayfa">
+    <span class="rail-logo__mark" aria-hidden="true">E</span>
+    <span class="rail-logo__dot" aria-hidden="true">•</span>
+  </a>
+
+  <!--
+    Compose entry (VAL-WSH-004). A real <button> so it is keyboard-reachable +
+    keyboard-activatable; navigates to the feed composer route. Primary brand
+    treatment makes it the unmistakable principal action of the rail. The
+    leading glyph is aria-hidden (meaning is in the label).
+  -->
+  <button type="button" class="rail-compose" (click)="compose()">
+    <svg class="rail-compose__glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 19l1.1-3.4a7 7 0 1 1 2.3 2.3L5 19z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M9.5 11.5h5M12 9v5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    </svg>
+    <span class="rail-compose__label">Oluştur</span>
+  </button>
+
+  <!--
+    Primary navigation landmark (VAL-WSH-002). Every item is a native <a
+    routerLink> so keyboard Tab reaches each in visual order; accessible name =
+    the Turkish label (+ exact unread count where applicable). No nested
+    interactive elements. The active item carries >=2 NON-color cues
+    (VAL-WSH-001): the signal-arc indicator in the reserved leading slot +
+    raised surface tone + heavier weight + brighter ink + aria-current="page".
+  -->
+  <nav class="rail-nav" aria-label="Ana navigasyon">
+    @for (entry of navEntries; track entry.link) {
+      <a
+        class="rail-nav__item"
+        [routerLink]="entry.link"
+        routerLinkActive="is-active"
+        (isActiveChange)="setActive(entry.link, $event)"
+        [class.is-current]="isCurrent(entry.link)"
+        [attr.aria-current]="isCurrent(entry.link) ? 'page' : null"
+        [attr.aria-label]="ariaLabel(entry)"
+      >
+        <!--
+          Leading slot reserves fixed space so the signal-arc indicator can
+          appear/disappear without layout shift. The numeral is decorative
+          editorial numbering (aria-hidden); the arc renders only for the
+          current route. The arc is a redundant visual cue (aria-current + the
+          raised tone + weight already convey active state), so it is hidden
+          from AT.
+        -->
+        <span class="rail-nav__leading" aria-hidden="true">
+          @if (isCurrent(entry.link)) {
+            <svg class="rail-nav__signal" viewBox="0 0 10 24" preserveAspectRatio="xMidYMid meet">
+              <path d="M8 2 Q 1 12 8 22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          } @else {
+            <span class="rail-nav__numeral">{{ entry.order }}</span>
+          }
+        </span>
+        <span class="rail-nav__label">{{ entry.label }}</span>
+
+        @if (hasUnread(entry)) {
+          <!--
+            Unread indicator (VAL-WSH-003). The pulse-node motif is decorative
+            (aria-hidden; meaning flows through the link aria-label). The count
+            pill is a distinct shape + trailing position + literal digit, so the
+            indicator is never color-only. Absent entirely when count is zero.
+          -->
+          <span class="rail-nav__unread">
+            <zm-motif class="rail-nav__pulse" name="pulse-node" size="0.875rem" />
+            <b class="rail-nav__count" aria-hidden="true">{{ badgeFor(entry) }}</b>
+          </span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!--
+    Account menu (m2-account-theme-status; VAL-WSH-005 / VAL-WSH-006).
+    Replaces the legacy standalone Çıkış button with an account control that
+    opens a keyboard-navigable popover: profile header + Profil e git + theme
+    group (Sistem / Açık / Koyu, applied immediately + persisted, no flash on
+    reload) + Çıkış yap (real AuthService.logout() -> /giris). The component
+    owns its own AuthService / Router / ThemeService wiring; the rail just
+    hosts it.
+  -->
+  <zm-account-menu class="rail-account" />
+</aside>

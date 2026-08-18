@@ -1,0 +1,39 @@
+@import "tailwindcss";
+/* ZosyalMedya design-system tokens (Living Editorial Network direction).
+   Three-layer --zm-* system (primitive → semantic → component) + Tailwind 4
+   @theme bridge. See app/design-system/tokens/tokens.css.
+   Legacy --ink/--paper/--coral tokens below remain UNCHANGED (coexistence
+   during migration); do not remove until no consumer remains. */
+@import "./app/design-system/tokens/tokens.css";
+/* Self-hosted variable fonts for the three type roles declared in tokens.css
+   (Manrope Variable -> --zm-font-ui; Newsreader Variable -> --zm-font-display).
+   NO runtime CDN; woff2 files served same-origin from /fonts/. Turkish glyph
+   coverage via latin + latin-ext subsets. See typography/typography.css. */
+@import "./app/design-system/typography/typography.css";
+/* Motion system: enter/leave utility classes, state-feedback transitions,
+   route view-transition policy, and reduced-motion alternatives. Owns all
+   animation/transition/scroll-behavior policy (tokens.css owns the timings).
+   See app/design-system/motion/motion.css. */
+@import "./app/design-system/motion/motion.css";
+/* Angular CDK prebuilt styles for overlay (container/pane/backdrop structural
+   CSS + `.cdk-global-scrollblock` used by BlockScrollStrategy for scroll lock)
+   and a11y (focus-trap + visually-hidden). Required by the Zm overlay
+   primitives (ZmDialog/ZmSheet/ZmMenu/ZmTooltip). */
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@angular/cdk/a11y-prebuilt.css";
+/* Zm overlay primitives — global styles for the CDK-owned backdrop + pane
+   wrapper elements (scrim appearance, transparent menu backdrop, tooltip
+   pane pointer-events:none). See primitives/overlays/overlays-global.css. */
+@import "./app/design-system/primitives/overlays/overlays-global.css";
+/* Zm state primitives — shared base layout for ZmEmptyState / ZmErrorState /
+   ZmPermissionState (the three share the icon + title + description + action
+   editorial structure). The per-state scoped CSS adds only the variant
+   accent. See primitives/feedback-states/feedback-states-shared.css. */
+@import "./app/design-system/primitives/feedback-states/feedback-states-shared.css";
+/* color-scheme is owned by tokens.css (:root=light, [data-theme=dark]=dark) so
+   the dark override wins; the legacy :root block here must NOT redeclare it. */
+:root{--ink:#151619;--paper:#f4f0e8;--coral:#ff6b4a;--coral-dark:#c84a31;--muted:#6f706f;--muted-on-dark:#b8b7b2;--line:#d8d3ca;--display:Georgia,'Times New Roman',serif;--ui:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}*{box-sizing:border-box}html{background:var(--zm-canvas);color:var(--zm-text-1);font-family:var(--zm-font-ui);/* Focus visibility under sticky UI (VAL-WSH-011): reserve the optimal viewing
+   region so focus-driven scrolling / scrollIntoView never hides a focused
+   element under the sticky offline banner (top) or the fixed mobile bottom
+   nav (bottom, ~4.75rem + safe-area). scroll-padding does NOT affect layout
+   box sizes or sticky positioning — it only insets scroll-into-view targeting. */scroll-padding-top:3rem;scroll-padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}body{margin:0;min-width:320px;background:var(--zm-canvas);color:var(--zm-text-1)}button,input,textarea,select{font:inherit}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--zm-focus);outline-offset:3px}::selection{background:var(--zm-brand);color:var(--zm-brand-on)}

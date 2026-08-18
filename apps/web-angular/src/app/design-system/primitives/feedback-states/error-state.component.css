@@ -1,0 +1,17 @@
+/**
+ * ZmErrorState — variant accent.
+ *
+ * The shared layout lives in feedback-states-shared.css (imported globally via
+ * styles.css). This scoped file owns ONLY the error-state variant accent: the
+ * surface adds a subtle danger-tinted edge so the recoverable error reads as
+ * distinct from a neutral empty state even before the icon is parsed. The
+ * alert-triangle icon glyph is the primary non-color cue (VAL-DS-029).
+ */
+
+:host {
+  display: block;
+  /* Subtle danger edge: a 1px border in the danger accent at low visual
+   * weight. Paired with the alert-triangle icon (never color-only). */
+  border: 1px solid var(--zm-state-icon-danger);
+  background: var(--zm-state-bg);
+}

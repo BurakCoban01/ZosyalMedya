@@ -1,0 +1,205 @@
+/*!
+ * ZmSelect styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Shares the `--zm-input-*` component layer with ZmInput / ZmTextarea so the
+ * field language is identical. Wraps the native <select> (appearance:none on
+ * the resting box; the option popup stays native). No hardcoded hex
+ * (VAL-DS-002); the chevron is an inline currentColor SVG.
+ *
+ * State coverage (VAL-DS-023): rest, hover, focus-visible, disabled, error,
+ * high-contrast. Forced-colors keeps the control edge + focus ring visible.
+ */
+
+.zm-select {
+  display: block;
+}
+
+.zm-select__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+/* ============================================================================
+ * PERSISTENT LABEL (VAL-DS-021)
+ * ============================================================================ */
+.zm-select__label {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-label-size);
+  font-weight: var(--zm-input-label-weight);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-label-fg);
+  align-self: flex-start;
+  cursor: pointer;
+}
+.zm-select__required {
+  margin-left: 0.25ch;
+  color: var(--zm-input-error);
+}
+
+/* ============================================================================
+ * CONTROL ROW + NATIVE SELECT
+ *    appearance:none removes the OS arrow so the design owns the resting box.
+ *    The option popup remains native (correct mobile + AT behavior).
+ * ============================================================================ */
+.zm-select__control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.zm-select__input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: block;
+  width: 100%;
+  min-height: var(--zm-input-min-height);
+  box-sizing: border-box;
+  padding: var(--zm-input-padding-y) var(--zm-input-padding-x);
+  /* Reserve trailing room for the chevron so the selected label never slips
+     under the glyph. */
+  padding-right: calc(var(--zm-input-trailing-pad) + var(--zm-input-icon-size));
+  border-radius: var(--zm-input-radius);
+  border: var(--zm-border-width-hair) solid var(--zm-input-border);
+  background: var(--zm-input-bg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--zm-input-duration) var(--zm-input-ease),
+    border-color var(--zm-input-duration) var(--zm-input-ease),
+    box-shadow var(--zm-input-duration) var(--zm-input-ease),
+    outline-offset var(--zm-input-duration) var(--zm-input-ease);
+}
+/* Hide the native IE/Edge arrow as well. */
+.zm-select__input::-ms-expand {
+  display: none;
+}
+
+/* ============================================================================
+ * DECORATIVE CHEVRON (currentColor; aria-hidden; pointer-events:none)
+ * ============================================================================ */
+.zm-select__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--zm-input-padding-x);
+  transform: translateY(-50%);
+  width: var(--zm-input-icon-size);
+  height: var(--zm-input-icon-size);
+  color: var(--zm-input-helper);
+  pointer-events: none;
+  /* The chevron tones with the field; on focus it lifts to the label color so
+     the open state reads as active. */
+  transition: color var(--zm-input-duration) var(--zm-input-ease);
+}
+.zm-select__control:focus-within .zm-select__chevron {
+  color: var(--zm-input-label-fg);
+}
+
+/* ============================================================================
+ * STATES
+ * ============================================================================ */
+.zm-select__input:hover:not([disabled]):not(:focus) {
+  background: var(--zm-input-bg-hover);
+  border-color: var(--zm-input-border-hover);
+}
+.zm-select__input:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-input-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+  border-color: var(--zm-input-border-focus);
+  background: var(--zm-input-bg-focus);
+}
+.zm-select__field.is-disabled .zm-select__input,
+.zm-select__input:disabled {
+  background: var(--zm-input-bg-disabled);
+  border-color: var(--zm-input-border-disabled);
+  color: var(--zm-input-fg-disabled);
+  cursor: not-allowed;
+}
+.zm-select__field.is-disabled {
+  opacity: 0.7;
+}
+.zm-select__field.is-disabled .zm-select__label,
+.zm-select__field.is-disabled .zm-select__helper,
+.zm-select__field.is-disabled .zm-select__chevron {
+  color: var(--zm-input-fg-disabled);
+}
+
+/* Error (VAL-DS-021). */
+.zm-select__field.is-error .zm-select__input {
+  border-color: var(--zm-input-error-ring);
+}
+.zm-select__field.is-error .zm-select__input:focus-visible {
+  outline-color: var(--zm-input-error-ring);
+  border-color: var(--zm-input-error-ring);
+}
+.zm-select__field.is-error .zm-select__chevron {
+  color: var(--zm-input-error);
+}
+
+/* High-contrast (author-side). */
+.zm-select__field.is-high-contrast .zm-select__input {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * HELPER + ERROR
+ * ============================================================================ */
+.zm-select__helper {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-helper);
+}
+.zm-select__error {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-error);
+}
+.zm-select__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+
+/* ============================================================================
+ * REDUCED MOTION + FORCED COLORS
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-select__input,
+  .zm-select__chevron {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-select__input,
+:host-context([data-reduce-motion]) .zm-select__chevron {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+
+@media (forced-colors: active) {
+  .zm-select__input,
+  .zm-select__field.is-high-contrast .zm-select__input {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-select__input:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-select__input:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+  .zm-select__chevron {
+    color: ButtonText;
+  }
+}

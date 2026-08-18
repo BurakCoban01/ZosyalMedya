@@ -1,0 +1,335 @@
+/*!
+ * ZmButton styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-button-*` component layer (tokens.css §3) which itself
+ * composes the semantic `--zm-brand` / `--zm-text-*` / `--zm-danger` / `--zm-*`
+ * roles. No hardcoded hex / rgb / oklch appears in this file (VAL-DS-002).
+ *
+ * Layout model:
+ *   <zm-button class="zm-button">                 (host: inline-flex wrapper)
+ *     <button class="zm-button__btn">             (native control)
+ *       <span class="zm-button__spinner">         (loading overlay, aria-hidden)
+ *       <span class="zm-button__label">           (always rendered; opacity:0 when loading)
+ *
+ * The host is a wrapper so the inner native <button> owns the accessible name,
+ * focus, and disabled state directly. The host carries block/inline layout.
+ */
+
+/* ============================================================================
+ * HOST WRAPPER
+ * ============================================================================ */
+.zm-button {
+  display: inline-flex;
+  vertical-align: middle;
+}
+.zm-button:has(.is-block) {
+  display: flex;
+  width: 100%;
+}
+
+/* ============================================================================
+ * BASE CONTROL
+ * ============================================================================ */
+.zm-button__btn {
+  /* layout */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zm-button-icon-gap);
+  min-height: var(--zm-button-min-height);
+  padding: var(--zm-button-padding-y) var(--zm-button-padding-x);
+  box-sizing: border-box;
+  /* shape + material */
+  border-radius: var(--zm-button-radius);
+  border: var(--zm-border-width-hair) solid transparent;
+  /* typography */
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  font-weight: 650;
+  line-height: var(--zm-leading-ui);
+  letter-spacing: 0;
+  white-space: nowrap;
+  /* behavior */
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* engine: CSS transitions only (state feedback). The .zm-feedback utility
+     already declares this list; we restate it scoped to the button so the
+     primitive is self-contained when consumed without the utility class. */
+  transition:
+    background-color var(--zm-button-duration) var(--zm-button-ease),
+    border-color var(--zm-button-duration) var(--zm-button-ease),
+    color var(--zm-button-duration) var(--zm-button-ease),
+    box-shadow var(--zm-button-duration) var(--zm-button-ease),
+    outline-offset var(--zm-button-duration) var(--zm-button-ease);
+}
+
+/* Block: fill the host. */
+.zm-button__btn.is-block {
+  width: 100%;
+}
+
+/* Density: small. min-height lowers but the padded hit region still clears the
+   44px WCAG 2.2 target via vertical padding; never used for primary actions. */
+.zm-button__btn[data-size='sm'] {
+  min-height: calc(var(--zm-button-min-height) - 8px);
+  padding-block: calc(var(--zm-button-padding-y) - 0.125rem);
+  font-size: var(--zm-text-sm);
+}
+
+/* ============================================================================
+ * VARIANTS — rest state
+ * ============================================================================ */
+/* Primary — the coral brand fill. The page's principal action. */
+.zm-button__btn[data-variant='primary'] {
+  background: var(--zm-button-primary-bg);
+  color: var(--zm-button-primary-fg);
+  border-color: var(--zm-button-primary-bg);
+}
+/* Secondary — quiet ink on canvas with a structural border. */
+.zm-button__btn[data-variant='secondary'] {
+  background: var(--zm-button-secondary-bg);
+  color: var(--zm-button-secondary-fg);
+  border-color: var(--zm-button-secondary-border);
+}
+/* Quiet — transparent resting surface; the lowest-emphasis action. */
+.zm-button__btn[data-variant='quiet'] {
+  background: transparent;
+  color: var(--zm-button-quiet-fg);
+  border-color: transparent;
+}
+/* Danger — destructive / irreversible action. Pairs ember fill with an icon
+   or explicit label so the state is never color-only. */
+.zm-button__btn[data-variant='danger'] {
+  background: var(--zm-button-danger-bg);
+  color: var(--zm-button-danger-fg);
+  border-color: var(--zm-button-danger-bg);
+}
+
+/* ============================================================================
+ * STATE: hover, focus-visible, active (pressed)
+ *    Hover/focus are keyboard-equivalent (Web-app contract). Active gives a
+ *    pressed affordance via a darker tonal step + a 1px translate.
+ * ============================================================================ */
+.zm-button__btn[data-variant='primary']:hover {
+  background: var(--zm-button-primary-bg-hover);
+  border-color: var(--zm-button-primary-bg-hover);
+}
+.zm-button__btn[data-variant='secondary']:hover {
+  background: var(--zm-button-secondary-bg-hover);
+  border-color: var(--zm-text-3);
+}
+.zm-button__btn[data-variant='quiet']:hover {
+  background: var(--zm-button-secondary-bg-hover);
+  color: var(--zm-button-secondary-fg);
+}
+.zm-button__btn[data-variant='danger']:hover {
+  background: var(--zm-button-danger-bg-hover);
+  border-color: var(--zm-button-danger-bg-hover);
+}
+
+/* Focus-visible — never obscured, always present, theme-aware ring. */
+.zm-button__btn:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-button-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+/* Quiet + secondary keep a hair of surface behind the ring so it reads on busy
+   canvases; primary/danger already fill. */
+.zm-button__btn[data-variant='quiet']:focus-visible,
+.zm-button__btn[data-variant='secondary']:focus-visible {
+  background: var(--zm-button-secondary-bg-hover);
+}
+
+/* Pressed — active. A tonal step beyond hover + a tiny depress; transform only
+   (compositor-friendly; killed under reduced motion by the token cascade). */
+.zm-button__btn:active:not([disabled]) {
+  transform: translateY(1px);
+}
+.zm-button__btn[data-variant='primary']:active:not([disabled]) {
+  background: var(--zm-button-primary-bg-active);
+  border-color: var(--zm-button-primary-bg-active);
+}
+.zm-button__btn[data-variant='secondary']:active:not([disabled]) {
+  background: var(--zm-button-secondary-bg-active);
+}
+.zm-button__btn[data-variant='quiet']:active:not([disabled]) {
+  background: var(--zm-button-secondary-bg-active);
+  color: var(--zm-button-secondary-fg);
+}
+.zm-button__btn[data-variant='danger']:active:not([disabled]) {
+  background: var(--zm-button-danger-bg-active);
+  border-color: var(--zm-button-danger-bg-active);
+}
+
+/* ============================================================================
+ * STATE: selected (aria-pressed=true)
+ *    Persistent "chosen" treatment. Uses a brand inset ring (position cue, not
+ *    color-only) + the brand tone on the label. Quiet + secondary receive the
+ *    full treatment; primary/danger signal selection via the inset ring only
+ *    (their fill already dominates).
+ * ============================================================================ */
+.zm-button__btn.is-selected {
+  box-shadow: inset 0 0 0 var(--zm-border-width-strong) var(--zm-button-selected-indicator);
+}
+.zm-button__btn[data-variant='quiet'].is-selected,
+.zm-button__btn[data-variant='secondary'].is-selected {
+  background: var(--zm-button-selected-bg);
+  color: var(--zm-button-selected-fg);
+  border-color: var(--zm-button-selected-indicator);
+}
+
+/* ============================================================================
+ * STATE: error
+ *    Couples the danger ring with the variant color. The ring's shape persists
+ *    in grayscale so the state is never color-only.
+ * ============================================================================ */
+.zm-button__btn.is-error {
+  border-color: var(--zm-button-error-ring);
+}
+.zm-button__btn.is-error:focus-visible {
+  outline-color: var(--zm-button-error-ring);
+}
+
+/* ============================================================================
+ * STATE: high-contrast (author-side reinforcement)
+ *    The OS forced-colors path is handled by `@media (forced-colors: active)`
+ *    below + tokens.css. This input is for author-controlled high-visibility
+ *    contexts (e.g. overlays on imagery). It doubles the structural border.
+ * ============================================================================ */
+.zm-button__btn.is-high-contrast {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+.zm-button__btn[data-variant='quiet'].is-high-contrast,
+.zm-button__btn[data-variant='secondary'].is-high-contrast {
+  background: var(--zm-canvas-raised);
+}
+
+/* ============================================================================
+ * STATE: disabled (explicit or via loading)
+ * ============================================================================ */
+.zm-button__btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  /* Disabled controls must not capture the active depress. */
+  transform: none;
+}
+.zm-button__btn[disabled]:hover {
+  /* Hold the resting variant background so hover cannot imply action. */
+  background: inherit;
+}
+
+/* ============================================================================
+ * LABEL + SPINNER (loading state — VAL-DS-019)
+ *    The label is ALWAYS rendered. Under loading it is set to opacity:0 so:
+ *      - its text node continues to supply the button's accessible name;
+ *      - its box keeps the same width (no layout shift; opacity does not
+ *        affect layout, so getBoundingClientRect().width is stable).
+ *    The spinner overlays the label region, absolutely positioned + centered.
+ *    The spinner is aria-hidden so it never pollutes the accessible name.
+ * ============================================================================ */
+.zm-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zm-button-icon-gap);
+  /* Prevent the label from collapsing under sub-pixel rounding when loading. */
+  min-width: 0;
+}
+.zm-button__btn.is-loading .zm-button__label {
+  opacity: 0;
+}
+
+.zm-button__spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--zm-button-spinner-size);
+  height: var(--zm-button-spinner-size);
+  border-radius: var(--zm-radius-pill);
+  border-width: var(--zm-border-width-hair);
+  border-style: solid;
+  border-color: currentColor;
+  border-top-color: transparent;
+  opacity: 0.9;
+  /* One owner: CSS keyframes (no @angular/animations). The loop is killed under
+     reduced motion by the global `animation-iteration-count: 1` kill-switch in
+     motion.css, so the spinner parks and the pending state survives via
+     aria-busy + the dimmed label region. */
+  animation: zm-button-spin var(--zm-duration-base) linear infinite;
+  pointer-events: none;
+}
+@keyframes zm-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+ * REDUCED MOTION — state feedback without spatial motion
+ *    tokens.css already collapses every --zm-duration-* under both OS reduce
+ *    and the [data-reduce-motion] product toggle, so the button's transition
+ *    becomes near-instant (state still discriminable in a static frame). The
+ *    spinner is parked by the global kill-switch; here we additionally pin it
+ *    to a static mid-spin position so the pending affordance is unmistakable.
+ *
+ *    NOTE on encapsulation: `:root[data-reduce-motion]` in COMPONENT css is
+ *    rewritten by Angular's emulated view encapsulation to
+ *    `:root[_ngcontent-x][data-reduce-motion]`, which never matches <html>
+ *    (the html element carries data-reduce-motion but not the component's
+ *    ngcontent attr). Use `:host-context([data-reduce-motion])` instead — it
+ *    penetrates the encapsulation boundary to match any ancestor (here <html>).
+ *    The `!important` on `animation: none` ensures it wins over the global
+ *    `animation-iteration-count: 1 !important` kill-switch in motion.css for
+ *    the animation-name property (so the spinner is fully static, not a
+ *    one-shot rotation).
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-button__btn {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+  .zm-button__btn:active:not([disabled]) {
+    transform: none;
+  }
+  .zm-button__spinner {
+    animation: none;
+    border-top-color: currentColor;
+    opacity: 0.55;
+  }
+}
+:host-context([data-reduce-motion]) .zm-button__btn {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+:host-context([data-reduce-motion]) .zm-button__btn:active:not([disabled]) {
+  transform: none;
+}
+:host-context([data-reduce-motion]) .zm-button__spinner {
+  animation: none !important;
+  border-top-color: currentColor;
+  opacity: 0.55;
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Windows Contrast themes)
+ *    The control edge + focus ring must remain visible. We force a visible
+ *    border + map the focus ring to the system Highlight color. tokens.css
+ *    already remaps --zm-border-* / --zm-focus / --zm-brand under forced-colors;
+ *    here we additionally guarantee the edge width.
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-button__btn,
+  .zm-button__btn.is-high-contrast {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-button__btn:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-button__btn[disabled] {
+    color: GrayText;
+    border-color: GrayText;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,1088 @@
+/*!
+ * ZosyalMedya Design System — Tokens
+ * Direction: Living Editorial Network.
+ *
+ * Three-layer architecture (binding; see docs/agent/03-DESIGN-SYSTEM.md):
+ *   1. Primitive  — raw color / spacing / type / radius / shadow / motion / z / layout.
+ *                  Components MUST NOT consume primitives directly.
+ *   2. Semantic   --zm-canvas | --zm-surface-1..3 | --zm-text-1..3 | --zm-brand(-hover/-on) |
+ *                  --zm-discovery | --zm-info | --zm-success | --zm-warning | --zm-danger |
+ *                  --zm-focus | --zm-border-subtle/-strong | --zm-scrim | typography roles |
+ *                  motion roles. Light + dark are INDEPENDENT pairs (no mechanical inversion).
+ *   3. Component  --zm-button-* | --zm-input-* | --zm-feed-item-* | --zm-nav-item-* |
+ *                  --zm-composer-* | --zm-message-bubble-* | --zm-dialog-* | --zm-badge-*.
+ *
+ * Tailwind 4 bridge: a single `@theme inline` block exposes the semantic layer to
+ * utilities (bg-zm-canvas, text-zm-text-1, font-zm-display, rounded-zm-md, shadow-zm-md,
+ * ease-zm-standard, ...). `inline` keeps theme switching live: utilities resolve the
+ * cascaded --zm-* value, so [data-theme="dark"] overrides take effect without rebuild.
+ *
+ * Coexistence: the legacy informal tokens (--ink, --paper, --coral, --coral-dark,
+ * --muted, --muted-on-dark, --line, --display, --ui) remain in styles.css UNCHANGED.
+ * Migration is incremental, page-by-page. Do not delete legacy tokens until no
+ * consumer remains. This file does NOT alias legacy tokens to the new semantic
+ * values, so current appearance is byte-for-byte preserved.
+ *
+ * Consumption rules:
+ *   - Component CSS / templates: var(--zm-<role>) or Tailwind zm-* utilities.
+ *   - TS (canvas drawing, Web Animations API): import name constants from ./index.
+ *   - No hardcoded hex / rgb / oklch inside component CSS.
+ *
+ * Contrast: candidate values come from docs/agent/03-DESIGN-SYSTEM.md and must be
+ * verified by computed contrast checks before a surface ships.
+ */
+
+/* ============================================================================
+ * 1. PRIMITIVE LAYER
+ *    Raw palette + scale. Never consumed directly by components.
+ * ============================================================================ */
+:root {
+  /* --- Brand ramps (light-biased source values) --- */
+  --zm-color-coral-300: oklch(0.780 0.165 29);
+  --zm-color-coral-400: oklch(0.735 0.180 29);
+  --zm-color-coral-500: oklch(0.655 0.205 29);
+  --zm-color-coral-600: oklch(0.600 0.215 29);
+
+  /* --- Discovery (violet) --- */
+  --zm-color-violet-300: oklch(0.780 0.150 296);
+  --zm-color-violet-400: oklch(0.735 0.165 296);
+  --zm-color-violet-500: oklch(0.610 0.205 296);
+
+  /* --- Connection / info (sky) --- */
+  --zm-color-sky-400: oklch(0.760 0.120 220);
+  --zm-color-sky-500: oklch(0.650 0.145 220);
+
+  /* --- Status: success (leaf) / warning (amber) / danger (ember) --- */
+  --zm-color-leaf-400: oklch(0.735 0.130 150);
+  --zm-color-leaf-500: oklch(0.455 0.125 150);
+  --zm-color-amber-400: oklch(0.800 0.125 78);
+  --zm-color-amber-500: oklch(0.690 0.145 78);
+  --zm-color-ember-400: oklch(0.720 0.175 27);
+  --zm-color-ember-500: oklch(0.545 0.205 27);
+
+  /* --- Ink (blue-charcoal neutrals) --- */
+  --zm-color-ink-900: oklch(0.205 0.025 255);
+  --zm-color-ink-800: oklch(0.405 0.025 255);
+  --zm-color-ink-700: oklch(0.525 0.020 255);
+  --zm-color-ink-600: oklch(0.650 0.030 255);
+  --zm-color-ink-500: oklch(0.150 0.025 255);
+
+  /* --- Paper (warm-neutral light surfaces) --- */
+  --zm-color-paper-canvas:  oklch(0.975 0.012 78);
+  --zm-color-paper-raised:  oklch(0.985 0.006 78);
+  --zm-color-paper-1:       oklch(0.985 0.008 78);
+  --zm-color-paper-2:       oklch(0.958 0.014 78);
+  --zm-color-paper-3:       oklch(0.925 0.020 78);
+  --zm-color-paper-line-s:  oklch(0.875 0.018 78);
+  --zm-color-paper-line-m:  oklch(0.650 0.030 255);
+
+  /* --- Coal (blue-charcoal dark surfaces; independent pair, NOT inverted paper) --- */
+  --zm-color-coal-canvas:   oklch(0.145 0.024 255);
+  --zm-color-coal-raised:   oklch(0.175 0.026 255);
+  --zm-color-coal-1:        oklch(0.195 0.025 255);
+  --zm-color-coal-2:        oklch(0.235 0.027 255);
+  --zm-color-coal-3:        oklch(0.285 0.028 255);
+  --zm-color-coal-line-s:   oklch(0.315 0.026 255);
+  --zm-color-coal-line-m:   oklch(0.540 0.035 255);
+
+  /* --- Mist (light text tones for dark theme) --- */
+  --zm-color-mist-100: oklch(0.955 0.010 78);
+  --zm-color-mist-200: oklch(0.790 0.018 78);
+  --zm-color-mist-300: oklch(0.665 0.018 78);
+
+  /* --- Spacing scale (4px base; semantic steps per design-system §4) --- */
+  --zm-space-0:  0;
+  --zm-space-1:  0.25rem;  /*  4 */
+  --zm-space-2:  0.5rem;   /*  8 */
+  --zm-space-3:  0.75rem;  /* 12 */
+  --zm-space-4:  1rem;     /* 16 */
+  --zm-space-5:  1.25rem;  /* 20 */
+  --zm-space-6:  1.5rem;   /* 24 */
+  --zm-space-8:  2rem;     /* 32 */
+  --zm-space-10: 2.5rem;   /* 40 */
+  --zm-space-12: 3rem;     /* 48 */
+  --zm-space-16: 4rem;     /* 64 */
+  --zm-space-20: 5rem;     /* 80 */
+  --zm-space-24: 6rem;     /* 96 */
+
+  /* --- Typography families (roles; fonts self-hosted/subset later) --- */
+  --zm-font-ui:      "Manrope Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --zm-font-display: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  --zm-font-mono:    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+
+  /* --- Type scale (responsive clamp; design-system §3) --- */
+  --zm-text-xs:      clamp(0.75rem, 0.72rem + 0.10vw, 0.80rem);
+  --zm-text-sm:      clamp(0.875rem, 0.84rem + 0.12vw, 0.94rem);
+  --zm-text-md:      clamp(1rem, 0.96rem + 0.16vw, 1.08rem);
+  --zm-text-lg:      clamp(1.18rem, 1.08rem + 0.34vw, 1.38rem);
+  --zm-text-xl:      clamp(1.48rem, 1.28rem + 0.75vw, 1.95rem);
+  --zm-text-2xl:     clamp(2rem, 1.55rem + 1.8vw, 3.2rem);
+  --zm-text-display: clamp(3rem, 1.8rem + 5vw, 7rem);
+
+  /* --- Leading / tracking --- */
+  --zm-leading-display: 0.92;
+  --zm-leading-tight:   1.2;
+  --zm-leading-ui:      1.3;
+  --zm-leading-body:    1.6;
+  --zm-leading-loose:   1.7;
+  --zm-tracking-tight:  -0.02em;
+  --zm-tracking-normal: 0;
+  --zm-tracking-wide:   0.08em;
+  --zm-tracking-eyebrow: 0.18em; /* uppercase eyebrow / meta labels only */
+
+  /* --- Measure (reading width, characters per line) ---
+     Long-form column is expressed in `ch` so the browser sizes to the
+     actual advance width of the rendered font (VAL-DS-011: 68–72 avg chars
+     per line at the default desktop viewport). The 70ch value sits at the
+     midpoint of the 68–72 target band and is well under the 46rem hard
+     ceiling imposed on long-post columns. */
+  --zm-measure-body:      42rem;   /* 38–46rem general reading column */
+  --zm-measure-long-form: 70ch;    /* long-form post text (VAL-DS-011, 68–72ch) */
+  --zm-measure-feed:      48rem;   /* feed/action shell 42–52rem */
+  --zm-measure-bleed:     72rem;   /* wide / ops surfaces */
+
+  /* --- Radius (design-system §5) ---
+     Monotonic ladder. The role tokens in §2c bind component kinds onto these
+     steps so the scale stays the single source of truth.
+       controls 10–12   → sm  (10)        inputs/buttons 12–16 → md  (14)
+       cards 18–24      → lg  (20)        sheets 18–24        → xl  (24)
+     xl aligns to the §5 cards/sheets upper bound (24); 2xl (28) is reserved
+     for oversized/edge surfaces and is not referenced by a default role.
+     (xl was 28 in the initial scaffold; repointed to 24 to comply with §5.
+     The only consumer at that time was --zm-dialog-radius, which resolves to
+     24 via the new --zm-radius-sheet role — no visible behavior changed.) */
+  --zm-radius-xs:   6px;
+  --zm-radius-sm:   10px;
+  --zm-radius-md:   14px;
+  --zm-radius-lg:   20px;
+  --zm-radius-xl:   24px;
+  --zm-radius-2xl:  28px;
+  --zm-radius-pill: 999px;
+
+  /* --- Elevation (theme-specific; subtle, paired with tonal separation) --- */
+  --zm-shadow-sm: 0 1px 2px oklch(0.205 0.025 255 / 0.06);
+  --zm-shadow-md: 0 4px 12px oklch(0.205 0.025 255 / 0.08);
+  --zm-shadow-lg: 0 12px 32px oklch(0.205 0.025 255 / 0.12);
+
+  /* --- Motion (design-system §7; exit faster than enter) --- */
+  --zm-duration-instant: 90ms;
+  --zm-duration-fast:    140ms;
+  --zm-duration-base:    220ms;
+  --zm-duration-slow:    360ms;
+  --zm-duration-scene:   520ms;
+  --zm-ease-standard:   cubic-bezier(0.2, 0.8, 0.2, 1);
+  --zm-ease-enter:      cubic-bezier(0.16, 1, 0.3, 1);
+  --zm-ease-exit:       cubic-bezier(0.4, 0, 1, 1);
+  --zm-ease-emphasized: cubic-bezier(0.2, 0.9, 0.15, 1.15);
+
+  /* --- Layering (design-system §6; tonal separation before shadows) --- */
+  --zm-z-canvas:    0;
+  --zm-z-surface:   10;
+  --zm-z-raised:    20;
+  --zm-z-sticky:    100;
+  --zm-z-popover:   200;
+  --zm-z-dialog:    300;
+  --zm-z-toast:     400;
+  --zm-z-syslayer:  500;
+}
+
+/* ============================================================================
+ * 2. SEMANTIC LAYER — light (default)
+ *    Role aliases. Components consume these. Pairs are independent in dark.
+ * ============================================================================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Canvas + surfaces */
+  --zm-canvas:        var(--zm-color-paper-canvas);
+  --zm-canvas-raised: var(--zm-color-paper-raised);
+  --zm-surface-1:     var(--zm-color-paper-1);
+  --zm-surface-2:     var(--zm-color-paper-2);
+  --zm-surface-3:     var(--zm-color-paper-3);
+
+  /* Text */
+  --zm-text-1: var(--zm-color-ink-900);
+  --zm-text-2: var(--zm-color-ink-800);
+  --zm-text-3: var(--zm-color-ink-700);
+
+  /* Borders */
+  --zm-border-subtle: var(--zm-color-paper-line-s);
+  --zm-border-strong: var(--zm-color-paper-line-m);
+
+  /* Brand (coral) */
+  --zm-brand:       var(--zm-color-coral-500);
+  --zm-brand-hover: var(--zm-color-coral-600);
+  --zm-brand-on:    var(--zm-color-paper-raised);
+
+  /* Signal colors */
+  --zm-discovery: var(--zm-color-violet-500);
+  --zm-info:      var(--zm-color-sky-500);
+  --zm-success:   var(--zm-color-leaf-500);
+  --zm-warning:   var(--zm-color-amber-500);
+  --zm-danger:    var(--zm-color-ember-500);
+
+  /* Focus + scrim */
+  --zm-focus: var(--zm-color-violet-500);
+  --zm-scrim: oklch(0.150 0.025 255 / 0.58);
+}
+
+/* ============================================================================
+ * 2b. SEMANTIC LAYER — dark (independent pairs; applied by ThemeService later)
+ * ============================================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --zm-canvas:        var(--zm-color-coal-canvas);
+  --zm-canvas-raised: var(--zm-color-coal-raised);
+  --zm-surface-1:     var(--zm-color-coal-1);
+  --zm-surface-2:     var(--zm-color-coal-2);
+  --zm-surface-3:     var(--zm-color-coal-3);
+
+  --zm-text-1: var(--zm-color-mist-100);
+  --zm-text-2: var(--zm-color-mist-200);
+  --zm-text-3: var(--zm-color-mist-300);
+
+  --zm-border-subtle: var(--zm-color-coal-line-s);
+  --zm-border-strong: var(--zm-color-coal-line-m);
+
+  --zm-brand:       var(--zm-color-coral-400);
+  --zm-brand-hover: var(--zm-color-coral-300);
+  --zm-brand-on:    var(--zm-color-coal-canvas);
+
+  --zm-discovery: var(--zm-color-violet-400);
+  --zm-info:      var(--zm-color-sky-400);
+  --zm-success:   var(--zm-color-leaf-400);
+  --zm-warning:   var(--zm-color-amber-400);
+  --zm-danger:    var(--zm-color-ember-400);
+
+  --zm-focus: var(--zm-color-violet-300);
+  --zm-scrim: oklch(0.070 0.020 255 / 0.72);
+
+  /* Dark shadows are deeper, low-spread */
+  --zm-shadow-sm: 0 1px 2px oklch(0 0 0 / 0.40);
+  --zm-shadow-md: 0 4px 14px oklch(0 0 0 / 0.50);
+  --zm-shadow-lg: 0 16px 40px oklch(0 0 0 / 0.62);
+}
+
+/* ============================================================================
+ * 2c. SHAPE, BORDER, SEPARATOR & MATERIAL-DEPTH ROLES
+ *     Theme-independent role mappings. Radius roles bind component kinds to
+ *     the §5 radius ladder; border-width + separator roles give every divider
+ *     a canonical weight/color; material-depth tiers compose the seven-layer
+ *     elevation system (design-system §6). Each resolves a SEMANTIC token, so
+ *     [data-theme] overrides stay live. Components consume these roles in
+ *     preference to raw primitives.
+ * ============================================================================ */
+:root {
+  /* --- Radius roles (design-system §5) ---
+     Preferred consumption point for component curvature. Maps a component
+     kind to a primitive step; change a role here and every consumer follows. */
+  --zm-radius-control: var(--zm-radius-sm);   /* chips, status, icon-button hit area (10) */
+  --zm-radius-field:   var(--zm-radius-md);   /* inputs, buttons, textareas, selects  (14) */
+  --zm-radius-card:    var(--zm-radius-lg);   /* content cards, media frames            (20) */
+  --zm-radius-sheet:   var(--zm-radius-xl);   /* sheets, dialogs, large overlays        (24) */
+
+  /* --- Border weights (design-system §6 "borders before shadows") ---
+     Two canonical widths. Combine with --zm-border-subtle / -strong colors
+     (or the separator roles below) for the full divider matrix. The focus
+     ring width lives separately as --zm-focus-ring-width (3px). */
+  --zm-border-width-hair:   1px;   /* default separators, control borders, hairlines */
+  --zm-border-width-strong: 2px;   /* emphasized/structural separators, active indicators */
+
+  /* --- Separator roles ---
+     Named dividers for list rows, section breaks, and hairlines. The color
+     roles reference semantic borders (theme-aware); the composed rules drop
+     straight into `border(-top/-bottom): var(--zm-separator-rule)`. */
+  --zm-separator:             var(--zm-border-subtle);  /* inline list rows, subtle breaks */
+  --zm-separator-strong:      var(--zm-border-strong);  /* structural section breaks */
+  --zm-separator-rule:        var(--zm-border-width-hair) solid var(--zm-border-subtle);
+  --zm-separator-rule-strong: var(--zm-border-width-hair) solid var(--zm-border-strong);
+
+  /* --- Material depth / elevation tiers (design-system §6) ---
+     Seven named tiers compose the app's depth system. Each tier pairs a
+     surface tone with an elevation shadow and a z-index. Prefer tonal
+     separation + borders BEFORE shadows — only sticky and above cast shadows,
+     so the reading surface stays calm and identical floating cards never
+     appear across the product.
+
+     Tier ladder (low → high), with the canonical (surface, shadow, z):
+       canvas  (canvas,        none,            --zm-z-canvas  =   0)
+       page    (surface-1,     none,            --zm-z-surface =  10)
+       raised  (surface-2,     --zm-shadow-sm,  --zm-z-raised  =  20)
+       sticky  (canvas-raised, --zm-shadow-sm,  --zm-z-sticky  = 100)
+       popover (canvas-raised, --zm-shadow-md,  --zm-z-popover = 200)
+       dialog  (canvas-raised, --zm-shadow-lg,  --zm-z-dialog  = 300)
+       urgent  (canvas-raised, --zm-shadow-lg,  --zm-z-toast   = 400)
+     Components consume the elevation token for the shadow and pair it with
+     the documented surface tone + z-index for their tier (see --zm-z-* §1). */
+  --zm-elevation-canvas:  none;                 /* layer 1: app background */
+  --zm-elevation-page:    none;                 /* layer 2: page content (lists/sections) */
+  --zm-elevation-raised:  var(--zm-shadow-sm);  /* layer 3: composer/media/emphasized panels */
+  --zm-elevation-sticky:  var(--zm-shadow-sm);  /* layer 4: app bars/toolbars (on scroll) */
+  --zm-elevation-popover: var(--zm-shadow-md);  /* layer 5: menus/tooltips/dropdowns */
+  --zm-elevation-dialog:  var(--zm-shadow-lg);  /* layer 6: dialogs/sheets/modals (+scrim) */
+  --zm-elevation-urgent:  var(--zm-shadow-lg);  /* layer 7: toasts/system banners */
+}
+
+/* ============================================================================
+ * 3. COMPONENT LAYER
+ *    Initial set. Each primitive that lands extends this layer. Components
+ *    consume these (not semantic directly) where a role composes multiple
+ *    tokens, so visual changes stay centralized here.
+ * ============================================================================ */
+:root {
+  /* Button (primary / secondary / quiet / danger / icon — variants expand later) */
+  --zm-button-radius:       var(--zm-radius-field);
+  --zm-button-min-height:   40px;
+  --zm-button-padding-x:    var(--zm-space-5);
+  --zm-button-padding-y:    var(--zm-space-2);
+  --zm-button-primary-bg:   var(--zm-brand);
+  --zm-button-primary-bg-hover: var(--zm-brand-hover);
+  --zm-button-primary-fg:   var(--zm-brand-on);
+  --zm-button-secondary-bg: transparent;
+  --zm-button-secondary-bg-hover: var(--zm-surface-2);
+  --zm-button-secondary-fg: var(--zm-text-1);
+  --zm-button-secondary-border: var(--zm-border-strong);
+  --zm-button-quiet-fg:     var(--zm-text-2);
+  --zm-button-danger-bg:    var(--zm-danger);
+  --zm-button-danger-fg:    var(--zm-brand-on);
+  --zm-button-focus-ring:   var(--zm-focus);
+  --zm-button-duration:     var(--zm-duration-fast);
+  --zm-button-ease:         var(--zm-ease-standard);
+  /* Extended state matrix (m1-primitive-buttons-actions; VAL-DS-018/019/020).
+     Active = a tonal step beyond hover (pressed affordance). Selected gives
+     quiet/secondary buttons a persistent "chosen" treatment using the brand
+     signal + a non-color cue (the inset ring). The icon-button target size
+     is tokenized so the 44x44 WCAG 2.2 minimum is tunable in one place. */
+  --zm-button-primary-bg-active:    var(--zm-color-coral-600);   /* pressed (darker than hover) */
+  --zm-button-secondary-bg-active:  var(--zm-surface-3);
+  --zm-button-danger-bg-hover:      var(--zm-color-ember-400);   /* lighter on hover for visibility */
+  --zm-button-danger-bg-active:     var(--zm-color-ember-500);
+  --zm-button-selected-bg:          var(--zm-surface-2);
+  --zm-button-selected-fg:          var(--zm-brand);
+  --zm-button-selected-indicator:   var(--zm-brand);              /* inset ring (non-color cue = position) */
+  --zm-button-error-ring:           var(--zm-danger);
+  --zm-button-icon-size:            44px;                         /* WCAG 2.2 target minimum */
+  --zm-button-icon-gap:             var(--zm-space-2);            /* gap between icon + label */
+  --zm-button-spinner-size:         1.125em;                      /* relative to button font-size */
+
+  /* Input / textarea / select (m1-primitive-form-controls; VAL-DS-021/022/023).
+     Shared component layer for every form field: persistent label, optional
+     helper, error tied via aria-describedby, focus-visible ring, and the
+     password reveal trailing button. Every value references a semantic role,
+     so [data-theme="dark"] overrides cascade automatically. Padding/duration/
+     label-weight/icon-size live here so a single edit retunes every field. */
+  --zm-input-radius:        var(--zm-radius-field);
+  --zm-input-bg:            var(--zm-surface-1);
+  --zm-input-bg-hover:      var(--zm-surface-2);
+  --zm-input-bg-focus:      var(--zm-surface-2);
+  --zm-input-bg-disabled:   transparent;
+  --zm-input-border:        var(--zm-border-strong);
+  --zm-input-border-hover:  var(--zm-text-3);
+  --zm-input-border-focus:  var(--zm-focus);
+  --zm-input-border-disabled: var(--zm-border-subtle);
+  --zm-input-error-ring:    var(--zm-danger);
+  --zm-input-focus-ring:    var(--zm-focus);
+  --zm-input-fg:            var(--zm-text-1);
+  --zm-input-fg-disabled:   var(--zm-text-3);
+  --zm-input-placeholder:   var(--zm-text-3);
+  --zm-input-helper:        var(--zm-text-2);
+  --zm-input-error:         var(--zm-danger);
+  --zm-input-label-fg:      var(--zm-text-1);
+  --zm-input-label-size:    var(--zm-text-sm);
+  --zm-input-label-weight:  650;
+  --zm-input-helper-size:   var(--zm-text-xs);
+  --zm-input-error-size:    var(--zm-text-xs);
+  --zm-input-padding-x:     var(--zm-space-4);
+  --zm-input-padding-y:     var(--zm-space-3);
+  --zm-input-trailing-pad:  var(--zm-space-5);   /* room reserved for reveal/chevron */
+  --zm-input-icon-size:     1.25em;              /* reveal eye / select chevron */
+  --zm-input-min-height:    44px;                /* WCAG 2.2 target minimum */
+  --zm-input-line-height:   var(--zm-leading-ui);
+  --zm-input-duration:      var(--zm-duration-fast);
+  --zm-input-ease:          var(--zm-ease-standard);
+
+  /* Selection controls — checkbox / radio / switch / segmented
+     (m1-primitive-selection-controls; VAL-DS-024 / VAL-DS-025).
+     Shared component layer for every selection primitive. State is carried by
+     a real native input (checkbox/radio) so AT role/state come for free; the
+     visible indicator (checkmark / dot / thumb) is a NON-color cue (shape +
+     position + icon) layered over the native control so the state survives
+     grayscale conversion and reduced motion. Every value references a
+     semantic role so [data-theme="dark"] overrides cascade automatically. */
+  --zm-selection-box:         20px;                 /* WCAG 2.2 target via label tap area + 44px row */
+  --zm-selection-box-radius:  var(--zm-radius-control);
+  --zm-selection-stroke:      var(--zm-border-width-strong);
+  --zm-selection-stroke-idle: var(--zm-border-strong);
+  --zm-selection-bg:          transparent;
+  --zm-selection-bg-hover:    var(--zm-surface-2);
+  --zm-selection-bg-checked:  var(--zm-brand);
+  --zm-selection-bg-checked-hover: var(--zm-brand-hover);
+  --zm-selection-fg-checked:  var(--zm-brand-on);   /* checkmark / dot color on the filled box */
+  --zm-selection-fg-icon:     var(--zm-brand-on);   /* check glyph color */
+  --zm-selection-border-checked: var(--zm-brand);
+  --zm-selection-error-ring:  var(--zm-danger);
+  --zm-selection-error-fg:    var(--zm-danger);
+  --zm-selection-focus-ring:  var(--zm-focus);
+  --zm-selection-fg-disabled: var(--zm-text-3);
+  --zm-selection-border-disabled: var(--zm-border-subtle);
+  --zm-selection-bg-disabled: transparent;
+  --zm-selection-label-fg:   var(--zm-text-1);
+  --zm-selection-label-size: var(--zm-text-md);
+  --zm-selection-label-weight: 500;
+  --zm-selection-helper-fg:  var(--zm-text-2);
+  --zm-selection-helper-size: var(--zm-text-xs);
+  --zm-selection-error-size: var(--zm-text-xs);
+  --zm-selection-line-height: var(--zm-leading-ui);
+  --zm-selection-duration:   var(--zm-duration-fast);
+  --zm-selection-ease:       var(--zm-ease-standard);
+  --zm-selection-row-gap:    var(--zm-space-2);
+  /* Switch-specific */
+  --zm-switch-track-w:       44px;
+  --zm-switch-track-h:       24px;
+  --zm-switch-thumb:         18px;
+  --zm-switch-track-radius:  var(--zm-radius-pill);
+  --zm-switch-track-off:     var(--zm-surface-3);
+  --zm-switch-track-off-hover: var(--zm-border-strong);
+  --zm-switch-track-on:      var(--zm-brand);
+  --zm-switch-track-on-hover: var(--zm-brand-hover);
+  --zm-switch-thumb-off:     var(--zm-canvas-raised);
+  --zm-switch-thumb-on:      var(--zm-brand-on);
+  --zm-switch-thumb-disabled: var(--zm-text-3);
+  --zm-switch-track-disabled: var(--zm-surface-2);
+  /* Segmented-specific (single/multi selection bar) */
+  --zm-segmented-bg:         var(--zm-surface-1);
+  --zm-segmented-bg-hover:   var(--zm-surface-2);
+  --zm-segmented-bg-active:  var(--zm-canvas-raised);
+  --zm-segmented-bg-selected: var(--zm-canvas-raised);
+  --zm-segmented-border:     var(--zm-border-subtle);
+  --zm-segmented-border-strong: var(--zm-border-strong);
+  --zm-segmented-fg:         var(--zm-text-2);
+  --zm-segmented-fg-hover:   var(--zm-text-1);
+  --zm-segmented-fg-selected: var(--zm-text-1);
+  --zm-segmented-fg-disabled: var(--zm-text-3);
+  --zm-segmented-indicator:  var(--zm-brand);        /* active segment underline (non-color cue = position) */
+  --zm-segmented-radius:     var(--zm-radius-control);
+  --zm-segmented-segment-radius: calc(var(--zm-radius-control) - 3px);
+  --zm-segmented-shadow-selected: var(--zm-shadow-sm);
+  --zm-segmented-focus-ring: var(--zm-focus);
+  --zm-segmented-error-ring: var(--zm-danger);
+
+  /* Feed item / post frame */
+  --zm-feed-item-bg:        transparent;
+  --zm-feed-item-bg-raised: var(--zm-surface-1);
+  --zm-feed-item-border:    var(--zm-border-subtle);
+  --zm-feed-item-radius:    var(--zm-radius-card);
+  --zm-feed-item-body-font: var(--zm-font-display);
+  --zm-feed-item-body-size: var(--zm-text-lg);
+  --zm-feed-item-body-leading: var(--zm-leading-body);
+  --zm-feed-item-body-measure: var(--zm-measure-feed);
+
+  /* Post frame — the editorial structural shell for a single post
+     (m3-post-card-core; VAL-FEED-009/010/011/017/019). A calm reading surface
+     with a reserved thread-line gutter motif (decorative, never crosses text),
+     a strategic raised variant for media/poll content, and a long-form body
+     measure of 70ch (68-72ch target band). Composes semantic roles. */
+  --zm-post-frame-bg:           var(--zm-feed-item-bg);
+  --zm-post-frame-bg-raised:    var(--zm-feed-item-bg-raised);
+  --zm-post-frame-border:       var(--zm-feed-item-border);
+  --zm-post-frame-radius:       var(--zm-feed-item-radius);
+  --zm-post-frame-pad-y:        var(--zm-space-6, 1.5rem);
+  --zm-post-frame-pad-x:        0;
+  --zm-post-frame-pad-raised:   var(--zm-space-5, 1.25rem);
+  --zm-post-frame-margin-raised: var(--zm-space-4, 1rem);
+  --zm-post-frame-gutter:       1.75rem;
+  --zm-post-frame-motif-fg:     var(--zm-border-strong);
+  --zm-post-frame-body-font:    var(--zm-feed-item-body-font);
+  --zm-post-frame-body-size:    var(--zm-feed-item-body-size);
+  --zm-post-frame-body-leading: var(--zm-feed-item-body-leading);
+  --zm-post-frame-body-measure: var(--zm-measure-long-form);
+  --zm-post-frame-duration:     var(--zm-duration-slow);
+  --zm-post-frame-ease:         var(--zm-ease-enter);
+
+  /* Post identity — avatar + display name + handle cluster (VAL-FEED-009).
+     The handle uses the discovery accent to read as a network identity; the
+     profile link is the brand accent when resolvable. */
+  --zm-post-identity-name-fg:      var(--zm-text-1);
+  --zm-post-identity-name-fg-link: var(--zm-text-1);
+  --zm-post-identity-handle-fg:    var(--zm-text-3);
+  --zm-post-identity-link-fg:      var(--zm-brand);
+  --zm-post-identity-link-fg-hover: var(--zm-brand-hover);
+  --zm-post-identity-meta-fg:      var(--zm-text-3);
+  --zm-post-identity-gap:          var(--zm-space-3, 0.75rem);
+  --zm-post-identity-avatar-size:  md;
+
+  /* Nav item (rail / bottom nav) */
+  --zm-nav-item-bg:         transparent;
+  --zm-nav-item-bg-hover:   var(--zm-surface-2);
+  --zm-nav-item-bg-active:  var(--zm-surface-2);
+  --zm-nav-item-fg:         var(--zm-text-2);
+  --zm-nav-item-fg-hover:   var(--zm-text-1);
+  --zm-nav-item-fg-active:  var(--zm-text-1);
+  --zm-nav-item-indicator:  var(--zm-brand);
+  --zm-nav-item-radius:     var(--zm-radius-control);
+
+  /* Nav rail — persistent editorial left rail (m2-desktop-navigation;
+     VAL-WSH-001..004). A calm raised surface with the signal-arc active
+     indicator and the pulse-node unread motif as the signature social signals.
+     Active state uses >=2 NON-color cues — the signal-arc indicator (a distinct
+     shape in a reserved leading slot) + a raised surface tone + heavier weight
+     + brighter ink — so the current route is unmistakable without color and
+     survives grayscale / forced-colors (VAL-WSH-001). Every value references a
+     semantic role so [data-theme="dark"] overrides cascade automatically. */
+  --zm-nav-rail-bg:               var(--zm-canvas-raised);
+  --zm-nav-rail-fg:               var(--zm-text-2);
+  --zm-nav-rail-border:           var(--zm-border-subtle);
+  --zm-nav-rail-width:            13rem;
+  --zm-nav-rail-width-compact:    11rem;      /* tablet (<=1050px) */
+  --zm-nav-rail-padding-x:        var(--zm-space-4);
+  --zm-nav-rail-padding-y:        var(--zm-space-6);
+  --zm-nav-rail-gap:              var(--zm-space-6);
+  --zm-nav-rail-logo-fg:          var(--zm-text-1);
+  --zm-nav-rail-logo-mark:        var(--zm-brand);
+  --zm-nav-rail-logo-font:        var(--zm-font-display);
+  /* Per-item composition. The leading slot reserves space for the editorial
+     numeral AND the signal-arc active indicator so toggling active never causes
+     layout shift (the arc renders inside the reserved slot, opacity-driven). */
+  --zm-nav-item-padding-x:        var(--zm-space-3);
+  --zm-nav-item-padding-y:        var(--zm-space-3);
+  --zm-nav-item-gap:              var(--zm-space-2);
+  --zm-nav-item-min-height:       44px;        /* WCAG 2.2 target minimum */
+  --zm-nav-item-weight:           500;
+  --zm-nav-item-weight-active:    750;
+  --zm-nav-item-leading-width:    2.25rem;     /* numeral + signal-arc slot */
+  --zm-nav-item-indicator-width:  3px;         /* signal-arc stroke weight */
+  --zm-nav-item-numeral-fg:       var(--zm-text-3);
+  --zm-nav-item-numeral-fg-active: var(--zm-brand);
+  --zm-nav-item-numeral-size:     var(--zm-text-xs);
+  --zm-nav-item-label-size:       var(--zm-text-sm);
+  --zm-nav-item-focus-ring:       var(--zm-focus);
+  --zm-nav-item-separator:        var(--zm-separator-rule);
+  /* Unread badge + pulse — distinct shape (count pill) + trailing position +
+     aria-label, so the indicator is never color-only (VAL-WSH-003). The
+     pulse-node motif is the decorative live cue; the digit is the literal
+     count; the full "n okunmamis" text lives in the link's aria-label. */
+  --zm-nav-unread-fg:             var(--zm-brand-on);
+  --zm-nav-unread-bg:             var(--zm-brand);
+  --zm-nav-unread-size:           1.0625rem;   /* 17px — fits two digits at xs */
+  --zm-nav-unread-font-size:      var(--zm-text-xs);
+  --zm-nav-unread-gap:            var(--zm-space-2);
+  --zm-nav-unread-pulse-fg:       var(--zm-brand);
+  /* Compose entry — the principal action of the rail (VAL-WSH-004). Primary
+     brand treatment so it is unmistakable; a real button so it is keyboard-
+     reachable + keyboard-activatable; navigates to the feed composer route. */
+  --zm-nav-compose-bg:            var(--zm-brand);
+  --zm-nav-compose-bg-hover:      var(--zm-brand-hover);
+  --zm-nav-compose-bg-active:     var(--zm-brand-hover);
+  --zm-nav-compose-fg:            var(--zm-brand-on);
+  --zm-nav-compose-radius:        var(--zm-radius-field);
+  --zm-nav-compose-min-height:    44px;
+  --zm-nav-compose-weight:        700;
+  /* Sign-out (preserved flow; account menu absorbs it in m2-account-theme-status) */
+  --zm-nav-signout-fg:            var(--zm-text-3);
+  --zm-nav-signout-fg-hover:      var(--zm-danger);
+  --zm-nav-signout-min-height:    44px;
+
+  /* Nav tablet rail — compact icon-only rail at tablet widths (768-1049px);
+     m2-tablet-mobile-navigation; VAL-WSH-007. Same raised surface + brand
+     active indicator + 44x44 targets as the desktop rail, collapsed to a
+     square icon-only column so the workspace stays comfortable without a
+     squeezed-between-sidebar context rail. */
+  --zm-nav-tablet-width:          4.5rem;
+  --zm-nav-tablet-item-size:      44px;        /* WCAG 2.2 target minimum */
+
+  /* Nav mobile-web bottom bar — fixed bottom navigation below 680px;
+     m2-tablet-mobile-navigation; VAL-WSH-008. Safe-area-aware (reserves
+     env(safe-area-inset-bottom)) so iOS Safari home indicator + Android
+     gesture nav never obstruct targets. Active route uses the same >=2
+     NON-color cue contract as the other variants. */
+  --zm-nav-bottom-item-min-size:  44px;        /* WCAG 2.2 target minimum */
+  --zm-nav-bottom-compose-size:   3rem;        /* center FAB (>=44px) */
+  --zm-nav-bottom-label-size:     var(--zm-text-xs);
+
+  /* Account menu — signed-in user's account control + popover (desktop rail
+     + tablet compact). m2-account-theme-status; VAL-WSH-005 / VAL-WSH-006.
+     The trigger blends into the rail (surface-1 tone, hair border); the
+     popover content reuses --zm-menu-* for the panel + item rows. Theme
+     selection + logout danger affordances compose semantic roles so dark
+     theme cascades automatically. No hardcoded hex. */
+  --zm-account-menu-trigger-bg:           var(--zm-surface-1);
+  --zm-account-menu-trigger-bg-hover:     var(--zm-surface-2);
+  --zm-account-menu-trigger-border:       var(--zm-border-subtle);
+  --zm-account-menu-trigger-border-hover: var(--zm-border-strong);
+  --zm-account-menu-trigger-fg:           var(--zm-text-2);
+  --zm-account-menu-trigger-radius:       var(--zm-radius-control);
+  --zm-account-menu-trigger-pad-x:        var(--zm-space-2);
+  --zm-account-menu-trigger-pad-y:        var(--zm-space-2);
+  --zm-account-menu-trigger-gap:          var(--zm-space-2);
+  --zm-account-menu-trigger-min-height:   44px;        /* WCAG 2.2 target */
+  --zm-account-menu-compact-size:         44px;        /* tablet icon-button parity */
+  --zm-account-menu-name-fg:              var(--zm-text-1);
+  --zm-account-menu-handle-fg:            var(--zm-text-3);
+  --zm-account-menu-focus-ring:           3px;
+  --zm-account-menu-focus-offset:         1px;
+  --zm-account-menu-header-gap:           var(--zm-space-2);
+  --zm-account-menu-header-pad-y:         var(--zm-space-1);
+  --zm-account-menu-sep-bg:               var(--zm-border-subtle);
+  --zm-account-menu-sep-margin-x:         0;
+  --zm-account-menu-sep-margin-y:         var(--zm-space-1);
+  --zm-account-menu-group-pad-y:          var(--zm-space-2);
+  --zm-account-menu-group-pad-y-bottom:   var(--zm-space-1);
+  --zm-account-menu-item-pad-x:           var(--zm-space-3);
+  --zm-account-menu-item-pad-y:           var(--zm-space-2);
+  --zm-account-menu-item-gap:             var(--zm-space-2);
+  --zm-account-menu-item-glyph-fg:        var(--zm-text-2);
+  --zm-account-menu-selected-fg:          var(--zm-text-1);
+  --zm-account-menu-danger-fg:            var(--zm-danger);
+  --zm-account-menu-danger-bg-hover:      color-mix(in oklch, var(--zm-danger) 14%, transparent);
+  --zm-account-menu-duration:             var(--zm-duration-fast);
+  --zm-account-menu-ease:                 var(--zm-ease-enter);
+
+  /* Offline / degraded indicator — slim sticky status banner shown only when
+     the browser reports offline. m2-account-theme-status; VAL-WSH-013.
+     Warning tone PAIRED with a glyph + Turkish text (never color alone). */
+  --zm-offline-bg:        color-mix(in oklch, var(--zm-warning) 18%, var(--zm-canvas));
+  --zm-offline-fg:        var(--zm-text-1);
+  --zm-offline-glyph-fg:  var(--zm-warning);
+  --zm-offline-border:    color-mix(in oklch, var(--zm-warning) 45%, transparent);
+  --zm-offline-pad-x:     var(--zm-space-3);
+  --zm-offline-pad-y:     var(--zm-space-2);
+  --zm-offline-gap:       var(--zm-space-2);
+  --zm-offline-z:         30;
+  --zm-offline-duration:  var(--zm-duration-fast);
+  --zm-offline-ease:      var(--zm-ease-enter);
+
+  /* Composer */
+  --zm-composer-bg:         var(--zm-surface-1);
+  --zm-composer-bg-focus:   var(--zm-surface-2);
+  --zm-composer-border:     var(--zm-border-subtle);
+  --zm-composer-border-focus: var(--zm-focus);
+  --zm-composer-radius:     var(--zm-radius-card);
+
+  /* Message bubble */
+  --zm-message-bubble-own-bg:    var(--zm-brand);
+  --zm-message-bubble-own-fg:    var(--zm-brand-on);
+  --zm-message-bubble-other-bg:  var(--zm-surface-2);
+  --zm-message-bubble-other-fg:  var(--zm-text-1);
+  --zm-message-bubble-radius:    var(--zm-radius-card);
+  --zm-message-bubble-max-width: 34rem;
+
+  /* Dialog (centered modal) */
+  --zm-dialog-scrim:        var(--zm-scrim);
+  --zm-dialog-bg:           var(--zm-canvas-raised);
+  --zm-dialog-fg:           var(--zm-text-1);
+  --zm-dialog-border:       var(--zm-border-subtle);
+  --zm-dialog-radius:       var(--zm-radius-sheet);
+  --zm-dialog-shadow:       var(--zm-shadow-lg);
+  --zm-dialog-max-width:    32rem;
+  --zm-dialog-padding:      var(--zm-space-5);
+  --zm-dialog-duration:     var(--zm-duration-base);
+  --zm-dialog-ease:         var(--zm-ease-enter);
+
+  /* Sheet (side-anchored overlay; slides in from an edge) */
+  --zm-sheet-scrim:         var(--zm-scrim);
+  --zm-sheet-bg:            var(--zm-canvas-raised);
+  --zm-sheet-fg:            var(--zm-text-1);
+  --zm-sheet-border:        var(--zm-border-subtle);
+  --zm-sheet-radius:        var(--zm-radius-sheet);
+  --zm-sheet-shadow:        var(--zm-shadow-lg);
+  --zm-sheet-max-width:     32rem;
+  --zm-sheet-padding:       var(--zm-space-5);
+  --zm-sheet-duration:      var(--zm-duration-slow);
+  --zm-sheet-ease:          var(--zm-ease-emphasized);
+
+  /* Menu (anchored popover list) */
+  --zm-menu-bg:             var(--zm-canvas-raised);
+  --zm-menu-fg:             var(--zm-text-1);
+  --zm-menu-border:         var(--zm-border-subtle);
+  --zm-menu-radius:         var(--zm-radius-card);
+  --zm-menu-shadow:         var(--zm-shadow-lg);
+  --zm-menu-min-width:      14rem;
+  --zm-menu-max-width:      22rem;
+  --zm-menu-padding-x:      var(--zm-space-2);
+  --zm-menu-padding-y:      var(--zm-space-2);
+  --zm-menu-item-radius:    var(--zm-radius-control);
+  --zm-menu-item-padding-x: var(--zm-space-3);
+  --zm-menu-item-padding-y: var(--zm-space-2);
+  --zm-menu-item-gap:       var(--zm-space-1);
+  --zm-menu-item-bg-hover:  var(--zm-surface-2);
+  --zm-menu-item-fg-disabled: var(--zm-text-3);
+  --zm-menu-duration:       var(--zm-duration-fast);
+  --zm-menu-ease:           var(--zm-ease-enter);
+
+  /* Tooltip (transient label; inverted bubble for max contrast) */
+  --zm-tooltip-bg:          var(--zm-text-1);
+  --zm-tooltip-fg:          var(--zm-canvas);
+  --zm-tooltip-radius:      var(--zm-radius-control);
+  --zm-tooltip-padding-x:   var(--zm-space-2);
+  --zm-tooltip-padding-y:   var(--zm-space-1);
+  --zm-tooltip-shadow:      var(--zm-shadow-md);
+  --zm-tooltip-max-width:   20rem;
+  --zm-tooltip-duration:    var(--zm-duration-fast);
+  --zm-tooltip-ease:        var(--zm-ease-enter);
+
+  /* Badge / status chip */
+  --zm-badge-bg:            var(--zm-surface-3);
+  --zm-badge-fg:            var(--zm-text-2);
+  --zm-badge-radius:        var(--zm-radius-pill);
+  --zm-badge-padding-x:     var(--zm-space-2);
+  --zm-badge-padding-y:     var(--zm-space-1);
+
+  /* Skeleton (shimmer) */
+  --zm-skeleton-base:       var(--zm-surface-2);
+  --zm-skeleton-sheen:      var(--zm-surface-3);
+  --zm-skeleton-duration:   var(--zm-duration-scene);
+  --zm-skeleton-radius:     var(--zm-radius-control);
+  --zm-skeleton-text-height: var(--zm-text-md);
+
+  /* Toast (live-region notification; status never color-only — icon + label) */
+  --zm-toast-bg:            var(--zm-canvas-raised);
+  --zm-toast-fg:            var(--zm-text-1);
+  --zm-toast-fg-meta:       var(--zm-text-3);
+  --zm-toast-border:        var(--zm-border-strong);
+  --zm-toast-shadow:        var(--zm-shadow-lg);
+  --zm-toast-radius:        var(--zm-radius-field);
+  --zm-toast-padding-x:     var(--zm-space-4);
+  --zm-toast-padding-y:     var(--zm-space-3);
+  --zm-toast-gap:           var(--zm-space-3);
+  --zm-toast-icon-size:     1.25rem;
+  --zm-toast-duration:      var(--zm-duration-base);
+  --zm-toast-ease:          var(--zm-ease-enter);
+  --zm-toast-dismiss-default: 5000ms;
+  --zm-toast-info-accent:   var(--zm-info);
+  --zm-toast-success-accent: var(--zm-success);
+  --zm-toast-warning-accent: var(--zm-warning);
+  --zm-toast-danger-accent: var(--zm-danger);
+
+  /* Empty / error / permission state surfaces (centered editorial state block) */
+  --zm-state-bg:            transparent;
+  --zm-state-fg:            var(--zm-text-1);
+  --zm-state-fg-meta:       var(--zm-text-2);
+  --zm-state-fg-quiet:      var(--zm-text-3);
+  --zm-state-border:        var(--zm-border-subtle);
+  --zm-state-icon-size:     2.5rem;
+  --zm-state-icon-info:     var(--zm-info);
+  --zm-state-icon-success:  var(--zm-success);
+  --zm-state-icon-warning:  var(--zm-warning);
+  --zm-state-icon-danger:   var(--zm-danger);
+  --zm-state-icon-discovery: var(--zm-discovery);
+  --zm-state-padding-y:     var(--zm-space-10);
+  --zm-state-padding-x:     var(--zm-space-6);
+  --zm-state-gap:           var(--zm-space-4);
+  --zm-state-radius:        var(--zm-radius-card);
+
+  /* Avatar — identity-token fallback + image + presence/unread ring
+     (m1-primitive-avatar-chip-status; VAL-DS-030 / VAL-DS-031).
+     The identity palette is an 8-step editorial ramp drawn from the primitive
+     color ramps. It is INTENTIONALLY distinct from the presence semantic roles
+     (success / warning / danger / text-3) so the presence ring never shares a
+     color family with the identity fallback (VAL-DS-031). The initials ink is
+     a fixed dark tone because the identity colors are mid-lightness in BOTH
+     themes (primitive ramps are theme-independent); a near-white ink would
+     drop below 4.5:1 on the lighter steps. Leaf/ember are reserved for status
+     presence so green/red stay unambiguously state-bearing. Sizes reserve
+     dimensions so the image load/error swap never causes layout shift. */
+  --zm-avatar-radius:           var(--zm-radius-pill);
+  --zm-avatar-size-xs:          1.5rem;     /* 24px — inline mentions */
+  --zm-avatar-size-sm:          1.75rem;    /* 28px — dense lists */
+  --zm-avatar-size-md:          2.5rem;     /* 40px — default (matches icon-button target row) */
+  --zm-avatar-size-lg:          3.5rem;     /* 56px — profile header / composer */
+  --zm-avatar-size-xl:          5rem;       /* 80px — profile hero */
+  --zm-avatar-bg:               var(--zm-surface-3);   /* behind img while loading */
+  --zm-avatar-border:           var(--zm-border-subtle);
+  --zm-avatar-initials-fg:      var(--zm-color-ink-900);
+  --zm-avatar-initials-font:    var(--zm-font-display);
+  --zm-avatar-initials-weight:  600;
+  --zm-avatar-duration:         var(--zm-duration-fast);
+  --zm-avatar-ease:             var(--zm-ease-standard);
+  --zm-avatar-identity-1:       var(--zm-color-violet-400);
+  --zm-avatar-identity-2:       var(--zm-color-sky-400);
+  --zm-avatar-identity-3:       var(--zm-color-coral-400);
+  --zm-avatar-identity-4:       var(--zm-color-amber-400);
+  --zm-avatar-identity-5:       var(--zm-color-violet-500);
+  --zm-avatar-identity-6:       var(--zm-color-sky-500);
+  --zm-avatar-identity-7:       var(--zm-color-coral-500);
+  --zm-avatar-identity-8:       var(--zm-color-amber-500);
+  /* Presence ring — reserved corner slot, separated from avatar content. The
+     ring sits on a canvas-colored halo so it lifts off the identity color. */
+  --zm-avatar-ring-halo:        var(--zm-canvas);          /* gap between avatar + presence */
+  --zm-avatar-ring-halo-raised: var(--zm-canvas-raised);   /* halo over raised surfaces */
+  --zm-avatar-presence-online:  var(--zm-success);
+  --zm-avatar-presence-away:    var(--zm-warning);
+  --zm-avatar-presence-busy:    var(--zm-danger);
+  --zm-avatar-presence-offline: var(--zm-text-3);
+  --zm-avatar-presence-size-xs: 0.5rem;
+  --zm-avatar-presence-size-sm: 0.625rem;
+  --zm-avatar-presence-size-md: 0.75rem;
+  --zm-avatar-presence-size-lg: 0.9375rem;
+  --zm-avatar-presence-size-xl: 1.1875rem;
+  /* Unread count badge — distinct shape (rounded count pill) + position
+     (top-end) + aria-label, so it never relies on hue alone (VAL-DS-031). */
+  --zm-avatar-unread-bg:        var(--zm-brand);
+  --zm-avatar-unread-fg:        var(--zm-brand-on);
+  --zm-avatar-unread-halo:      var(--zm-canvas-raised);
+  --zm-avatar-unread-size:      1.0625rem;   /* 17px — fits two digits at text-xs */
+  --zm-avatar-unread-font:      var(--zm-font-ui);
+
+  /* Chip — compact label token (m1-primitive-avatar-chip-status; VAL-DS-032).
+     Always carries a textual label; color categories couple with a distinct
+     leading glyph so grayscale still discriminates the category. Removable
+     chips expose their remove action with an accessible name. */
+  --zm-chip-radius:             var(--zm-radius-pill);
+  --zm-chip-padding-x:          var(--zm-space-3);
+  --zm-chip-padding-y:          0.1875rem;
+  --zm-chip-min-height:         1.75rem;
+  --zm-chip-fg:                 var(--zm-text-1);
+  --zm-chip-bg:                 var(--zm-surface-2);
+  --zm-chip-bg-hover:           var(--zm-surface-3);
+  --zm-chip-bg-selected:        var(--zm-surface-3);
+  --zm-chip-border:             var(--zm-border-subtle);
+  --zm-chip-border-selected:    var(--zm-border-strong);
+  --zm-chip-font:               var(--zm-font-ui);
+  --zm-chip-font-size:          var(--zm-text-sm);
+  --zm-chip-weight:             600;
+  --zm-chip-glyph-size:         0.875em;
+  --zm-chip-gap:                var(--zm-space-2);
+  --zm-chip-remove-size:        1.125rem;
+  --zm-chip-focus-ring:         var(--zm-focus);
+  --zm-chip-duration:           var(--zm-duration-fast);
+  --zm-chip-ease:               var(--zm-ease-standard);
+  /* Variant accents — color + distinct glyph pairing (never color-only). */
+  --zm-chip-brand-fg:           var(--zm-brand);
+  --zm-chip-brand-bg:           color-mix(in srgb, var(--zm-brand) 12%, transparent);
+  --zm-chip-brand-accent:       var(--zm-brand);
+  --zm-chip-discovery-fg:       var(--zm-discovery);
+  --zm-chip-discovery-bg:       color-mix(in srgb, var(--zm-discovery) 12%, transparent);
+  --zm-chip-discovery-accent:   var(--zm-discovery);
+  --zm-chip-info-fg:            var(--zm-info);
+  --zm-chip-info-bg:            color-mix(in srgb, var(--zm-info) 12%, transparent);
+  --zm-chip-info-accent:        var(--zm-info);
+  --zm-chip-success-fg:         var(--zm-success);
+  --zm-chip-success-bg:         color-mix(in srgb, var(--zm-success) 14%, transparent);
+  --zm-chip-success-accent:     var(--zm-success);
+  --zm-chip-warning-fg:         var(--zm-warning);
+  --zm-chip-warning-bg:         color-mix(in srgb, var(--zm-warning) 14%, transparent);
+  --zm-chip-warning-accent:     var(--zm-warning);
+  --zm-chip-danger-fg:          var(--zm-danger);
+  --zm-chip-danger-bg:          color-mix(in srgb, var(--zm-danger) 12%, transparent);
+  --zm-chip-danger-accent:      var(--zm-danger);
+
+  /* Status — inline status token (m1-primitive-avatar-chip-status; VAL-DS-032).
+     A compact status marker that always renders a textual label + a leading
+     shape whose form encodes the category (circle / check / triangle / cross /
+     diamond / arc / ring), so status is never color-only (VAL-DS-029 / 032). */
+  --zm-status-radius:           var(--zm-radius-pill);
+  --zm-status-padding-x:        var(--zm-space-2);
+  --zm-status-padding-y:        0.125rem;
+  --zm-status-min-height:       1.5rem;
+  --zm-status-fg:               var(--zm-text-2);
+  --zm-status-bg:               var(--zm-surface-1);
+  --zm-status-border:           var(--zm-border-subtle);
+  --zm-status-font:             var(--zm-font-ui);
+  --zm-status-font-size:        var(--zm-text-xs);
+  --zm-status-weight:           600;
+  --zm-status-shape-size:       0.5rem;
+  --zm-status-gap:              var(--zm-space-2);
+  --zm-status-focus-ring:       var(--zm-focus);
+  --zm-status-duration:         var(--zm-duration-fast);
+  --zm-status-ease:             var(--zm-ease-standard);
+  /* Variant accents + matching shape token (color is one cue; shape is the
+     non-color cue). */
+  --zm-status-brand-fg:         var(--zm-brand);
+  --zm-status-brand-shape:      var(--zm-brand);
+  --zm-status-discovery-fg:     var(--zm-discovery);
+  --zm-status-discovery-shape:  var(--zm-discovery);
+  --zm-status-info-fg:          var(--zm-info);
+  --zm-status-info-shape:       var(--zm-info);
+  --zm-status-success-fg:       var(--zm-success);
+  --zm-status-success-shape:    var(--zm-success);
+  --zm-status-warning-fg:       var(--zm-warning);
+  --zm-status-warning-shape:    var(--zm-warning);
+  --zm-status-danger-fg:        var(--zm-danger);
+  --zm-status-danger-shape:     var(--zm-danger);
+
+  /* Signature motifs — authored decorative SVG marks (m1-iconography; VAL-DS-033/034/035).
+     Motifs are DECORATIVE-ONLY (aria-hidden, never carry meaning, never cross
+     text). The foreground resolves to a low-chroma separator tone so a motif
+     reads as ornament on its surface, never as a brand/status fill that could
+     confuse adjacent content. Dark theme cascades automatically via the
+     semantic border/separator roles. The pulse duration sits in the slow
+     ambient band (≥ scene) so the pulse-node reads as a calm live indicator,
+     not a flashing alarm. */
+  --zm-motif-fg:                var(--zm-border-strong);
+  --zm-motif-origin-fg:         var(--zm-text-3);
+  --zm-duration-motif-pulse:    2400ms;
+
+  /* Contextual right rail (m2-contextual-rail; VAL-WSH-012).
+     The rail shows live, route-relevant content (trends / conversation
+     summary / profile summary / safety context / honest empty). It replaces
+     the static marketing copy and consumes ONLY these component tokens, which
+     compose the semantic roles — so light + dark + reduced-motion cascade
+     automatically with no per-theme overrides. The host fills its parent
+     (desktop persistent aside OR tablet on-demand sheet); it does not own
+     positioning/border/padding of the container, only the inner editorial
+     typography + state surfaces. */
+  --zm-context-rail-fg:              var(--zm-text-2);
+  --zm-context-rail-title-fg:        var(--zm-text-1);
+  --zm-context-rail-kicker-fg:       var(--zm-brand);
+  --zm-context-rail-lede-fg:         var(--zm-text-2);
+  --zm-context-rail-rank-fg:         var(--zm-text-3);
+  --zm-context-rail-accent-fg:       var(--zm-border-strong);
+  --zm-context-rail-skeleton-bg:     var(--zm-surface-2);
+  --zm-context-rail-stat-bg:         var(--zm-canvas-raised);
+  --zm-context-rail-stat-border:     var(--zm-border-subtle);
+  --zm-context-rail-bar-fg:          var(--zm-brand);
+  --zm-context-rail-badge-ok-border: color-mix(in srgb, var(--zm-success) 40%, transparent);
+  --zm-context-rail-badge-warn-border: color-mix(in srgb, var(--zm-warning) 40%, transparent);
+  /* Action (retry / empty next-action) */
+  --zm-context-rail-action-bg:       var(--zm-surface-1);
+  --zm-context-rail-action-fg:       var(--zm-text-1);
+  --zm-context-rail-action-border:   var(--zm-border-strong);
+  --zm-context-rail-action-bg-hover: var(--zm-surface-2);
+  --zm-context-rail-action-border-hover: var(--zm-brand);
+  /* Recoverable error surface */
+  --zm-context-rail-error-bg:        color-mix(in srgb, var(--zm-danger) 8%, transparent);
+  --zm-context-rail-error-fg:        var(--zm-text-1);
+  --zm-context-rail-error-border:    color-mix(in srgb, var(--zm-danger) 35%, transparent);
+  --zm-context-rail-error-icon-fg:   var(--zm-danger);
+  /* Empty state glyph */
+  --zm-context-rail-empty-icon-fg:   var(--zm-text-3);
+
+  /* Focus ring (shared) */
+  --zm-focus-ring-color:        var(--zm-focus);
+  --zm-focus-ring-width:    3px;
+  --zm-focus-ring-offset:   3px;
+}
+
+/* ============================================================================
+ * 4. TAILWIND 4 BRIDGE — `@theme inline`
+ *    Exposes semantic tokens as Tailwind utilities. `inline` makes utilities
+ *    emit `var(--zm-*)` so [data-theme] overrides stay live at runtime.
+ *    Resulting utilities (non-exhaustive):
+ *      bg-zm-canvas | bg-zm-surface-1..3 | text-zm-text-1..3 |
+ *      border-zm-border-subtle | border-zm-border-strong |
+ *      bg-zm-brand | text-zm-brand | bg-zm-discovery | text-zm-info |
+ *      bg-zm-success | bg-zm-warning | bg-zm-danger | text-zm-success |
+ *      ring-zm-focus | font-zm-display | font-zm-ui | font-zm-mono |
+ *      text-zm-xs | text-zm-md | text-zm-display | rounded-zm-md |
+ *      shadow-zm-md | ease-zm-enter.
+ * ============================================================================ */
+@theme inline {
+  /* Colors → bg-* / text-* / border-* / ring-* / fill-* / stroke-* / from-* / to-* */
+  --color-zm-canvas:         var(--zm-canvas);
+  --color-zm-canvas-raised:  var(--zm-canvas-raised);
+  --color-zm-surface-1:      var(--zm-surface-1);
+  --color-zm-surface-2:      var(--zm-surface-2);
+  --color-zm-surface-3:      var(--zm-surface-3);
+  --color-zm-text-1:         var(--zm-text-1);
+  --color-zm-text-2:         var(--zm-text-2);
+  --color-zm-text-3:         var(--zm-text-3);
+  --color-zm-border-subtle:  var(--zm-border-subtle);
+  --color-zm-border-strong:  var(--zm-border-strong);
+  --color-zm-brand:          var(--zm-brand);
+  --color-zm-brand-hover:    var(--zm-brand-hover);
+  --color-zm-brand-on:       var(--zm-brand-on);
+  --color-zm-discovery:      var(--zm-discovery);
+  --color-zm-info:           var(--zm-info);
+  --color-zm-success:        var(--zm-success);
+  --color-zm-warning:        var(--zm-warning);
+  --color-zm-danger:         var(--zm-danger);
+  --color-zm-focus:          var(--zm-focus);
+  --color-zm-scrim:          var(--zm-scrim);
+
+  /* Fonts → font-* */
+  --font-zm-ui:      var(--zm-font-ui);
+  --font-zm-display: var(--zm-font-display);
+  --font-zm-mono:    var(--zm-font-mono);
+
+  /* Type scale → text-* (size only; pair with leading-* utilities or component CSS) */
+  --text-zm-xs:      var(--zm-text-xs);
+  --text-zm-sm:      var(--zm-text-sm);
+  --text-zm-md:      var(--zm-text-md);
+  --text-zm-lg:      var(--zm-text-lg);
+  --text-zm-xl:      var(--zm-text-xl);
+  --text-zm-2xl:     var(--zm-text-2xl);
+  --text-zm-display: var(--zm-text-display);
+
+  /* Radius → rounded-* (primitive ladder + role aliases; roles are the
+     preferred kind for new components). */
+  --radius-zm-xs:      var(--zm-radius-xs);
+  --radius-zm-sm:      var(--zm-radius-sm);
+  --radius-zm-md:      var(--zm-radius-md);
+  --radius-zm-lg:      var(--zm-radius-lg);
+  --radius-zm-xl:      var(--zm-radius-xl);
+  --radius-zm-2xl:     var(--zm-radius-2xl);
+  --radius-zm-pill:    var(--zm-radius-pill);
+  --radius-zm-control: var(--zm-radius-control);
+  --radius-zm-field:   var(--zm-radius-field);
+  --radius-zm-card:    var(--zm-radius-card);
+  --radius-zm-sheet:   var(--zm-radius-sheet);
+
+  /* Shadow → shadow-* */
+  --shadow-zm-sm: var(--zm-shadow-sm);
+  --shadow-zm-md: var(--zm-shadow-md);
+  --shadow-zm-lg: var(--zm-shadow-lg);
+
+  /* Easing → ease-* (transition-timing-function) */
+  --ease-zm-standard:   var(--zm-ease-standard);
+  --ease-zm-enter:      var(--zm-ease-enter);
+  --ease-zm-exit:       var(--zm-ease-exit);
+  --ease-zm-emphasized: var(--zm-ease-emphasized);
+}
+
+/* ============================================================================
+ * 5. REDUCED MOTION + FORCED COLORS
+ *    Complete alternatives, never "off". Spatial motion becomes short
+ *    opacity/state changes; forced-colors maps roles to system semantic colors.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --zm-duration-instant: 0ms;
+    --zm-duration-fast:    0ms;
+    --zm-duration-base:    80ms;
+    --zm-duration-slow:    80ms;
+    --zm-duration-scene:   100ms;
+    --zm-ease-standard:    linear;
+    --zm-ease-enter:       linear;
+    --zm-ease-exit:        linear;
+    --zm-ease-emphasized:  linear;
+    --zm-skeleton-duration: 0ms;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * Product-level reduce-motion toggle.
+ * ThemeService sets `data-reduce-motion` on <html> when the user opts into
+ * reduced motion via the product control (VAL-DS-007). Mirrors the OS
+ * `prefers-reduced-motion: reduce` rule above so the toggle works on devices
+ * whose OS does not signal reduce. Both triggers can apply simultaneously;
+ * the token values are identical so the union is stable.
+ * -------------------------------------------------------------------------- */
+:root[data-reduce-motion] {
+  --zm-duration-instant: 0ms;
+  --zm-duration-fast:    0ms;
+  --zm-duration-base:    80ms;
+  --zm-duration-slow:    80ms;
+  --zm-duration-scene:   100ms;
+  --zm-ease-standard:    linear;
+  --zm-ease-enter:       linear;
+  --zm-ease-exit:        linear;
+  --zm-ease-emphasized:  linear;
+  --zm-skeleton-duration: 0ms;
+}
+
+@media (forced-colors: active) {
+  :root {
+    --zm-border-subtle: CanvasText;
+    --zm-border-strong: CanvasText;
+    --zm-focus:         Highlight;
+    --zm-brand:         LinkText;
+    --zm-brand-hover:   LinkText;
+    --zm-brand-on:      Canvas;
+    --zm-text-1:        CanvasText;
+    --zm-text-2:        CanvasText;
+    --zm-text-3:        GrayText;
+    --zm-scrim:         Canvas;
+  }
+}

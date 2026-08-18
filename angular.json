@@ -1,0 +1,94 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "apps",
+  "projects": {
+    "web-angular": {
+      "projectType": "application",
+      "root": "apps/web-angular",
+      "sourceRoot": "apps/web-angular/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "apps/web-angular/src/main.ts",
+            "tsConfig": "apps/web-angular/tsconfig.app.json",
+            "polyfills": ["zone.js"],
+            "assets": [{ "glob": "**/*", "input": "apps/web-angular/public" }],
+            "styles": ["apps/web-angular/src/styles.css"]
+          },
+          "configurations": {
+            "production": { "budgets": [{ "type": "initial", "maximumWarning": "750kB", "maximumError": "1MB" }], "outputHashing": "all", "fileReplacements": [{ "replace": "apps/web-angular/src/environments/environment.ts", "with": "apps/web-angular/src/environments/environment.prod.ts" }] },
+            "development": { "optimization": false, "sourceMap": true }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "apps/web-angular/proxy.conf.json"
+          },
+          "configurations": {
+            "production": { "buildTarget": "web-angular:build:production" },
+            "development": { "buildTarget": "web-angular:build:development" }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "web-angular:build:development",
+            "tsConfig": "apps/web-angular/tsconfig.spec.json",
+            "runner": "vitest",
+            "setupFiles": ["apps/web-angular/src/test-setup.ts"]
+          }
+        }
+      }
+    },
+    "mobile-ionic": {
+      "projectType": "application",
+      "root": "apps/mobile-ionic",
+      "sourceRoot": "apps/mobile-ionic/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "apps/mobile-ionic/src/main.ts",
+            "tsConfig": "apps/mobile-ionic/tsconfig.app.json",
+            "polyfills": ["zone.js"],
+            "assets": [{ "glob": "**/*", "input": "apps/mobile-ionic/public" }],
+            "styles": ["apps/mobile-ionic/src/theme/variables.css", "apps/mobile-ionic/src/global.css"]
+          },
+          "configurations": {
+            "production": { "budgets": [{ "type": "initial", "maximumWarning": "1.1MB", "maximumError": "1.5MB" }], "outputHashing": "all", "serviceWorker": "ngsw-config.json", "fileReplacements": [{ "replace": "apps/mobile-ionic/src/environments/environment.ts", "with": "apps/mobile-ionic/src/environments/environment.prod.ts" }] },
+            "development": { "optimization": false, "sourceMap": true }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "apps/mobile-ionic/proxy.conf.json"
+          },
+          "configurations": {
+            "production": { "buildTarget": "mobile-ionic:build:production" },
+            "development": { "buildTarget": "mobile-ionic:build:development" }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "mobile-ionic:build:development",
+            "tsConfig": "apps/mobile-ionic/tsconfig.spec.json",
+            "runner": "vitest",
+            "setupFiles": ["apps/mobile-ionic/src/test-setup.ts"]
+          }
+        }
+      }
+    }
+  },
+  "cli": { "analytics": false }
+}

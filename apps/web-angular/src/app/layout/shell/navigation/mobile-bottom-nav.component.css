@@ -1,0 +1,318 @@
+/* ============================================================================
+ * ZmMobileBottomNav — fixed bottom navigation bar for mobile-web (<680px).
+ *
+ * Fulfils VAL-WSH-008. Consumes ONLY --zm-* tokens (no hardcoded hex).
+ * Safe-area-aware: the bar reserves env(safe-area-inset-bottom) so iOS Safari
+ * home indicator + Android gesture nav never obstruct targets. 44x44 minimum
+ * targets throughout. Active route = >=2 NON-color cues: brand top inset bar
+ * (position cue) + filled background + brighter icon + aria-current="page".
+ * ============================================================================ */
+
+:host {
+  display: block;
+}
+
+.bottom-nav {
+  position: fixed;
+  z-index: var(--zm-z-sticky);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  /* 5 primary items + 1 compose FAB + 1 More button = 7 columns. The FAB
+     spans its own column at a slightly larger size. */
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: var(--zm-space-1);
+  padding: var(--zm-space-1) var(--zm-space-2);
+  /* Safe-area aware: pad the bottom so iOS home indicator / Android gesture
+     nav never obstruct targets. The 0.25rem is the minimum breathing room
+     when env() resolves to 0 (desktop Chrome). */
+  padding-bottom: calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  background: var(--zm-nav-rail-bg);
+  border-top: var(--zm-separator-rule);
+  color: var(--zm-nav-rail-fg);
+  font-family: var(--zm-font-ui);
+}
+
+/* ---- Primary nav items ----------------------------------------------- */
+.bottom-nav__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-width: var(--zm-nav-bottom-item-min-size);
+  min-height: var(--zm-nav-bottom-item-min-size);
+  padding: var(--zm-space-1) var(--zm-space-1);
+  border-radius: var(--zm-nav-item-radius);
+  background: transparent;
+  color: var(--zm-nav-item-fg);
+  font-size: var(--zm-nav-bottom-label-size);
+  font-weight: var(--zm-nav-item-weight);
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.bottom-nav__item--more {
+  border: 0;
+  font-family: inherit;
+}
+
+.bottom-nav__icon {
+  color: inherit;
+}
+
+.bottom-nav__label {
+  font-size: var(--zm-nav-bottom-label-size);
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bottom-nav__item:hover {
+  background: var(--zm-nav-item-bg-hover);
+  color: var(--zm-nav-item-fg-hover);
+}
+
+.bottom-nav__item:focus-visible,
+.bottom-nav__compose:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-nav-item-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ---- Active route (>=2 NON-color cues)
+   1. brand top inset bar (position cue — reserved notch at the top edge).
+   2. filled background (surface-2 tone).
+   3. brighter icon + label color (text-1).
+   4. aria-current="page" (semantic, bound in template). */
+.bottom-nav__item.is-active,
+.bottom-nav__item.is-current {
+  background: var(--zm-nav-item-bg-active);
+  color: var(--zm-nav-item-fg-active);
+  font-weight: var(--zm-nav-item-weight-active);
+}
+
+.bottom-nav__item.is-active::before,
+.bottom-nav__item.is-current::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: var(--zm-nav-item-indicator-width);
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-item-indicator);
+}
+
+/* ---- Center compose FAB ---------------------------------------------- *
+ * Brand-treated FAB in the center column. Larger than the other items so it
+ * is the unmistakable primary action. 44x44 minimum target. */
+.bottom-nav__compose {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-bottom-compose-size);
+  height: var(--zm-nav-bottom-compose-size);
+  margin: 0 var(--zm-space-1);
+  border: 0;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-compose-bg);
+  color: var(--zm-nav-compose-fg);
+  cursor: pointer;
+  /* Lift the FAB slightly above the bar with a raised shadow + negative
+     margin so it reads as the principal action. */
+  box-shadow: var(--zm-shadow-sm);
+  transform: translateY(-25%);
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              transform var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.bottom-nav__compose:hover {
+  background: var(--zm-nav-compose-bg-hover);
+  transform: translateY(-30%);
+}
+
+.bottom-nav__compose:active {
+  background: var(--zm-nav-compose-bg-active);
+  transform: translateY(-20%);
+}
+
+.bottom-nav__compose-icon {
+  color: inherit;
+}
+
+/* ---- Unread badge ---------------------------------------------------- *
+ * Literal count pill on the icon's top-end corner. Distinct shape + position
+ * + digit. aria-hidden: count flows through the link aria-label. */
+.bottom-nav__badge {
+  position: absolute;
+  top: 0.0625rem;
+  right: 0.5rem;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-unread-bg);
+  color: var(--zm-nav-unread-fg);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ---- More sheet contents --------------------------------------------- *
+ * The ZmSheet host owns the dialog/scrim/slide behavior; this styles the
+ * projected content. The sheet is `side=bottom` so it spans the full width
+ * and slides up from the bottom. */
+.bottom-nav__more-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--zm-space-3) var(--zm-space-2);
+  padding-bottom: calc(var(--zm-space-3) + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--zm-space-1);
+}
+
+.bottom-nav__more-item {
+  display: block;
+}
+
+.bottom-nav__more-item--signout {
+  grid-column: 1 / -1;
+}
+
+.bottom-nav__more-link {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-3);
+  width: 100%;
+  min-height: var(--zm-nav-bottom-item-min-size);
+  padding: var(--zm-space-2) var(--zm-space-3);
+  border: 0;
+  border-radius: var(--zm-nav-item-radius);
+  background: transparent;
+  color: var(--zm-nav-item-fg);
+  font-family: inherit;
+  font-size: var(--zm-nav-item-label-size);
+  font-weight: var(--zm-nav-item-weight);
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.bottom-nav__more-link:hover {
+  background: var(--zm-nav-item-bg-hover);
+  color: var(--zm-nav-item-fg-hover);
+}
+
+.bottom-nav__more-link:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-nav-item-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+.bottom-nav__more-item--signout .bottom-nav__more-link {
+  color: var(--zm-nav-signout-fg);
+}
+
+.bottom-nav__more-item--signout .bottom-nav__more-link:hover {
+  color: var(--zm-nav-signout-fg-hover);
+}
+
+.bottom-nav__more-icon {
+  color: inherit;
+  flex: none;
+}
+
+.bottom-nav__more-label {
+  flex: 1;
+}
+
+/* ---- Theme group (m2-account-theme-status; VAL-WSH-006) ------------- *
+ * Section label + checkmark slot for the inline Sistem/Açık/Koyu options.
+ * The check is a shape cue so selection is never color-only. */
+.bottom-nav__more-item--group {
+  grid-column: 1 / -1;
+  padding: var(--zm-space-2) var(--zm-space-3) var(--zm-space-1);
+}
+
+.bottom-nav__more-group-label {
+  font-size: var(--zm-text-xs);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--zm-text-3);
+}
+
+.bottom-nav__more-link--theme .bottom-nav__more-check {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zm-brand);
+}
+
+.bottom-nav__more-link--theme .bottom-nav__more-check svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.bottom-nav__more-link--theme.is-selected {
+  color: var(--zm-text-1);
+  font-weight: 650;
+}
+
+/* ---- Reduced motion -------------------------------------------------- *
+ * State feedback (background/color) survives via the token cascade. The
+ * compose FAB's translateY lift collapses to a no-op (state still conveyed
+ * by color + size + position). */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav__item,
+  .bottom-nav__compose,
+  .bottom-nav__more-link {
+    transition-duration: 1ms;
+  }
+  .bottom-nav__compose,
+  .bottom-nav__compose:hover,
+  .bottom-nav__compose:active {
+    transform: none;
+  }
+}
+
+/* ---- Forced colors (Windows high-contrast) --------------------------- *
+ * Active indicator + focus ring + unread badge map to system semantic colors
+ * so the bar remains operable + the current route unmistakable. */
+@media (forced-colors: active) {
+  .bottom-nav {
+    border-top: 1px solid CanvasText;
+  }
+  .bottom-nav__item.is-active,
+  .bottom-nav__item.is-current {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .bottom-nav__item.is-active::before,
+  .bottom-nav__item.is-current::before {
+    background: LinkText;
+  }
+  .bottom-nav__compose {
+    background: LinkText;
+    color: Canvas;
+  }
+  .bottom-nav__badge {
+    background: LinkText;
+    color: Canvas;
+  }
+}

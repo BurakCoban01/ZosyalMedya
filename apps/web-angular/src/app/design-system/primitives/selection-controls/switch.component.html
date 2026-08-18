@@ -1,0 +1,66 @@
+<!--
+  ZmSwitch row. role="switch" + aria-checked are set on the visible control
+  (the .zm-switch__track) so AT announce the toggle semantics; the native
+  <input type=checkbox> underneath stays the click/focus/form participant.
+-->
+<label
+  class="zm-switch__row zm-feedback"
+  [attr.for]="resolvedId()"
+  [class.is-checked]="checked()"
+  [class.is-loading]="loading()"
+  [class.is-disabled]="isDisabled()"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+>
+  <span class="zm-switch__text">
+    <span class="zm-switch__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="zm-switch__required" aria-hidden="true">*</span>
+      }
+    </span>
+    @if (helper() && helper().trim().length > 0) {
+      <span class="zm-switch__helper" [id]="helperId()">{{ helper() }}</span>
+    }
+    @if (hasError()) {
+      <span class="zm-switch__error" [id]="errorId()" role="alert">
+        {{ error() }}
+      </span>
+    }
+  </span>
+
+  <!--
+    Track + thumb + native input. The native input is visually hidden but
+    functional: it is the click target, the focus recipient, and the source
+    of truth for AT semantics (the role=switch wrapper echoes aria-checked).
+    The thumb slides left/right as a POSITION cue (non-color). Under loading
+    the spinner overlays the thumb and the row is disabled; aria-busy is set.
+  -->
+  <span
+    class="zm-switch__track"
+    role="switch"
+    [attr.aria-checked]="checked() ? 'true' : 'false'"
+    [attr.aria-busy]="loading() ? 'true' : null"
+  >
+    <input
+      class="zm-switch__input"
+      [id]="resolvedId()"
+      type="checkbox"
+      [checked]="checked()"
+      [attr.name]="name() && name().length > 0 ? name() : null"
+      [attr.value]="value() && value().length > 0 ? value() : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [disabled]="isDisabled()"
+      [required]="required()"
+      (change)="onChange($event)"
+      (focus)="focused.emit()"
+      (blur)="blurred.emit()"
+    />
+    <span class="zm-switch__thumb" aria-hidden="true">
+      @if (loading()) {
+        <span class="zm-switch__spinner" aria-hidden="true" role="presentation"></span>
+      }
+    </span>
+  </span>
+</label>

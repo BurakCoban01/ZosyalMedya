@@ -1,0 +1,66 @@
+<!--
+  ZmSelect field shell — persistent <label for=id>, projected <option>s, and a
+  decorative chevron (aria-hidden). The native <select> is appearance:none'd
+  in CSS so the design owns the resting box; the option popup stays native
+  (correct AT + mobile behavior).
+-->
+<div
+  class="zm-select__field"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+  [class.is-disabled]="disabled()"
+>
+  <label class="zm-select__label" [attr.for]="resolvedId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="zm-select__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <div class="zm-select__control">
+    <select
+      class="zm-select__input zm-feedback"
+      [id]="resolvedId()"
+      [value]="value()"
+      [attr.name]="name() && name().length > 0 ? name() : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [disabled]="disabled()"
+      [required]="required()"
+      (change)="onChange($event)"
+      (focus)="focused.emit()"
+      (blur)="blurred.emit()"
+    >
+      <ng-content></ng-content>
+    </select>
+
+    <!--
+      Decorative chevron. aria-hidden + pointer-events:none so it never enters
+      the AX tree and never steals the select's click. currentColor follows the
+      control tone (theme + forced-colors aware); no hex data-URI (VAL-DS-002).
+    -->
+    <svg
+      class="zm-select__chevron"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      pointer-events="none"
+    >
+      <path
+        d="M6 9l6 6 6-6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </div>
+
+  @if (helper() && helper().trim().length > 0) {
+    <p class="zm-select__helper" [id]="helperId()">{{ helper() }}</p>
+  }
+  @if (hasError()) {
+    <p class="zm-select__error" [id]="errorId()">{{ error() }}</p>
+  }
+</div>

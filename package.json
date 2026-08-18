@@ -1,0 +1,60 @@
+{
+  "name": "enterprise-social-community-platform-clients",
+  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web-angular",
+    "apps/mobile-ionic",
+    "packages/api-client"
+  ],
+  "scripts": {
+    "api:generate": "ng-openapi-gen --input contracts/openapi/api-v1.yaml --output packages/api-client/src/generated",
+    "web:start": "ng serve web-angular",
+    "web:build": "ng build web-angular --configuration production",
+    "mobile:start": "ng serve mobile-ionic --port 8100",
+    "mobile:build": "ng build mobile-ionic --configuration production",
+    "test:web": "npm run test:web:main && npm run test:web:shell",
+    "test:web:main": "ng test web-angular --watch=false --exclude=**/account-menu.component.spec.ts --exclude=**/desktop-rail.component.spec.ts --exclude=**/mobile-bottom-nav.component.spec.ts --exclude=**/tablet-nav.component.spec.ts",
+    "test:web:shell": "npm run test:web:shell:account && npm run test:web:shell:desktop && npm run test:web:shell:mobile && npm run test:web:shell:tablet",
+    "test:web:shell:account": "ng test web-angular --watch=false --include=**/account-menu.component.spec.ts",
+    "test:web:shell:desktop": "ng test web-angular --watch=false --include=**/desktop-rail.component.spec.ts",
+    "test:web:shell:mobile": "ng test web-angular --watch=false --include=**/mobile-bottom-nav.component.spec.ts",
+    "test:web:shell:tablet": "ng test web-angular --watch=false --include=**/tablet-nav.component.spec.ts",
+    "test:mobile": "ng test mobile-ionic --watch=false",
+    "test": "npm run test:web && npm run test:mobile",
+    "build": "npm run api:generate && npm run web:build && npm run mobile:build"
+  },
+  "dependencies": {
+    "@angular/animations": "20.3.28",
+    "@angular/cdk": "^20.2.14",
+    "@angular/common": "20.3.28",
+    "@angular/compiler": "20.3.28",
+    "@angular/core": "20.3.28",
+    "@angular/forms": "20.3.28",
+    "@angular/platform-browser": "20.3.28",
+    "@angular/router": "20.3.28",
+    "@angular/service-worker": "20.3.28",
+    "@ionic/angular": "8.8.13",
+    "@microsoft/signalr": "10.0.0",
+    "ionicons": "7.4.0",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1",
+    "zone.js": "0.15.1"
+  },
+  "devDependencies": {
+    "@angular/build": "20.3.32",
+    "@angular/cli": "20.3.28",
+    "@angular/compiler-cli": "20.3.28",
+    "@tailwindcss/postcss": "4.1.14",
+    "jsdom": "26.1.0",
+    "ng-openapi-gen": "1.0.5",
+    "postcss": "8.5.26",
+    "tailwindcss": "4.1.14",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

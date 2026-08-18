@@ -1,0 +1,301 @@
+/*!
+ * ZmCheckbox styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-selection-*` component layer (tokens.css §3) which
+ * itself composes the semantic `--zm-brand` / `--zm-text-*` / `--zm-border-*` /
+ * `--zm-focus` / `--zm-danger` roles. No hardcoded hex / rgb / oklch appears
+ * in this file (VAL-DS-002).
+ *
+ * State coverage (VAL-DS-024): rest, hover, focus-visible, checked, unchecked,
+ * indeterminate, disabled, error, high-contrast. The checked state is conveyed
+ * by BOTH a brand-filled box AND a checkmark glyph; indeterminate by a dash
+ * glyph; the box edge and focus ring survive forced-colors.
+ */
+
+/* ============================================================================
+ * ROW — the whole control is the tap target (WCAG 2.2 ≥44px height)
+ * ============================================================================ */
+.zm-checkbox__row {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--zm-space-3);
+  /* min-height reserves the 44px tap target even when the label wraps. */
+  min-height: var(--zm-button-icon-size);
+  padding-block: calc(var(--zm-space-1) / 2);
+  font-family: var(--zm-font-ui);
+  color: var(--zm-selection-label-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--zm-selection-box-radius);
+  transition:
+    color var(--zm-selection-duration) var(--zm-selection-ease),
+    background-color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ============================================================================
+ * VISIBLE BOX (presentational chrome)
+ *    The native input sits inside the box at full hit area but visually
+ *    hidden (opacity 0). The box carries the visible square + border + fill.
+ * ============================================================================ */
+.zm-checkbox__box {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--zm-selection-box);
+  height: var(--zm-selection-box);
+  margin-top: calc((var(--zm-selection-label-size) * var(--zm-selection-line-height) - var(--zm-selection-box)) / 2);
+  border-radius: var(--zm-selection-box-radius);
+  border: var(--zm-selection-stroke) solid var(--zm-selection-stroke-idle);
+  background: var(--zm-selection-bg);
+  color: var(--zm-selection-fg-icon);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color var(--zm-selection-duration) var(--zm-selection-ease),
+    border-color var(--zm-selection-duration) var(--zm-selection-ease),
+    box-shadow var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* Native input — visually hidden but functional. It is the click target, the
+   focus recipient, and the source of truth for AT. Sized to overlap the box
+   exactly so the hit area matches the visible chrome. */
+.zm-checkbox__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+  /* iOS/Safari: don't show the native check; we draw our own. */
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* ============================================================================
+ * GLYPHS — checkmark (checked) and dash (indeterminate).
+ *    Both default to invisible; the sibling selector reveals the right one
+ *    based on the native input's :checked / [indeterminate] state. The glyph
+ *    color follows currentColor, which is set to the on-brand ink so it
+ *    contrasts against the brand fill.
+ * ============================================================================ */
+.zm-checkbox__check,
+.zm-checkbox__dash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--zm-selection-duration) var(--zm-selection-ease),
+    transform var(--zm-selection-duration) var(--zm-selection-ease);
+}
+.zm-checkbox__check-path {
+  /* Path drawing animation kept CSS-only; no JS. Stroke length is fixed. */
+}
+
+/* ----------------------------------------------------------------------------
+ * CHECKED — filled box + checkmark glyph (non-color cue).
+ * ---------------------------------------------------------------------------- */
+.zm-checkbox__row.is-checked .zm-checkbox__box {
+  background: var(--zm-selection-bg-checked);
+  border-color: var(--zm-selection-border-checked);
+}
+.zm-checkbox__row.is-checked .zm-checkbox__check {
+  opacity: 1;
+  transform: scale(1);
+}
+.zm-checkbox__row.is-checked .zm-checkbox__dash {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+/* ----------------------------------------------------------------------------
+ * INDETERMINATE — outlined brand box + dash glyph (different non-color cue).
+ * ---------------------------------------------------------------------------- */
+.zm-checkbox__row.is-indeterminate .zm-checkbox__box {
+  background: var(--zm-selection-bg-checked);
+  border-color: var(--zm-selection-border-checked);
+}
+.zm-checkbox__row.is-indeterminate .zm-checkbox__dash {
+  opacity: 1;
+  transform: scale(1);
+}
+.zm-checkbox__row.is-indeterminate .zm-checkbox__check {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+/* ============================================================================
+ * HOVER — gentle surface lift on the box (pre-checked accent).
+ * ============================================================================ */
+.zm-checkbox__row:hover:not(.is-disabled):not(.is-readonly) .zm-checkbox__box {
+  background: var(--zm-selection-bg-hover);
+}
+.zm-checkbox__row.is-checked:hover:not(.is-disabled):not(.is-readonly) .zm-checkbox__box,
+.zm-checkbox__row.is-indeterminate:hover:not(.is-disabled):not(.is-readonly) .zm-checkbox__box {
+  background: var(--zm-selection-bg-checked-hover);
+}
+
+/* ============================================================================
+ * FOCUS-VISIBLE — theme-aware ring on the box (never obscured).
+ *    We mirror the focus ring onto the visible box because the input itself
+ *    is opacity:0; the user perceives the box as the control. The native
+ *    input keeps :focus-visible so keyboard users get the ring on the box
+ *    precisely when the platform would show it.
+ * ============================================================================ */
+.zm-checkbox__input:focus-visible + .zm-checkbox__check,
+.zm-checkbox__input:focus-visible ~ .zm-checkbox__check {
+  /* placeholder sibling chain (kept for clarity; the box rule below carries the ring) */
+}
+.zm-checkbox__row:has(.zm-checkbox__input:focus-visible) .zm-checkbox__box {
+  outline: var(--zm-focus-ring-width) solid var(--zm-selection-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ============================================================================
+ * DISABLED — neutral, non-interactive. The box edge stays visible.
+ * ============================================================================ */
+.zm-checkbox__row.is-disabled {
+  cursor: not-allowed;
+  color: var(--zm-selection-fg-disabled);
+}
+.zm-checkbox__row.is-disabled .zm-checkbox__box {
+  background: var(--zm-selection-bg-disabled);
+  border-color: var(--zm-selection-border-disabled);
+}
+.zm-checkbox__row.is-disabled .zm-checkbox__check,
+.zm-checkbox__row.is-disabled .zm-checkbox__dash {
+  color: var(--zm-selection-fg-disabled);
+}
+
+/* ----------------------------------------------------------------------------
+ * READ-ONLY — pointer-events disabled on the input; visually mirrors the
+ * resting state so the user understands the value is fixed.
+ * ---------------------------------------------------------------------------- */
+.zm-checkbox__row.is-readonly {
+  cursor: default;
+}
+.zm-checkbox__row.is-readonly .zm-checkbox__input {
+  pointer-events: none;
+}
+
+/* ============================================================================
+ * ERROR — danger ring on the box, message text underneath (non-color cue).
+ * ============================================================================ */
+.zm-checkbox__row.is-error .zm-checkbox__box {
+  border-color: var(--zm-selection-error-ring);
+}
+.zm-checkbox__row.is-error .zm-checkbox__input:focus-visible ~ .zm-checkbox__check,
+.zm-checkbox__row:has(.zm-checkbox__input:focus-visible) .zm-checkbox__box {
+  /* keep the focus ring readable in error */
+}
+.zm-checkbox__row.is-error:has(.zm-checkbox__input:focus-visible) .zm-checkbox__box {
+  outline-color: var(--zm-selection-error-ring);
+}
+
+/* ============================================================================
+ * HIGH-CONTRAST — author-side reinforcement (doubles structural border).
+ * ============================================================================ */
+.zm-checkbox__row.is-high-contrast .zm-checkbox__box {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * LABEL + HELPER + ERROR TEXT
+ * ============================================================================ */
+.zm-checkbox__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  /* aligned to the box top + a hair below to optical-center single-line labels */
+  padding-top: 0.05em;
+}
+.zm-checkbox__label {
+  font-size: var(--zm-selection-label-size);
+  font-weight: var(--zm-selection-label-weight);
+  line-height: var(--zm-selection-line-height);
+  color: var(--zm-selection-label-fg);
+}
+.zm-checkbox__required {
+  margin-left: 0.25ch;
+  color: var(--zm-selection-error-fg);
+}
+.zm-checkbox__helper {
+  font-size: var(--zm-selection-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-helper-fg);
+}
+.zm-checkbox__error {
+  font-size: var(--zm-selection-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-error-fg);
+}
+.zm-checkbox__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+.zm-checkbox__row.is-disabled .zm-checkbox__label,
+.zm-checkbox__row.is-disabled .zm-checkbox__helper {
+  color: var(--zm-selection-fg-disabled);
+}
+
+/* ============================================================================
+ * REDUCED MOTION — state feedback without spatial motion.
+ *    tokens.css collapses --zm-duration-*; glyph scale/opacity transitions
+ *    become near-instant. State is still discriminable (fill + glyph).
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-checkbox__row,
+  .zm-checkbox__box,
+  .zm-checkbox__check,
+  .zm-checkbox__dash {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-checkbox__row,
+:host-context([data-reduce-motion]) .zm-checkbox__box,
+:host-context([data-reduce-motion]) .zm-checkbox__check,
+:host-context([data-reduce-motion]) .zm-checkbox__dash {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Contrast themes)
+ *    The box edge + check glyph + focus ring must remain visible. Map the
+ *    checked fill to the system Link/Highlight color and the focus ring to
+ *    Highlight so the control reads under any theme.
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-checkbox__box {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-checkbox__row.is-checked .zm-checkbox__box,
+  .zm-checkbox__row.is-indeterminate .zm-checkbox__box {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+  .zm-checkbox__row.is-checked .zm-checkbox__check,
+  .zm-checkbox__row.is-indeterminate .zm-checkbox__dash {
+    color: HighlightText;
+  }
+  .zm-checkbox__row:has(.zm-checkbox__input:focus-visible) .zm-checkbox__box {
+    outline-color: Highlight;
+  }
+  .zm-checkbox__row.is-disabled .zm-checkbox__box {
+    border-color: GrayText;
+  }
+  .zm-checkbox__row.is-disabled .zm-checkbox__label,
+  .zm-checkbox__row.is-disabled .zm-checkbox__helper {
+    color: GrayText;
+  }
+}

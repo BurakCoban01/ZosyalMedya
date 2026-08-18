@@ -1,0 +1,200 @@
+/**
+ * ZmToast — scoped toast styles.
+ *
+ * Consumes ONLY `--zm-toast-*` component-layer tokens (which compose the
+ * semantic `--zm-canvas-raised` / `--zm-text-1` / `--zm-border-strong` /
+ * `--zm-shadow-lg` roles + the per-variant accent roles `--zm-info/success/
+ * warning/danger`). No hardcoded hex anywhere.
+ *
+ * Layout: the toast is a horizontal flex [icon | body | action? | close].
+ * Each variant gets a 4px accent stripe on the inline-start edge so the
+ * status is readable even when the icon is not (e.g. high contrast). The icon
+ * glyph itself is the primary non-color cue (VAL-DS-029).
+ *
+ * Motion: enter/exit via `transform: translateX` + `opacity` only (the host
+ * slides in from the inline-end side and fades). Reduced motion collapses via
+ * the `--zm-toast-duration` token cascade (tokens.css §5).
+ */
+
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zm-toast-gap);
+  /* The accent stripe is the inline-start border, widened so it reads as an
+   * intentional editorial accent, not a hairline. */
+  border-inline-start: 4px solid var(--zm-toast-info-accent);
+  border-radius: var(--zm-toast-radius);
+  background: var(--zm-toast-bg);
+  color: var(--zm-toast-fg);
+  box-shadow: var(--zm-toast-shadow);
+  padding: var(--zm-toast-padding-y) var(--zm-toast-padding-x);
+  width: min(100%, 28rem);
+  /* Enter motion: slide in from the inline-end + fade. */
+  transition:
+    transform var(--zm-toast-duration) var(--zm-toast-ease),
+    opacity var(--zm-toast-duration) var(--zm-toast-ease);
+}
+
+:host([data-variant='info']) {
+  border-inline-start-color: var(--zm-toast-info-accent);
+}
+:host([data-variant='success']) {
+  border-inline-start-color: var(--zm-toast-success-accent);
+}
+:host([data-variant='warning']) {
+  border-inline-start-color: var(--zm-toast-warning-accent);
+}
+:host([data-variant='error']) {
+  border-inline-start-color: var(--zm-toast-danger-accent);
+}
+
+/* The icon is the primary non-color status cue. Each variant renders a
+ * distinct glyph (circle-i / check / triangle / alert-x) so grayscale
+ * conversion still discriminates the variant (VAL-DS-029). */
+.zm-toast__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zm-toast-icon-size);
+  height: var(--zm-toast-icon-size);
+  color: var(--zm-toast-info-accent);
+}
+:host([data-variant='info']) .zm-toast__icon {
+  color: var(--zm-toast-info-accent);
+}
+:host([data-variant='success']) .zm-toast__icon {
+  color: var(--zm-toast-success-accent);
+}
+:host([data-variant='warning']) .zm-toast__icon {
+  color: var(--zm-toast-warning-accent);
+}
+:host([data-variant='error']) .zm-toast__icon {
+  color: var(--zm-toast-danger-accent);
+}
+.zm-toast__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zm-toast__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.zm-toast__message {
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-leading-ui);
+  font-weight: 590;
+  color: var(--zm-toast-fg);
+  /* Allow the message to wrap; long Turkish copy must not be truncated. */
+  overflow-wrap: anywhere;
+}
+.zm-toast__meta {
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-ui);
+  color: var(--zm-toast-fg-meta);
+  overflow-wrap: anywhere;
+}
+
+/* Inline action button (e.g. Undo). Uses the .zm-feedback transition class
+ * for a consistent press/hover cadence. */
+.zm-toast__action {
+  flex: 0 0 auto;
+  align-self: center;
+  appearance: none;
+  border: 1px solid var(--zm-toast-border);
+  background: transparent;
+  color: var(--zm-toast-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 650;
+  line-height: var(--zm-leading-ui);
+  padding: var(--zm-space-1) var(--zm-space-3);
+  border-radius: var(--zm-radius-control);
+  cursor: pointer;
+  min-height: 36px;
+  transition:
+    background-color var(--zm-toast-duration) var(--zm-toast-ease),
+    border-color var(--zm-toast-duration) var(--zm-toast-ease),
+    color var(--zm-toast-duration) var(--zm-toast-ease);
+}
+.zm-toast__action:hover {
+  background: var(--zm-surface-2);
+}
+.zm-toast__action:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus-ring-color);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* Close (dismiss) control — icon-only, aria-label supplied. */
+.zm-toast__close {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--zm-toast-fg-meta);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--zm-radius-control);
+  cursor: pointer;
+  transition:
+    background-color var(--zm-toast-duration) var(--zm-toast-ease),
+    color var(--zm-toast-duration) var(--zm-toast-ease);
+}
+.zm-toast__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+.zm-toast__close:hover {
+  background: var(--zm-surface-2);
+  color: var(--zm-toast-fg);
+}
+.zm-toast__close:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus-ring-color);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------------------
+ * Reduced motion: collapse the enter/exit transition to opacity-only (no
+ * spatial slide). Honors both the OS media query and the product
+ * [data-reduce-motion] toggle on <html>.
+ * -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: opacity var(--zm-toast-duration) linear;
+    transform: none !important;
+  }
+}
+:host-context([data-reduce-motion]) {
+  transition: opacity var(--zm-toast-duration) linear;
+  transform: none !important;
+}
+
+/* Under forced-colors, restore a visible edge + accent so the toast + its
+ * status survive Windows high-contrast. */
+@media (forced-colors: active) {
+  :host {
+    border: 2px solid CanvasText;
+  }
+  .zm-toast__icon {
+    color: CanvasText;
+  }
+  .zm-toast__action,
+  .zm-toast__close {
+    border-color: CanvasText;
+  }
+  .zm-toast__action:focus-visible,
+  .zm-toast__close:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

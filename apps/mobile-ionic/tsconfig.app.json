@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "outDir": "../../out-tsc/mobile", "types": [] },
+  "files": ["src/main.ts"],
+  "include": ["src/**/*.d.ts", "../../packages/api-client/src/**/*.ts"]
+}

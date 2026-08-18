@@ -1,0 +1,302 @@
+/*!
+ * ZmSegmented styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-segmented-*` component layer (tokens.css §3) which
+ * composes the semantic `--zm-brand` / `--zm-text-*` / `--zm-border-*` /
+ * `--zm-focus` / `--zm-danger` roles. No hardcoded hex / rgb / oklch
+ * (VAL-DS-002).
+ *
+ * State coverage (VAL-DS-025): rest, hover, focus-visible, active (selected),
+ * disabled (whole bar or per-segment), error, high-contrast. The active
+ * segment is conveyed by BOTH a raised surface (elevation) AND an underline
+ * indicator bar (a position cue) — never color alone. In multi mode a
+ * checkmark glyph also reinforces the checked state. Raised surface +
+ * underline + focus ring survive forced-colors.
+ */
+
+:host {
+  display: block;
+  max-width: 100%;
+  font-family: var(--zm-font-ui);
+  color: var(--zm-segmented-fg);
+}
+
+/* ============================================================================
+ * FIELD — the group container (role=radiogroup | role=group)
+ * ============================================================================ */
+.zm-segmented__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+}
+
+/* ============================================================================
+ * TRACK — the horizontal bar that holds the segments. Tonal separation
+ * (surface-1 over canvas) precedes elevation; the bar reads as a quiet
+ * container, not a heavy card.
+ * ============================================================================ */
+.zm-segmented__track {
+  display: flex;
+  gap: var(--zm-space-1);
+  padding: var(--zm-space-1);
+  background: var(--zm-segmented-bg);
+  border: var(--zm-border-width-hair) solid var(--zm-segmented-border);
+  border-radius: var(--zm-segmented-radius);
+  position: relative;
+  transition:
+    background-color var(--zm-selection-duration) var(--zm-selection-ease),
+    border-color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ============================================================================
+ * SEGMENT WRAPPER — hosts the underline indicator (::after) so it tracks the
+ * active segment without JS measurement. Each segment flexes equally so the
+ * bar distributes width like a classic segmented control.
+ * ============================================================================ */
+.zm-segmented__segment {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+}
+
+/* ============================================================================
+ * SEGMENT BUTTON — the interactive element (role=radio | role=checkbox).
+ * Transparent at rest; reads its state from the wrapper's .is-active class.
+ * ============================================================================ */
+.zm-segmented__segment-btn {
+  flex: 1 1 auto;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: var(--zm-border-width-hair) solid transparent;
+  border-radius: var(--zm-segmented-segment-radius);
+  padding-inline: var(--zm-space-3);
+  padding-block: var(--zm-space-2);
+  /* WCAG 2.2 target minimum (44px) — matches --zm-button-icon-size */
+  min-height: var(--zm-button-icon-size);
+  min-width: var(--zm-button-icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zm-space-2);
+  font-family: inherit;
+  font-size: var(--zm-selection-label-size);
+  font-weight: var(--zm-selection-label-weight);
+  line-height: var(--zm-selection-line-height);
+  color: var(--zm-segmented-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--zm-selection-duration) var(--zm-selection-ease),
+    color var(--zm-selection-duration) var(--zm-selection-ease),
+    border-color var(--zm-selection-duration) var(--zm-selection-ease),
+    box-shadow var(--zm-selection-duration) var(--zm-selection-ease),
+    transform var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+.zm-segmented__segment-label {
+  /* allow label to truncate cleanly on narrow widths without breaking layout */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+ * ACTIVE — RAISED surface (elevation) + brand underline (position cue).
+ * These two cues together read in a static frame and under reduced motion;
+ * color (brand indicator) is reinforcement only.
+ * ============================================================================ */
+.zm-segmented__segment.is-active .zm-segmented__segment-btn {
+  background: var(--zm-segmented-bg-active);
+  color: var(--zm-segmented-fg-selected);
+  border-color: var(--zm-segmented-border-strong);
+  box-shadow: var(--zm-segmented-shadow-selected);
+}
+
+/* Underline indicator bar — sits just below the active segment as a position
+   cue (non-color). Slides implicitly with the active segment (each segment
+   owns its own ::after). */
+.zm-segmented__segment.is-active::after {
+  content: '';
+  position: absolute;
+  left: var(--zm-space-3);
+  right: var(--zm-space-3);
+  bottom: calc(var(--zm-space-1) * -1);
+  height: var(--zm-border-width-strong);
+  background: var(--zm-segmented-indicator);
+  border-radius: var(--zm-radius-pill);
+  pointer-events: none;
+}
+
+/* ============================================================================
+ * GLYPH — checkmark reinforcement (multi mode only). Scales in for the
+ * active segment; collapses to opacity-only under reduced motion. Hidden in
+ * single mode (the raised surface + underline is the tab-like indicator).
+ * ============================================================================ */
+.zm-segmented__segment-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  opacity: 0;
+  transform: scale(0.5);
+  color: var(--zm-segmented-indicator);
+  transition:
+    opacity var(--zm-selection-duration) var(--zm-selection-ease),
+    transform var(--zm-selection-duration) var(--zm-selection-ease),
+    color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+.zm-segmented__segment-glyph svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.zm-segmented__field.is-multi
+  .zm-segmented__segment.is-active
+  .zm-segmented__segment-glyph {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================================================
+ * HOVER — segment tone lifts (off path). Active path keeps its raised state
+ * and deepens slightly.
+ * ============================================================================ */
+.zm-segmented__segment-btn:hover:not([disabled]) {
+  background: var(--zm-segmented-bg-hover);
+  color: var(--zm-segmented-fg-hover);
+}
+.zm-segmented__segment.is-active .zm-segmented__segment-btn:hover:not([disabled]) {
+  background: var(--zm-segmented-bg-active);
+  color: var(--zm-segmented-fg-selected);
+}
+
+/* ============================================================================
+ * FOCUS-VISIBLE — theme-aware ring on the segment button (never obscured by
+ * the track or underline).
+ * ============================================================================ */
+.zm-segmented__segment-btn:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-segmented-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ============================================================================
+ * DISABLED — whole bar or per-segment. Neutral, non-interactive. The track
+ * + segment edges remain visible (status never hidden from AT).
+ * ============================================================================ */
+.zm-segmented__field.is-disabled .zm-segmented__track {
+  background: var(--zm-segmented-bg);
+  opacity: 0.65;
+}
+.zm-segmented__field.is-disabled .zm-segmented__segment-btn,
+.zm-segmented__segment.is-disabled .zm-segmented__segment-btn,
+.zm-segmented__segment-btn[disabled] {
+  cursor: not-allowed;
+  color: var(--zm-segmented-fg-disabled);
+  box-shadow: none;
+}
+.zm-segmented__segment.is-disabled.is-active::after,
+.zm-segmented__field.is-disabled .zm-segmented__segment.is-active::after {
+  background: var(--zm-segmented-fg-disabled);
+}
+
+/* ============================================================================
+ * ERROR — danger ring on the track + message text underneath. aria-invalid
+ * is set on the group (role=radiogroup/group).
+ * ============================================================================ */
+.zm-segmented__field.is-error .zm-segmented__track {
+  border-color: var(--zm-segmented-error-ring);
+}
+.zm-segmented__field.is-error .zm-segmented__segment-btn:focus-visible {
+  outline-color: var(--zm-segmented-error-ring);
+}
+
+/* ============================================================================
+ * HIGH-CONTRAST — author-side reinforcement (structural border thickens)
+ * ============================================================================ */
+.zm-segmented__field.is-high-contrast .zm-segmented__track {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-segmented-border-strong);
+}
+
+/* ============================================================================
+ * HELPER + ERROR TEXT — same vocabulary as the other selection controls
+ * ============================================================================ */
+.zm-segmented__helper {
+  font-size: var(--zm-selection-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-helper-fg);
+}
+.zm-segmented__error {
+  font-size: var(--zm-selection-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-error-fg);
+}
+.zm-segmented__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+
+/* ============================================================================
+ * REDUCED MOTION — token cascade collapses durations; the indicator slide
+ * (implicit via active-segment change) collapses to near-instant. The
+ * checkmark glyph becomes opacity-only (no scale). State still fully
+ * discriminable via raised surface + underline + glyph.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-segmented__segment-btn,
+  .zm-segmented__segment-glyph {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-segmented__segment-btn,
+:host-context([data-reduce-motion]) .zm-segmented__segment-glyph {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+:host-context([data-reduce-motion]) .zm-segmented__segment-glyph {
+  transform: scale(1);
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Contrast themes)
+ * The track edge, active segment, underline indicator, and focus ring
+ * remain visible. Active maps to Highlight; text to HighlightText so the
+ * raised segment reads against any system palette.
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-segmented__track {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-segmented__segment-btn {
+    border-color: transparent;
+  }
+  .zm-segmented__segment.is-active .zm-segmented__segment-btn {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .zm-segmented__segment.is-active::after {
+    background: Highlight;
+  }
+  .zm-segmented__segment-btn:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-segmented__segment.is-disabled .zm-segmented__segment-btn,
+  .zm-segmented__field.is-disabled .zm-segmented__segment-btn {
+    color: GrayText;
+  }
+  .zm-segmented__segment.is-disabled.is-active::after,
+  .zm-segmented__field.is-disabled .zm-segmented__segment.is-active::after {
+    background: GrayText;
+  }
+  .zm-segmented__helper {
+    color: GrayText;
+  }
+}

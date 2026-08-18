@@ -1,0 +1,237 @@
+/*!
+ * ZmRadio styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-selection-*` component layer (tokens.css §3) which
+ * composes the semantic `--zm-brand` / `--zm-text-*` / `--zm-border-*` /
+ * `--zm-focus` / `--zm-danger` roles. No hardcoded hex / rgb / oklch (VAL-DS-002).
+ *
+ * State coverage (VAL-DS-024): rest, hover, focus-visible, selected,
+ * unselected, disabled, error, high-contrast. The selected state is conveyed
+ * by BOTH a brand-filled outer ring AND a solid center dot (a non-color cue
+ * distinct from the checkbox checkmark). Ring + dot + focus ring survive
+ * forced-colors.
+ */
+
+/* ============================================================================
+ * ROW — the whole control is the tap target (WCAG 2.2 ≥44px height)
+ * ============================================================================ */
+.zm-radio__row {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--zm-space-3);
+  min-height: var(--zm-button-icon-size);
+  padding-block: calc(var(--zm-space-1) / 2);
+  font-family: var(--zm-font-ui);
+  color: var(--zm-selection-label-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--zm-selection-box-radius);
+  transition:
+    color var(--zm-selection-duration) var(--zm-selection-ease),
+    background-color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ============================================================================
+ * VISIBLE RING (presentational chrome). Round (vs square checkbox box) so
+ * the control TYPE reads in a static frame (non-color cue: shape).
+ * ============================================================================ */
+.zm-radio__ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--zm-selection-box);
+  height: var(--zm-selection-box);
+  margin-top: calc((var(--zm-selection-label-size) * var(--zm-selection-line-height) - var(--zm-selection-box)) / 2);
+  border-radius: 50%;
+  border: var(--zm-selection-stroke) solid var(--zm-selection-stroke-idle);
+  background: var(--zm-selection-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color var(--zm-selection-duration) var(--zm-selection-ease),
+    border-color var(--zm-selection-duration) var(--zm-selection-ease),
+    box-shadow var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+.zm-radio__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* ============================================================================
+ * CENTER DOT — solid brand fill when selected. Distinct shape (filled circle)
+ * from the checkbox checkmark so the type + state read at a glance.
+ * ============================================================================ */
+.zm-radio__dot {
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: var(--zm-selection-fg-checked);
+  /* Hidden by default; revealed via the is-checked class. Scale gives a
+     short growth cue under motion; collapses to opacity-only under RM. */
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity var(--zm-selection-duration) var(--zm-selection-ease),
+    transform var(--zm-selection-duration) var(--zm-selection-ease),
+    background-color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ----------------------------------------------------------------------------
+ * SELECTED — filled ring + center dot (non-color cue: position + solid shape)
+ * ---------------------------------------------------------------------------- */
+.zm-radio__row.is-checked .zm-radio__ring {
+  border-color: var(--zm-selection-border-checked);
+  background: var(--zm-selection-bg);
+}
+.zm-radio__row.is-checked .zm-radio__dot {
+  opacity: 1;
+  transform: scale(1);
+  background: var(--zm-selection-bg-checked);
+}
+
+/* ============================================================================
+ * HOVER
+ * ============================================================================ */
+.zm-radio__row:hover:not(.is-disabled) .zm-radio__ring {
+  background: var(--zm-selection-bg-hover);
+}
+.zm-radio__row.is-checked:hover:not(.is-disabled) .zm-radio__ring {
+  border-color: var(--zm-selection-bg-checked-hover);
+}
+
+/* ============================================================================
+ * FOCUS-VISIBLE — theme-aware ring on the outer ring (never obscured)
+ * ============================================================================ */
+.zm-radio__row:has(.zm-radio__input:focus-visible) .zm-radio__ring {
+  outline: var(--zm-focus-ring-width) solid var(--zm-selection-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ============================================================================
+ * DISABLED
+ * ============================================================================ */
+.zm-radio__row.is-disabled {
+  cursor: not-allowed;
+  color: var(--zm-selection-fg-disabled);
+}
+.zm-radio__row.is-disabled .zm-radio__ring {
+  background: var(--zm-selection-bg-disabled);
+  border-color: var(--zm-selection-border-disabled);
+}
+.zm-radio__row.is-disabled .zm-radio__dot {
+  background: var(--zm-selection-fg-disabled);
+}
+
+/* ============================================================================
+ * ERROR
+ * ============================================================================ */
+.zm-radio__row.is-error .zm-radio__ring {
+  border-color: var(--zm-selection-error-ring);
+}
+.zm-radio__row.is-error:has(.zm-radio__input:focus-visible) .zm-radio__ring {
+  outline-color: var(--zm-selection-error-ring);
+}
+
+/* ============================================================================
+ * HIGH-CONTRAST
+ * ============================================================================ */
+.zm-radio__row.is-high-contrast .zm-radio__ring {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * LABEL + HELPER + ERROR TEXT
+ * ============================================================================ */
+.zm-radio__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  padding-top: 0.05em;
+}
+.zm-radio__label {
+  font-size: var(--zm-selection-label-size);
+  font-weight: var(--zm-selection-label-weight);
+  line-height: var(--zm-selection-line-height);
+  color: var(--zm-selection-label-fg);
+}
+.zm-radio__required {
+  margin-left: 0.25ch;
+  color: var(--zm-selection-error-fg);
+}
+.zm-radio__helper {
+  font-size: var(--zm-selection-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-helper-fg);
+}
+.zm-radio__error {
+  font-size: var(--zm-selection-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-error-fg);
+}
+.zm-radio__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+.zm-radio__row.is-disabled .zm-radio__label,
+.zm-radio__row.is-disabled .zm-radio__helper {
+  color: var(--zm-selection-fg-disabled);
+}
+
+/* ============================================================================
+ * REDUCED MOTION — token cascade collapses durations; dot scale becomes near-
+ * instant. State still discriminable (filled ring + dot).
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-radio__row,
+  .zm-radio__ring,
+  .zm-radio__dot {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-radio__row,
+:host-context([data-reduce-motion]) .zm-radio__ring,
+:host-context([data-reduce-motion]) .zm-radio__dot {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Contrast themes)
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-radio__ring {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-radio__row.is-checked .zm-radio__ring {
+    border-color: Highlight;
+  }
+  .zm-radio__row.is-checked .zm-radio__dot {
+    background: Highlight;
+  }
+  .zm-radio__row:has(.zm-radio__input:focus-visible) .zm-radio__ring {
+    outline-color: Highlight;
+  }
+  .zm-radio__row.is-disabled .zm-radio__ring {
+    border-color: GrayText;
+  }
+  .zm-radio__row.is-disabled .zm-radio__dot {
+    background: GrayText;
+  }
+  .zm-radio__row.is-disabled .zm-radio__label,
+  .zm-radio__row.is-disabled .zm-radio__helper {
+    color: GrayText;
+  }
+}

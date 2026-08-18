@@ -1,0 +1,15 @@
+{
+  "/api": {
+    "target": "http://127.0.0.1:58080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/hubs": {
+    "target": "http://127.0.0.1:58080",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true,
+    "logLevel": "info"
+  }
+}

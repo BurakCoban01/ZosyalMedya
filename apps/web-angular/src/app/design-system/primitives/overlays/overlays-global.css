@@ -1,0 +1,86 @@
+/**
+ * ZosyalMedya overlay primitives — GLOBAL styles.
+ *
+ * Component-scoped CSS (dialog/sheet/menu/tooltip .component.css) styles the
+ * overlay CONTENT (the panel/bubble/items), because Angular's emulated
+ * encapsulation travels with the template via `_ngcontent` attributes even
+ * when the content is rendered into a CDK overlay pane.
+ *
+ * THIS file styles the CDK-OWNED elements (the backdrop + the pane wrapper),
+ * which the Overlay service creates inside `document.body` and which do NOT
+ * carry our `_ngcontent` attributes — therefore they MUST be styled globally.
+ *
+ * Consumes ONLY `--zm-*` tokens (no hardcoded hex). Imported once from the
+ * app's global styles.css.
+ */
+
+/* --- Dialog backdrop + pane (centered modal) ---------------------------- */
+.zm-dialog-backdrop {
+  background: var(--zm-dialog-scrim);
+  /* Fade the scrim in (opacity only — no spatial motion). */
+  transition: opacity var(--zm-dialog-duration) var(--zm-dialog-ease);
+}
+
+.zm-dialog-pane {
+  /* Let the panel size itself; CDK centers via GlobalPositionStrategy. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Keep the pane pointer-eventable so the panel receives clicks. */
+  pointer-events: auto;
+}
+
+/* --- Sheet backdrop + pane (side-anchored) ------------------------------- */
+.zm-sheet-backdrop {
+  background: var(--zm-sheet-scrim);
+  transition: opacity var(--zm-sheet-duration) var(--zm-sheet-ease);
+}
+
+.zm-sheet-pane {
+  pointer-events: auto;
+}
+
+/* --- Menu backdrop + pane (transparent; outside-click only) ------------- */
+.zm-menu-backdrop {
+  /* Transparent: the menu is non-modal (no visible scrim). The backdrop
+   * exists solely to capture pointer-down OUTSIDE the panel so the menu
+   * dismisses without firing any inner action (VAL-DS-027). */
+  background: transparent;
+  /* Keep the backdrop click-capturing but invisible. */
+  pointer-events: auto;
+}
+
+.zm-menu-pane {
+  pointer-events: auto;
+}
+
+/* --- Tooltip pane (never captures pointer events) ----------------------- */
+.zm-tooltip-pane {
+  /* The tooltip is transient; it must NEVER steal pointer events from the
+   * trigger beneath it (otherwise the mouseleave would fire on the bubble
+   * and the pointer could never bridge to it). */
+  pointer-events: none;
+}
+
+/* --- Reduced motion ----------------------------------------------------- */
+/* The motion.css global loop-kill + duration-collapse already neutralize
+ * spatial motion; here we ensure the scrim fades are near-instant too so
+ * the reduced-motion path is consistent across every overlay. */
+@media (prefers-reduced-motion: reduce) {
+  .zm-dialog-backdrop,
+  .zm-sheet-backdrop {
+    transition-duration: 1ms;
+  }
+}
+
+/* --- Forced colors ------------------------------------------------------ */
+/* Keep the dialog/sheet panel edge + scrim readable under Windows high-
+ * contrast. The panel border + the scrim's existence (not color) carry the
+ * separation cue. */
+@media (forced-colors: active) {
+  .zm-dialog-backdrop,
+  .zm-sheet-backdrop {
+    background: CanvasText !important;
+    opacity: 0.5;
+  }
+}

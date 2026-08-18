@@ -1,0 +1,1326 @@
+/*!
+ * ZosyalMedya design-system gallery — light-theme token reference surface.
+ *
+ * This is the M1 validation surface for VAL-DS-001 (tokens resolve) and
+ * VAL-DS-003 (warm-neutral canvas, coral brand, readable ink >= 4.5:1).
+ * It consumes ONLY --zm-* tokens (semantic + component layers). No hex, no
+ * legacy --ink/--paper/--coral, no oklch literals — every color resolves
+ * through the cascade so [data-theme] overrides stay live.
+ *
+ * Not a product surface: internal/dev design-system reference only.
+ */
+
+:host {
+  display: block;
+  background: var(--zm-canvas);
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+  min-height: 100vh;
+}
+
+.gallery {
+  max-width: var(--zm-measure-bleed);
+  margin: 0 auto;
+  padding: var(--zm-space-12) var(--zm-space-6) var(--zm-space-24);
+}
+
+/* --- Editorial header ( Living Editorial Network direction ) --- */
+.gallery__head {
+  position: relative;
+  max-width: var(--zm-measure-body);
+  margin-bottom: var(--zm-space-12);
+}
+/* Signature motif accent (VAL-DS-033/034): the signal-arc sits in the header's
+   top-end corner — a non-text region. It is aria-hidden decoration and never
+   underlies the title/lede, so contrast is unaffected. The accent is positioned
+   out of the text column (negative inset) so it stays ornamental. */
+.gallery__head-accent {
+  position: absolute;
+  top: calc(-1 * var(--zm-space-4));
+  inset-inline-end: calc(-1 * var(--zm-space-6));
+  /* Keep the motif's low-chroma tone; do not elevate to brand. */
+  color: var(--zm-motif-fg);
+  opacity: 0.85;
+  /* Hide the accent when the header column is too narrow (mobile) so it never
+     collides with the title text. */
+  pointer-events: none;
+}
+@media (max-width: 36rem) {
+  .gallery__head-accent {
+    display: none;
+  }
+}
+/* Deep-link status line (VAL-DS-036): shows the active `prim`/`state` filter so
+   a validator can confirm the deep-link took effect. */
+.gallery__deeplink {
+  margin: var(--zm-space-5) 0 0;
+  padding: var(--zm-space-3) var(--zm-space-4);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-sm);
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+.gallery__deeplink-label {
+  font-family: var(--zm-font-ui);
+  font-weight: 600;
+  color: var(--zm-text-3);
+  margin-inline-end: 0.5ch;
+}
+.gallery__deeplink code {
+  color: var(--zm-brand);
+}
+.eyebrow {
+  font-size: var(--zm-text-xs);
+  font-weight: 700;
+  letter-spacing: var(--zm-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--zm-brand);
+  margin: 0 0 var(--zm-space-3);
+}
+.gallery__title {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-2xl);
+  line-height: var(--zm-leading-display);
+  letter-spacing: var(--zm-tracking-tight);
+  color: var(--zm-text-1);
+  margin: 0 0 var(--zm-space-4);
+}
+.gallery__lede {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-2);
+  max-width: var(--zm-measure-body);
+  margin: 0;
+}
+
+/* --- Section panels (tonal separation before shadows, per design-system §6) --- */
+.panel {
+  border-top: 1px solid var(--zm-border-subtle);
+  padding: var(--zm-space-10) 0;
+}
+.panel > h2 {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-xl);
+  line-height: var(--zm-leading-tight);
+  letter-spacing: var(--zm-tracking-tight);
+  color: var(--zm-text-1);
+  margin: 0 0 var(--zm-space-6);
+}
+.panel__hint {
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-3);
+  margin: 0 0 var(--zm-space-6);
+  max-width: var(--zm-measure-body);
+}
+
+/* --- Readable body sample: this is the VAL-DS-003 text-1-on-canvas probe --- */
+.readable {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-1);
+  max-width: var(--zm-measure-body);
+  margin: 0 0 var(--zm-space-6);
+}
+.readable strong {
+  color: var(--zm-text-1);
+  font-weight: 650;
+}
+
+/* ============================================================================
+ * REFERENCE COMPONENT — primary / secondary / quiet buttons.
+ * Consumes the --zm-button-* component layer (which composes --zm-brand etc.).
+ * This is the VAL-DS-003 "primary button" pixel-sampling target.
+ * ============================================================================ */
+.ref-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  align-items: center;
+}
+.zm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--zm-button-min-height);
+  padding: var(--zm-button-padding-y) var(--zm-button-padding-x);
+  border-radius: var(--zm-button-radius);
+  border: 1px solid transparent;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  font-weight: 650;
+  line-height: var(--zm-leading-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--zm-button-duration) var(--zm-button-ease),
+    border-color var(--zm-button-duration) var(--zm-button-ease),
+    color var(--zm-button-duration) var(--zm-button-ease);
+}
+.zm-btn--primary {
+  background: var(--zm-button-primary-bg);
+  color: var(--zm-button-primary-fg);
+}
+.zm-btn--primary:hover {
+  background: var(--zm-button-primary-bg-hover);
+}
+.zm-btn--secondary {
+  background: var(--zm-button-secondary-bg);
+  color: var(--zm-button-secondary-fg);
+  border-color: var(--zm-button-secondary-border);
+}
+.zm-btn--secondary:hover {
+  background: var(--zm-button-secondary-bg-hover);
+}
+.zm-btn--quiet {
+  background: transparent;
+  color: var(--zm-button-quiet-fg);
+}
+.zm-btn--quiet:hover {
+  background: var(--zm-button-secondary-bg-hover);
+  color: var(--zm-button-secondary-fg);
+}
+.zm-btn:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-button-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+.zm-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+ * SEMANTIC SWATCH GRID — every role listed in VAL-DS-001.
+ * Chip background is bound inline to var(--zm-<role>) so the rendered sample
+ * is the live cascade value. Labels sit on the canvas (always readable).
+ * ============================================================================ */
+.swatches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--zm-space-3);
+}
+.swatch {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--zm-space-3);
+  align-items: center;
+  padding: var(--zm-space-3);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-md);
+}
+.swatch__chip {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--zm-radius-sm);
+  border: 1px solid var(--zm-border-strong);
+  /* background bound inline per role */
+}
+.swatch__meta {
+  min-width: 0;
+}
+.swatch__label {
+  display: block;
+  font-size: var(--zm-text-sm);
+  font-weight: 650;
+  color: var(--zm-text-1);
+}
+.swatch__token {
+  display: block;
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+  word-break: break-all;
+}
+.swatch__note {
+  display: block;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+  margin-top: 0.125rem;
+}
+
+/* --- Responsive: single column, comfortable edge padding on mobile --- */
+@media (max-width: 768px) {
+  .gallery {
+    padding: var(--zm-space-8) var(--zm-space-4) var(--zm-space-16);
+  }
+  .swatches {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+ * TYPOGRAPHY PANEL — VAL-DS-008 (three font roles), VAL-DS-009 (Turkish
+ * glyphs), VAL-DS-010 (responsive clamp scale), VAL-DS-011 (long-form
+ * measure 68–72ch). All samples exercise the Turkish glyph set so a single
+ * capture verifies rasterization across roles.
+ * ============================================================================ */
+.type-roles {
+  list-style: none;
+  margin: 0 0 var(--zm-space-8);
+  padding: 0;
+  display: grid;
+  gap: var(--zm-space-3);
+}
+.type-role {
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-lg);
+  padding: var(--zm-space-5) var(--zm-space-6);
+  display: grid;
+  gap: var(--zm-space-2);
+}
+.type-role__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--zm-space-3);
+  margin: 0;
+}
+.type-role__label {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 700;
+  letter-spacing: var(--zm-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--zm-brand);
+}
+.type-role__token {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+.type-role__sample {
+  margin: 0;
+  font-size: var(--zm-text-lg);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-1);
+}
+.type-role[data-role="ui"] .type-role__sample {
+  font-family: var(--zm-font-ui);
+  font-weight: 500;
+}
+.type-role[data-role="display"] .type-role__sample {
+  font-family: var(--zm-font-display);
+  font-weight: 450;
+}
+.type-role[data-role="mono"] .type-role__sample {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-md);
+}
+.type-role__note {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+
+/* --- Fluid scale table --- */
+.type-subhead {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  line-height: var(--zm-leading-tight);
+  letter-spacing: var(--zm-tracking-tight);
+  color: var(--zm-text-1);
+  margin: var(--zm-space-8) 0 var(--zm-space-3);
+}
+.type-scale {
+  margin: 0 0 var(--zm-space-8);
+  display: grid;
+  gap: var(--zm-space-2);
+}
+.type-scale__row {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--zm-space-4);
+  align-items: baseline;
+  padding: var(--zm-space-2) var(--zm-space-4);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-sm);
+}
+.type-scale__name {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+  margin: 0;
+}
+.type-scale__sample {
+  margin: 0;
+  font-family: var(--zm-font-display);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-text-1);
+  /* font-size bound inline to var(--zm-text-<step>) per row (live cascade). */
+}
+
+/* --- Long-form reading column (VAL-DS-011 measure probe) ---
+   max-width = var(--zm-measure-long-form) = 70ch.
+   The probe measures contentRect.width / avgCharWidth at desktop viewport and
+   asserts Math.round(...) ∈ [68, 72] AND column ≤ 46rem. With Newsreader at
+   --zm-text-md (~17px), 70ch ≈ 42rem — inside the band and under the ceiling. */
+.long-form {
+  margin: 0;
+  max-width: var(--zm-measure-long-form);
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-1);
+}
+
+@media (max-width: 768px) {
+  .type-role {
+    padding: var(--zm-space-4) var(--zm-space-5);
+  }
+  .type-scale__row {
+    grid-template-columns: 5rem 1fr;
+  }
+}
+
+/* ============================================================================
+ * SHAPE & DEPTH PANEL — design-system §5 (radius roles + border weights +
+ * separators) and §6 (seven material-depth tiers). Radius tiles render at
+ * their live curvature; the material stack shows each tier at its elevation
+ * shadow + surface tone. Consumes ONLY --zm-* tokens (roles + component layer).
+ * ============================================================================ */
+.shape-roles {
+  list-style: none;
+  margin: 0 0 var(--zm-space-8);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--zm-space-3);
+}
+.shape-role {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: var(--zm-space-3);
+  align-items: center;
+  padding: var(--zm-space-3);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card);
+}
+.shape-role__tile {
+  width: 3rem;
+  height: 3rem;
+  background: var(--zm-surface-3);
+  border: 1px solid var(--zm-border-strong);
+  /* border-radius bound inline per role (live cascade). */
+}
+.shape-role__label {
+  display: block;
+  font-size: var(--zm-text-sm);
+  font-weight: 650;
+  color: var(--zm-text-1);
+}
+.shape-role__token {
+  display: block;
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+/* --- Border weights (design-system §6 "borders before shadows") --- */
+.shape-borders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  align-items: center;
+  margin-bottom: var(--zm-space-8);
+}
+.shape-border {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--zm-space-2) var(--zm-space-4);
+  border-radius: var(--zm-radius-field);
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-2);
+  background: var(--zm-surface-1);
+}
+.shape-border--hair {
+  border: var(--zm-border-width-hair) solid var(--zm-border-strong);
+}
+.shape-border--strong {
+  border: var(--zm-border-width-strong) solid var(--zm-border-strong);
+}
+
+/* --- Separator roles (composed rules) --- */
+.shape-seps {
+  display: grid;
+  gap: var(--zm-space-1);
+  margin-bottom: var(--zm-space-8);
+  max-width: var(--zm-measure-body);
+}
+.shape-sep {
+  margin: 0;
+  padding: var(--zm-space-3) 0;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-2);
+}
+.shape-sep {
+  border-top: var(--zm-separator-rule);
+}
+.shape-sep--strong {
+  border-top: var(--zm-separator-rule-strong);
+}
+
+/* --- Material-depth stack (seven tiers; design-system §6) --- */
+.material-stack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--zm-space-2);
+  max-width: var(--zm-measure-body);
+}
+.material-layer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zm-space-3);
+  padding: var(--zm-space-3) var(--zm-space-4);
+  border: var(--zm-border-width-hair) solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card);
+  color: var(--zm-text-1);
+  /* background + box-shadow bound inline per tier (live cascade). */
+}
+.material-layer__tier {
+  font-size: var(--zm-text-xs);
+  font-weight: 650;
+  letter-spacing: var(--zm-tracking-eyebrow);
+  text-transform: uppercase;
+}
+.material-layer__z {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+@media (max-width: 768px) {
+  .shape-roles {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+ * MOTION PANEL — VAL-DS-012 (tokens bound), VAL-DS-013 (enter/leave +
+ * view-transitions), VAL-DS-014 (rapid input safe), VAL-DS-016 (reduced
+ * disables spatial), VAL-DS-017 (reduced preserves feedback). Every animated
+ * property is transform / opacity / color-group; every timing references the
+ * duration and ease tokens, so the reduced-motion cascade collapses the
+ * motion without hiding state.
+ * ============================================================================ */
+.motion-table {
+  margin: 0 0 var(--zm-space-8);
+  display: grid;
+  gap: var(--zm-space-2);
+}
+.motion-row {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  grid-template-areas:
+    "name value"
+    "use  use";
+  gap: var(--zm-space-1) var(--zm-space-4);
+  align-items: center;
+  padding: var(--zm-space-2) var(--zm-space-4);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-sm);
+  margin: 0;
+}
+.motion-row__name {
+  grid-area: name;
+  margin: 0;
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+.motion-row__value {
+  grid-area: value;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-3);
+  min-width: 0;
+}
+.motion-row__bar {
+  /* Width bound inline to the live duration so the bar visually scales with
+     the token (instant ~narrow, scene ~wide). transition-duration lives on
+     this element so reduced motion collapses the demo sweep automatically. */
+  flex: 1 1 auto;
+  height: 0.5rem;
+  border-radius: var(--zm-radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--zm-brand) 0%,
+    var(--zm-brand-hover) 100%
+  );
+  /* The bar's own width transitions when the table re-renders; uses tokens. */
+  transition: width var(--zm-duration-slow) var(--zm-ease-standard);
+}
+.motion-row__ms {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+  white-space: nowrap;
+}
+.motion-row__bezier {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-discovery);
+  /* timing-function bound inline to the live ease token; visualized via a
+     hover sweep so the curve character is observable. */
+  transition: background-position var(--zm-duration-scene) var(--zm-ease-emphasized);
+}
+.motion-row__use {
+  grid-area: use;
+  margin: 0;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+
+/* --- Enter/leave demo card --- */
+.motion-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  align-items: center;
+  margin: 0 0 var(--zm-space-4);
+}
+.motion-toggle-count {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+.motion-enter-card {
+  background: var(--zm-surface-2);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card);
+  padding: var(--zm-space-5) var(--zm-space-6);
+  margin: 0 0 var(--zm-space-8);
+  max-width: var(--zm-measure-body);
+  /* The .zm-enter utility (motion.css) supplies the entrance animation. */
+}
+.motion-enter-card__title {
+  margin: 0 0 var(--zm-space-2);
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  color: var(--zm-text-1);
+}
+.motion-enter-card__body {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-2);
+}
+
+/* --- Rapid-toggle track + thumb (VAL-DS-014 demo) ---
+   The thumb rides a CSS transition on `transform`. Rapid clicks retrigger
+   from the current visual state; the browser interpolates to the latest
+   computed value, so no queue forms. transition uses tokens so reduced
+   motion collapses it to a near-instant color/position change while the
+   on/off label still conveys state. */
+.motion-toggle-track {
+  position: relative;
+  width: 4rem;
+  height: 2rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-surface-3);
+  border: 1px solid var(--zm-border-subtle);
+  margin: 0 0 var(--zm-space-8);
+}
+.motion-toggle-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-strong);
+  transform: translateY(-50%);
+  transition:
+    transform var(--zm-duration-base) var(--zm-ease-standard),
+    background-color var(--zm-duration-base) var(--zm-ease-standard),
+    border-color var(--zm-duration-base) var(--zm-ease-standard);
+}
+.motion-toggle-thumb.is-on {
+  transform: translate(2rem, -50%);
+  background: var(--zm-brand);
+  border-color: var(--zm-brand);
+}
+
+/* --- State-feedback matrix (VAL-DS-017) ---
+   Every state pairs color with a label and a distinct dot, so each is
+   discriminable in a static frame (grayscale-invariant). Under reduced
+   motion the dots simply do not pulse; the labels and hues remain. */
+.motion-states {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--zm-space-2);
+}
+.motion-state {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-2) var(--zm-space-3);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-sm);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+.motion-state__dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--zm-border-strong);
+  flex: none;
+  /* A short opacity/transform pulse on hover demonstrates motion is NOT the
+     only differentiator: color + label already distinguish every state. */
+  transition:
+    transform var(--zm-duration-fast) var(--zm-ease-standard),
+    opacity var(--zm-duration-fast) var(--zm-ease-standard);
+}
+.motion-state:hover .motion-state__dot {
+  transform: scale(1.15);
+}
+.motion-state__dot--rest     { background: var(--zm-surface-3); }
+.motion-state__dot--hover    { background: var(--zm-brand-hover); }
+.motion-state__dot--active   { background: var(--zm-brand); }
+.motion-state__dot--selected { background: var(--zm-discovery); }
+.motion-state__dot--pending  { background: var(--zm-warning); }
+.motion-state__dot--success  { background: var(--zm-success); }
+.motion-state__dot--warning  { background: var(--zm-warning); border-color: var(--zm-warning); }
+.motion-state__dot--error    { background: var(--zm-danger); border-color: var(--zm-danger); }
+
+@media (max-width: 768px) {
+  .motion-row {
+    grid-template-columns: 6rem 1fr;
+  }
+}
+
+/* Reduced motion: collapse the toggle/feedback transitions to a near-instant
+   color/position change (tokens.css already collapses the durations; this
+   keeps the gallery demo honest about the policy). State feedback stays
+   discriminable via color + label. */
+@media (prefers-reduced-motion: reduce) {
+  .motion-toggle-thumb,
+  .motion-state__dot,
+  .motion-row__bar,
+  .motion-row__bezier {
+    transition-duration: var(--zm-duration-base);
+  }
+  .motion-state:hover .motion-state__dot {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+ * Reduced motion: collapse the button transition to a near-instant color
+ * change. tokens.css already collapses --zm-duration-* under both OS reduce
+ * and the [data-reduce-motion] product toggle, so this is a belt-and-braces
+ * override that also forces `linear` easing for the button control.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-btn {
+    transition:
+      background-color var(--zm-duration-base) linear,
+      border-color var(--zm-duration-base) linear,
+      color var(--zm-duration-base) linear;
+  }
+}
+
+/* ============================================================================
+ * BUTTONS PANEL — VAL-DS-018/019/020 (real <zm-button> / <zm-icon-button>)
+ *    Variant × state matrix + loading width demo + icon button row.
+ * ============================================================================ */
+.zm-matrix {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) repeat(4, minmax(0, 1fr));
+  gap: var(--zm-space-1);
+  margin-block: var(--zm-space-3);
+  padding: var(--zm-space-3);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-md);
+  font-size: var(--zm-text-sm);
+}
+.zm-matrix__head,
+.zm-matrix__row {
+  display: contents;
+}
+.zm-matrix__head > span,
+.zm-matrix__row > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zm-space-2);
+  border-bottom: 1px solid var(--zm-border-subtle);
+}
+.zm-matrix__head > span {
+  font-weight: 650;
+  color: var(--zm-text-2);
+  font-size: var(--zm-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--zm-tracking-eyebrow);
+}
+.zm-matrix__label {
+  justify-content: flex-start !important;
+  font-weight: 650;
+  color: var(--zm-text-1);
+}
+.zm-matrix__cell {
+  min-height: 3.5rem;
+}
+.zm-matrix__na {
+  color: var(--zm-text-3);
+  font-family: var(--zm-font-mono);
+}
+
+@media (max-width: 640px) {
+  /* On narrow viewports the matrix stacks into a readable variant-then-state
+     list so every cell stays operable (no horizontal scroll). */
+  .zm-matrix {
+    grid-template-columns: 1fr;
+  }
+  .zm-matrix__head {
+    display: none;
+  }
+  .zm-matrix__row {
+    display: grid;
+    grid-template-columns: minmax(7rem, 1fr) 1fr;
+    gap: var(--zm-space-1);
+    padding-block: var(--zm-space-2);
+    border-bottom: 1px solid var(--zm-border-subtle);
+  }
+  .zm-matrix__row > span {
+    border-bottom: none;
+    min-height: 2.75rem;
+  }
+  .zm-matrix__cell::before {
+    content: attr(data-state-label);
+    display: block;
+    font-size: var(--zm-text-xs);
+    color: var(--zm-text-3);
+    text-transform: uppercase;
+    letter-spacing: var(--zm-tracking-eyebrow);
+    margin-bottom: var(--zm-space-1);
+  }
+}
+
+/* --- Loading width-stability demo (VAL-DS-019) --- */
+.zm-loading-demo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  align-items: center;
+  margin-block: var(--zm-space-3);
+}
+.zm-loading-demo__state {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+
+/* --- Icon button row (VAL-DS-020) --- */
+.zm-icon-row {
+  gap: var(--zm-space-4);
+  margin-block: var(--zm-space-3);
+  /* Give the icon-row enough bottom padding so the tooltip (absolutely
+     positioned below each button) has room to render inside the panel. */
+  padding-bottom: var(--zm-space-12);
+}
+
+/* ============================================================================
+ * FORM CONTROLS PANEL (VAL-DS-021 / VAL-DS-022 / VAL-DS-023)
+ *    The fields render with their own component CSS (consuming --zm-input-*).
+ *    The grid here only lays them out responsively: two columns on comfortable
+ *    widths, single column on narrow viewports. Consumes ONLY --zm-* tokens.
+ * ============================================================================ */
+.zm-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--zm-space-5);
+  align-items: start;
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+}
+.zm-form__single {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-3);
+  max-width: var(--zm-measure-body);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+}
+.zm-form__state {
+  margin-top: var(--zm-space-4);
+  padding: var(--zm-space-3) var(--zm-space-4);
+  background: var(--zm-surface-1);
+  border: var(--zm-separator-rule);
+  border-radius: var(--zm-radius-field);
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-2);
+}
+.zm-form__state code {
+  font-family: inherit;
+  color: var(--zm-text-1);
+}
+
+/* ============================================================================
+ * SELECTION CONTROLS PANEL (VAL-DS-024 / VAL-DS-025)
+ *    The primitives render with their own component CSS (consuming
+ *    --zm-selection-* / --zm-switch-* / --zm-segmented-*). The helpers below
+ *    only lay out the radio group and the segmented demos. Consumes ONLY
+ *    --zm-* tokens.
+ * ============================================================================ */
+.zm-selection__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+  max-width: var(--zm-measure-body);
+}
+.zm-selection__segmented {
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+  max-width: var(--zm-measure-body);
+}
+
+/* ============================================================================
+ * Overlays panel (VAL-DS-026 / VAL-DS-027) — layout helpers only.
+ *    The overlay CONTENT primitives own their own visual styling (consuming
+ *    --zm-dialog-* / --zm-sheet-* / --zm-menu-* / --zm-tooltip-*). The helpers
+ *    below only lay out the trigger row + the in-panel action/stack clusters.
+ * ============================================================================ */
+.zm-overlay-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zm-space-3);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+}
+/* Action cluster inside a dialog/sheet (e.g. Vazgeç + Sil). Right-aligned,
+ * with enough gap for two adjacent targets (>=44px). */
+.zm-overlay__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  margin-top: var(--zm-space-5);
+}
+/* Vertical stack of interactive content inside a sheet (checkboxes etc.). */
+.zm-overlay__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  margin-block: var(--zm-space-4);
+}
+
+/* ============================================================================
+ * Feedback states panel (VAL-DS-028 / VAL-DS-029) — layout helpers only.
+ *    The state CONTENT primitives (ZmToast / ZmSkeleton / ZmEmptyState /
+ *    ZmErrorState / ZmPermissionState) own their own visual styling via the
+ *    shared feedback-states-shared.css + per-variant scoped CSS (all consuming
+ *    --zm-state-* / --zm-toast-* / --zm-skeleton-* component-layer tokens).
+ *    The helpers below only lay out the toast stack, the skeleton demo grid,
+ *    and the empty/error/permission surface wrappers.
+ * ============================================================================ */
+
+/* Toast stack: vertical column of persistent variant demos. Each toast owns
+ * its own surface + accent; the stack adds consistent rhythm between them. */
+.zm-states__toast-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-3);
+  max-width: var(--zm-measure-body);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+}
+
+/* Interactive toast demo row: trigger button + live state line. */
+.zm-states__interactive {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zm-space-4);
+  margin-block: var(--zm-space-3) var(--zm-space-2);
+}
+.zm-states__state {
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-3);
+}
+
+/* Transient toast container (mounts on demand; the toast auto-dismisses). */
+.zm-states__transient {
+  max-width: var(--zm-measure-body);
+  margin-block: var(--zm-space-2) var(--zm-space-5);
+}
+
+/* Skeleton demo: text block, avatar+lines row, and a rect media placeholder.
+ * The skeleton primitives own the shimmer; here we just space them. */
+.zm-states__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-4);
+  max-width: var(--zm-measure-body);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+}
+.zm-states__skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  max-width: 32rem;
+}
+.zm-states__skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-3);
+}
+.zm-states__skeleton-inline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  max-width: 24rem;
+}
+
+/* Empty/error/permission surface wrappers. These center the state surface and
+ * add a subtle tonal boundary so the state reads as a contained block. Each
+ * surface consumes only --zm-state-* tokens (defined in shared CSS). */
+.zm-states__surface {
+  max-width: var(--zm-measure-body);
+  margin-block: var(--zm-space-3) var(--zm-space-5);
+  padding: var(--zm-space-6) var(--zm-space-4);
+  border-radius: var(--zm-radius-card);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+}
+
+/* Projected secondary links inside state surfaces (e.g. "Destek al",
+ * "Herkese açık akışa dön"). Subtle, discovery-tinted, focus-visible ring. */
+.zm-states__link {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  font-weight: 600;
+  color: var(--zm-brand);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  padding: var(--zm-space-1) var(--zm-space-2);
+  border-radius: var(--zm-radius-control);
+  transition: color var(--zm-button-duration) var(--zm-button-ease);
+}
+.zm-states__link:hover {
+  color: var(--zm-brand-hover);
+}
+.zm-states__link:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus-ring-color);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ----------------------------------------------------------------------------
+ * Identity panel — avatar / chip / status (VAL-DS-030 / 031 / 032)
+ * ------------------------------------------------------------------------- */
+.zm-identity__avatars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--zm-space-5);
+  padding: var(--zm-space-4) 0;
+}
+.zm-identity__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--zm-space-2);
+  min-width: 4rem;
+}
+.zm-identity__cap {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+  text-align: center;
+  line-height: var(--zm-leading-ui);
+  max-width: 9rem;
+  overflow-wrap: anywhere;
+}
+.zm-identity__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-3) 0;
+}
+.zm-identity__statuses {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-3) 0;
+}
+
+/* ============================================================================
+ * Iconography & signature motifs panel (m1-iconography; VAL-DS-033/034/035).
+ * Every rule consumes ONLY --zm-* tokens. Motifs are decorative and never
+ * cross text: tiles/contexts reserve a non-text region for the motif and the
+ * text sits in its own column, so contrast is always the text-vs-surface pair.
+ * ============================================================================ */
+
+/* Motif library tiles — four signature motifs side by side. The motif sits on
+   a reserved surface tile (non-text region); the label/use text lives below,
+   never under the mark. */
+.zm-motif-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--zm-space-4);
+  margin: var(--zm-space-4) 0;
+  padding: 0;
+}
+.zm-motif-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-5) var(--zm-space-4);
+  background: var(--zm-canvas-raised);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-lg);
+}
+.zm-motif-tile__mark {
+  /* Reserved non-text region for the motif. The mark NEVER overlaps the tile's
+     label text — the label lives in its own row below. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.5rem;
+  width: 100%;
+  color: var(--zm-motif-fg);
+}
+.zm-motif-tile__mark[data-tone='raised'] {
+  background: var(--zm-surface-2);
+  border-radius: var(--zm-radius-md);
+}
+.zm-motif-tile__name {
+  font-family: var(--zm-font-ui);
+  font-weight: 600;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-1);
+}
+.zm-motif-tile__use {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+/* Hero-corner context — signal-arc in the header corner of a card. The motif
+   is absolutely positioned in the corner; the text body is in normal flow and
+   the motif never underlies it. */
+.zm-motif-context--hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  margin: var(--zm-space-4) 0;
+  padding: var(--zm-space-6) var(--zm-space-6) var(--zm-space-6) 0;
+  background: var(--zm-canvas-raised);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-xl);
+  overflow: hidden;
+}
+.zm-motif-context--hero .zm-motif-context__accent {
+  position: absolute;
+  top: calc(-1 * var(--zm-space-2));
+  inset-inline-end: 0;
+  color: var(--zm-motif-fg);
+  opacity: 0.9;
+}
+.zm-motif-context__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  max-width: 32rem;
+  /* The text body is inset from the end edge so the corner motif sits in empty
+     space, not over text. */
+  margin-inline-end: clamp(3rem, 12vw, 6rem);
+}
+.zm-motif-context__title {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  color: var(--zm-text-1);
+}
+.zm-motif-context__text {
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-2);
+}
+@media (max-width: 30rem) {
+  /* On very narrow viewports, drop the reserved end-margin so the text keeps a
+     comfortable measure; the motif hides because the corner has no room. */
+  .zm-motif-context--hero .zm-motif-context__accent {
+    display: none;
+  }
+  .zm-motif-context__body {
+    margin-inline-end: 0;
+  }
+}
+
+/* Editorial separator context — the cut sits BETWEEN two paragraphs in a
+   dedicated row, never as an underline under a heading or body line. */
+.zm-motif-context--separator {
+  margin: var(--zm-space-4) 0;
+}
+.zm-motif-context--separator .readable {
+  margin: 0 0 var(--zm-space-4);
+}
+.zm-motif-context__rule {
+  display: block;
+  width: 100%;
+  height: 0.75rem;
+  margin: var(--zm-space-4) 0;
+  color: var(--zm-motif-fg);
+}
+
+/* Thread-line context — the motif runs in a reserved GUTTER column to the
+   inline-start of each item's content. Content and motif never overlap. */
+.zm-thread {
+  list-style: none;
+  margin: var(--zm-space-4) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-5);
+}
+.zm-thread__item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  align-items: start;
+  gap: var(--zm-space-3);
+}
+.zm-thread__gutter {
+  /* Reserved non-text gutter: the thread motif lives here, content lives in
+     the adjacent column. They never share pixels. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--zm-motif-fg);
+}
+.zm-thread__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+}
+.zm-thread__title {
+  font-family: var(--zm-font-ui);
+  font-weight: 600;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-1);
+}
+.zm-thread__text {
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-2);
+  max-width: var(--zm-measure-body);
+}
+@media (max-width: 22rem) {
+  .zm-thread__item {
+    grid-template-columns: 2rem 1fr;
+    gap: var(--zm-space-2);
+  }
+}
+
+/* Pulse-node active indicator — the motif sits BESIDE the label in its own
+   column, never behind it. Inactive items show a quiet rest dot. */
+.zm-nav-sample {
+  list-style: none;
+  margin: var(--zm-space-4) 0;
+  padding: var(--zm-space-3);
+  background: var(--zm-canvas-raised);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  max-width: 20rem;
+}
+.zm-nav-sample__item {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr auto;
+  align-items: center;
+  gap: var(--zm-space-3);
+  padding: var(--zm-space-2) var(--zm-space-3);
+  border-radius: var(--zm-radius-md);
+}
+.zm-nav-sample__item.is-active {
+  background: var(--zm-surface-2);
+}
+.zm-nav-sample__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+.zm-nav-sample__dot.is-active {
+  color: var(--zm-brand);
+}
+.zm-nav-sample__rest {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-border-strong);
+}
+.zm-nav-sample__label {
+  font-family: var(--zm-font-ui);
+  font-weight: 500;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-1);
+}
+.zm-nav-sample__item.is-active .zm-nav-sample__label {
+  font-weight: 700;
+  color: var(--zm-text-1);
+}
+.zm-nav-sample__hint {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-brand);
+  font-weight: 600;
+}
+
+/* Normalize icon-family chips — the authored SVG family shown as a single row
+   so the shared vocabulary (viewBox, currentColor, stroke language) is visible. */
+.zm-icon-family {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  margin: var(--zm-space-4) 0;
+  padding: var(--zm-space-4);
+  background: var(--zm-canvas-raised);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-lg);
+}
+.zm-icon-family__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--zm-text-2);
+  background: var(--zm-surface-1);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-md);
+}
+.zm-icon-family__chip svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}

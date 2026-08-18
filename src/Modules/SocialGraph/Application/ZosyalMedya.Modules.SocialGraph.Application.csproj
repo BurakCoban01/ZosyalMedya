@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\ZosyalMedya.Modules.SocialGraph.Domain.csproj" />
+    <ProjectReference Include="..\Contracts\ZosyalMedya.Modules.SocialGraph.Contracts.csproj" />
+    <ProjectReference Include="..\..\Profiles\Contracts\ZosyalMedya.Modules.Profiles.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Application\ZosyalMedya.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>

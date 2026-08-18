@@ -1,0 +1,108 @@
+<!--
+  ZmSegmented — group + segments.
+
+  ARIA contract (VAL-DS-025):
+    - single variant → role="radiogroup"; each segment role="radio" +
+      aria-checked.
+    - multi variant  → role="group" + aria-multiselectable="true"; each
+      segment role="checkbox" + aria-checked.
+    - The group carries the required accessible name (label → aria-label) and
+      the described-by wiring (helper + error nodes).
+    - Each active segment also carries aria-current="true" as a redundant
+      position cue (reads in a static frame + survives forced-colors).
+
+  Keyboard contract (WAI-ARIA radiogroup / toolbar with roving tabindex):
+    - Roving tabindex via segmentTabindex(): the focus target is tabindex=0,
+      the rest are -1. Tab enters the bar at the focus target.
+    - Arrow Left/Right (and Up/Down aliases) move the focus target; in single
+      mode they also SELECT the focused segment (radiogroup pattern); in
+      multi mode they move focus only (Space/Enter toggles).
+    - Home/End jump to the first/last enabled segment.
+    - Space/Enter activate the focused segment.
+    - Letter keys jump to the next segment whose label starts with that letter
+      (Turkish-aware).
+
+  Visual contract (position + color/icon, never color alone):
+    - The active segment is RAISED (surface + shadow) AND underlined by the
+      brand indicator bar (a position cue). In multi mode a checkmark glyph
+      also scales in. Every cue reads in a static frame and under reduced
+      motion.
+-->
+<div
+  class="zm-segmented__field"
+  [class.is-single]="variant() === 'single'"
+  [class.is-multi]="variant() === 'multi'"
+  [class.is-disabled]="isDisabled()"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+  [attr.role]="variant() === 'single' ? 'radiogroup' : 'group'"
+  [attr.aria-label]="label()"
+  [attr.aria-multiselectable]="variant() === 'multi' ? 'true' : null"
+  [attr.aria-invalid]="hasError() ? 'true' : null"
+  [attr.aria-describedby]="describedBy()"
+>
+  <div class="zm-segmented__track" role="presentation">
+    @for (seg of segments(); track seg.value; let i = $index) {
+      <!--
+        Segment wrapper. position: relative hosts the underline indicator
+        (::after) so it tracks the active segment without JS measurement.
+      -->
+      <div
+        class="zm-segmented__segment"
+        [class.is-active]="isSegmentActive(seg.value)"
+        [class.is-disabled]="!!seg.disabled"
+        [attr.aria-current]="isSegmentActive(seg.value) ? 'true' : null"
+      >
+        <button
+          type="button"
+          class="zm-segmented__segment-btn zm-feedback"
+          [attr.role]="variant() === 'single' ? 'radio' : 'checkbox'"
+          [attr.aria-checked]="isSegmentActive(seg.value) ? 'true' : 'false'"
+          [attr.aria-label]="segmentAriaLabel(seg)"
+          [attr.aria-disabled]="(isDisabled() || !!seg.disabled) ? 'true' : null"
+          [attr.tabindex]="segmentTabindex(i)"
+          [disabled]="isDisabled() || !!seg.disabled"
+          (click)="selectSegment(i)"
+          (keydown)="onSegmentKeydown($event, i)"
+          (blur)="blurred.emit()"
+        >
+          <span class="zm-segmented__segment-label">{{ seg.label }}</span>
+          <!--
+            Non-color glyph reinforcement (multi mode). A checkmark that
+            scales in for the active segment. aria-hidden — the state is
+            already exposed via aria-checked/aria-current. Hidden in single
+            mode (tab-like indicator is the raised surface + underline).
+          -->
+          <span class="zm-segmented__segment-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path
+                d="M5 12.5l4.5 4.5L19 7.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+        </button>
+      </div>
+    }
+    @if (isDisabled()) {
+      <!--
+        Whole-bar disabled affordance: no segments are operable. The roving
+        target is still rendered (tabindex follows segmentTabindex) but every
+        button carries [disabled] so it is removed from interaction.
+      -->
+    }
+  </div>
+</div>
+
+@if (helper() && helper().trim().length > 0) {
+  <span class="zm-segmented__helper" [id]="helperId()">{{ helper() }}</span>
+}
+@if (hasError()) {
+  <span class="zm-segmented__error" [id]="errorId()" role="alert">
+    {{ error() }}
+  </span>
+}

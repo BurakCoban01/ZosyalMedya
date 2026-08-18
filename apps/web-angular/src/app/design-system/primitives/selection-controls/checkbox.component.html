@@ -1,0 +1,101 @@
+<!--
+  ZmCheckbox row.
+
+  Layout model:
+    <label class="zm-checkbox__row" for=id>     (whole row is the tap target → focuses input)
+      <span class="zm-checkbox__box">           (visual presentational box)
+        <input type="checkbox" class="zm-checkbox__input sr-only-ish">
+        <svg class="zm-checkbox__check">        (checkmark / dash glyph — aria-hidden)
+      </span>
+      <span class="zm-checkbox__text">
+        <span class="zm-checkbox__label">…</span>
+        @if (helper) <span class="zm-checkbox__helper">
+        @if (error)  <span class="zm-checkbox__error">
+      </span>
+    </label>
+
+  The native input is functional but visually hidden (opacity:0; absolute;
+  sized to overlap the visible box so it is the actual click target and the
+  recipient of :focus-visible). The visible box is aria-hidden presentational
+  chrome — the AX tree sees only the native input + its label.
+-->
+<label
+  class="zm-checkbox__row zm-feedback"
+  [attr.for]="resolvedId()"
+  [class.is-checked]="checked()"
+  [class.is-indeterminate]="indeterminate()"
+  [class.is-disabled]="disabled()"
+  [class.is-readonly]="readonly()"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+>
+  <span class="zm-checkbox__box" aria-hidden="true">
+    <input
+      class="zm-checkbox__input"
+      [id]="resolvedId()"
+      type="checkbox"
+      [checked]="checked()"
+      [indeterminate]="indeterminate()"
+      [attr.name]="name() && name().length > 0 ? name() : null"
+      [attr.value]="value() && value().length > 0 ? value() : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-readonly]="readonly() ? 'true' : null"
+      [disabled]="disabled()"
+      [required]="required()"
+      (change)="onChange($event)"
+      (focus)="focused.emit()"
+      (blur)="blurred.emit()"
+    />
+    <!--
+      Checkmark / dash glyph. The native checkbox's :checked / :indeterminate
+      pseudo-class drives which glyph shows via the sibling selector in CSS.
+      The glyph is decorative (aria-hidden on the parent .zm-checkbox__box); the
+      state name comes from the native checkbox's role/state to AT.
+    -->
+    <svg
+      class="zm-checkbox__check"
+      viewBox="0 0 24 24"
+      focusable="false"
+    >
+      <path
+        class="zm-checkbox__check-path"
+        d="M5 12.5l4.5 4.5L19 7.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    <svg
+      class="zm-checkbox__dash"
+      viewBox="0 0 24 24"
+      focusable="false"
+    >
+      <line
+        x1="6" y1="12" x2="18" y2="12"
+        stroke="currentColor"
+        stroke-width="2.6"
+        stroke-linecap="round"
+      />
+    </svg>
+  </span>
+
+  <span class="zm-checkbox__text">
+    <span class="zm-checkbox__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="zm-checkbox__required" aria-hidden="true">*</span>
+      }
+    </span>
+    @if (helper() && helper().trim().length > 0) {
+      <span class="zm-checkbox__helper" [id]="helperId()">{{ helper() }}</span>
+    }
+    @if (hasError()) {
+      <span class="zm-checkbox__error" [id]="errorId()" role="alert">
+        {{ error() }}
+      </span>
+    }
+  </span>
+</label>

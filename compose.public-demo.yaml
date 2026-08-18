@@ -1,0 +1,302 @@
+name: enterprise-social-community-platform
+
+x-postgres-connection: &postgres-connection >-
+  Host=postgres;Port=5432;Database=platform;Username=platform;Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+
+x-service-security: &service-security
+  security_opt: [ "no-new-privileges:true" ]
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  configuration-gate:
+    <<: *service-security
+    image: alpine:3.22@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    restart: "no"
+    read_only: true
+    network_mode: none
+    environment:
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?MONGO_APP_PASSWORD is required}
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        validate_secret() {
+          value="$$1"
+          test "$${#value}" -ge 24
+          normalized="$$(printf '%s' "$$value" | tr '[:upper:]' '[:lower:]')"
+          case "$$normalized" in
+            *replace_with*|*change_me*) return 1 ;;
+          esac
+          unique="$$(printf '%s' "$$value" | fold -w 1 | sort -u | wc -l)"
+          test "$$unique" -ge 8
+        }
+        validate_secret "$$MONGO_ROOT_PASSWORD"
+        validate_secret "$$MONGO_APP_PASSWORD"
+        test "$$MONGO_ROOT_PASSWORD" != "$$MONGO_APP_PASSWORD"
+    mem_limit: 16m
+    cpus: 0.10
+
+  postgres:
+    <<: *service-security
+    image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
+    environment:
+      POSTGRES_DB: platform
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes: [ "postgres-data:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U platform -d platform" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 300s
+    mem_limit: 384m
+    cpus: 0.75
+
+  mongodb:
+    <<: *service-security
+    image: mongo:7-jammy@sha256:d29d168ee010c2d701720aa909fe44baa86dfc54e6ccc54e3781c518fab525f7
+    depends_on:
+      configuration-gate: { condition: service_completed_successfully }
+    environment:
+      MONGO_INITDB_DATABASE: platform
+      MONGO_INITDB_ROOT_USERNAME: platform_admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}
+      MONGO_APP_DATABASE: platform
+      MONGO_APP_USERNAME: platform
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?MONGO_APP_PASSWORD is required}
+    volumes:
+      - mongo-data:/data/db
+      - ./deploy/public-demo/mongodb/01-create-application-user.js:/docker-entrypoint-initdb.d/01-create-application-user.js:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "timeout -s KILL 45s mongosh --quiet --host 127.0.0.1 --eval 'quit(db.adminCommand({ ping: 1 }).ok ? 0 : 2)'" ]
+      interval: 30s
+      timeout: 50s
+      retries: 12
+      start_period: 300s
+    mem_limit: 512m
+    cpus: 0.75
+
+  mongodb-application-user:
+    <<: *service-security
+    image: mongo:7-jammy@sha256:d29d168ee010c2d701720aa909fe44baa86dfc54e6ccc54e3781c518fab525f7
+    restart: "no"
+    read_only: true
+    network_mode: service:mongodb
+    depends_on:
+      mongodb: { condition: service_healthy }
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: platform_admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}
+      MONGO_APP_DATABASE: platform
+      MONGO_APP_USERNAME: platform
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?MONGO_APP_PASSWORD is required}
+    entrypoint: [ "/bin/sh", "-ec" ]
+    command:
+      - |
+        if timeout -s KILL 90s mongosh --quiet --host 127.0.0.1 \
+          --username "$$MONGO_INITDB_ROOT_USERNAME" \
+          --password "$$MONGO_INITDB_ROOT_PASSWORD" \
+          --authenticationDatabase admin \
+          /bootstrap/ensure-application-user.js; then
+          exit 0
+        fi
+        timeout -s KILL 90s mongosh --quiet --host 127.0.0.1 \
+          /bootstrap/ensure-root-user.js
+        timeout -s KILL 90s mongosh --quiet --host 127.0.0.1 \
+          --username "$$MONGO_INITDB_ROOT_USERNAME" \
+          --password "$$MONGO_INITDB_ROOT_PASSWORD" \
+          --authenticationDatabase admin \
+          /bootstrap/ensure-application-user.js
+    volumes:
+      - ./deploy/public-demo/mongodb/ensure-root-user.js:/bootstrap/ensure-root-user.js:ro
+      - ./deploy/public-demo/mongodb/01-create-application-user.js:/bootstrap/ensure-application-user.js:ro
+    tmpfs: [ "/tmp:rw,noexec,nosuid,size=32m" ]
+    mem_limit: 128m
+    cpus: 0.25
+
+  redis:
+    <<: *service-security
+    image: redis:7-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - allkeys-lru
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    volumes: [ "redis-data:/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    mem_limit: 192m
+    cpus: 0.50
+
+  minio:
+    <<: *service-security
+    build:
+      context: .
+      dockerfile: deploy/public-demo/minio/Dockerfile
+    read_only: true
+    command: [ "server", "/data" ]
+    environment:
+      HOME: /tmp
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    volumes: [ "minio-data:/data" ]
+    tmpfs: [ "/tmp:rw,noexec,nosuid,size=16m" ]
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://127.0.0.1:9000/minio/health/live" ]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+    mem_limit: 384m
+    cpus: 0.75
+
+  clamav:
+    <<: *service-security
+    image: clamav/clamav-debian:1.4_base@sha256:333e9cd0765fb8cb4f76a75d2435d70f6bd9b74794d7e68f34895fc28ff6ee0a
+    volumes: [ "clamav-data:/var/lib/clamav" ]
+    healthcheck:
+      test: [ "CMD", "clamdscan", "--ping", "1" ]
+      interval: 30s
+      timeout: 15s
+      retries: 20
+      start_period: 300s
+    mem_limit: 1280m
+    cpus: 1.00
+
+  api:
+    <<: *service-security
+    init: true
+    read_only: true
+    network_mode: service:web
+    build:
+      context: .
+      dockerfile: src/Host/Api/Dockerfile
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongodb-application-user: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+      minio: { condition: service_healthy }
+      clamav: { condition: service_healthy }
+      web: { condition: service_started }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://127.0.0.1:8081
+      PUBLIC_DEMO_MODE: "true"
+      PublicDemo__VisitorEmailDomain: visitor.escp.test
+      PublicDemo__Retention__ArtifactHours: "24"
+      PublicDemo__Retention__IntervalMinutes: "15"
+      PublicDemo__Retention__BatchSize: "50"
+      PublicDemo__Retention__AccountBatchSize: "5"
+      AllowedHosts: ${PUBLIC_HOST:?PUBLIC_HOST is required}
+      Security__Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY is required}
+      Security__Jwt__Issuer: enterprise-social-community-platform-api
+      Security__Jwt__Audience: enterprise-social-community-platform-clients
+      Security__AllowedOrigins__0: ${PUBLIC_ORIGIN:?PUBLIC_ORIGIN is required}
+      Security__AllowedOrigins__1: ${PUBLIC_ORIGIN:?PUBLIC_ORIGIN is required}
+      Deployment__PersistentDataRoot: /var/lib/enterprise-social-community-platform
+      Deployment__DataProtectionKeysPath: /var/lib/enterprise-social-community-platform/data-protection-keys
+      Deployment__TrustedProxies__0: 127.0.0.1
+      Deployment__MongoAppPassword: ${MONGO_APP_PASSWORD:?MONGO_APP_PASSWORD is required}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD:?REDIS_PASSWORD is required},abortConnect=false
+      Redis__Environment: public-demo
+      Redis__Application: enterprise-social-community-platform
+      Modules__Identity__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Profiles__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__SocialGraph__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Questions__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Questions__Persistence__Provider: MongoDb
+      Modules__Questions__Persistence__MongoConnectionString: mongodb://platform:${MONGO_APP_PASSWORD:?MONGO_APP_PASSWORD is required}@mongodb:27017/platform?authSource=platform
+      Modules__Questions__Persistence__MongoDatabaseName: platform
+      Modules__Content__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Reactions__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Comments__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Messaging__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Notifications__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Stories__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Communities__Persistence__PostgreSqlConnectionString: *postgres-connection
+      Modules__Media__PostgreSqlConnectionString: *postgres-connection
+      Modules__Search__PostgreSqlConnectionString: *postgres-connection
+      Modules__Audit__PostgreSqlConnectionString: *postgres-connection
+      Modules__Moderation__PostgreSqlConnectionString: *postgres-connection
+      Modules__Administration__PostgreSqlConnectionString: *postgres-connection
+      Integration__Outbox__PostgreSqlConnectionString: *postgres-connection
+      Modules__Identity__BootstrapAdministrator__Enabled: "false"
+      Modules__Identity__Delivery__PublicWebBaseUrl: ${PUBLIC_ORIGIN:?PUBLIC_ORIGIN is required}
+      Modules__Identity__Delivery__LocalPickupDirectory: /var/lib/enterprise-social-community-platform/email-pickup
+      Modules__Media__ObjectStorageProvider: Minio
+      Modules__Media__MinioEndpoint: minio:9000
+      Modules__Media__MinioAccessKey: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      Modules__Media__MinioSecretKey: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      Modules__Media__MinioBucket: platform-media
+      Modules__Media__AntivirusProvider: ClamAv
+      Modules__Media__ClamAvHost: clamav
+      Modules__Media__ClamAvPort: "3310"
+      Modules__Media__ClamAvTimeoutSeconds: "30"
+      Modules__Media__ClamAvMaxConcurrentScans: "2"
+      Modules__Media__MaxFileBytes: "26214400"
+      Modules__Media__OwnerQuotaBytes: "268435456"
+      Modules__Media__MaxConcurrentProcessing: "1"
+      Modules__Media__MaxConcurrentIngestion: "2"
+      Modules__Media__MaxImagePixels: "12000000"
+      Modules__Media__MaxVideoDurationSeconds: "90"
+      Modules__Search__OpenSearchEnabled: "false"
+    volumes:
+      - api-data:/var/lib/enterprise-social-community-platform
+    tmpfs: [ "/tmp:rw,noexec,nosuid,size=64m" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --spider -q --header='Host: '$${AllowedHosts} http://127.0.0.1:8081/health/ready" ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+    mem_limit: 768m
+    cpus: 1.50
+
+  web:
+    <<: *service-security
+    read_only: true
+    build:
+      context: .
+      dockerfile: apps/web-angular/Dockerfile
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?PUBLIC_HOST is required}
+      API_UPSTREAM: 127.0.0.1:8081
+    ports:
+      - "${PUBLIC_HTTP_BIND:-127.0.0.1}:${PUBLIC_HTTP_PORT:-8080}:8080"
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,size=32m
+      - /var/run:rw,noexec,nosuid,size=4m
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /etc/nginx/conf.d:rw,noexec,nosuid,size=1m
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --spider -q --header='Host: '$${PUBLIC_HOST} http://127.0.0.1:8080/health/live" ]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 600s
+    mem_limit: 192m
+    cpus: 0.50
+
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+  minio-data:
+  clamav-data:
+  api-data:

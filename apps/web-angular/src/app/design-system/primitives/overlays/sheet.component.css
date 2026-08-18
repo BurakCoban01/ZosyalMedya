@@ -1,0 +1,107 @@
+/**
+ * ZmSheet — scoped panel styles.
+ *
+ * Same content-scoping model as ZmDialog: these rules reach the
+ * `.zm-sheet__panel` rendered inside the CDK overlay pane. The backdrop +
+ * pane wrapper are styled globally (overlays-global.css).
+ *
+ * Consumes ONLY `--zm-sheet-*` component-layer tokens. No hardcoded hex.
+ */
+
+:host {
+  display: contents;
+}
+
+.zm-sheet__panel {
+  background: var(--zm-sheet-bg);
+  color: var(--zm-sheet-fg);
+  border: var(--zm-border-width-strong) solid var(--zm-sheet-border);
+  box-shadow: var(--zm-sheet-shadow);
+
+  /* Cross-axis sizing. The position strategy pins the panel to one edge and
+   * stretches it along the axis. The panel takes its natural height (top/bottom
+   * sheets) or width (start/end sheets), capped by --zm-sheet-max-width. */
+  max-width: var(--zm-sheet-max-width);
+  padding: var(--zm-sheet-padding);
+
+  /* Slide + fade motion. Each side sets its own transform-origin / slide axis
+   * via the side modifier classes below. */
+  transition:
+    transform var(--zm-sheet-duration) var(--zm-sheet-ease),
+    opacity var(--zm-sheet-duration) var(--zm-sheet-ease);
+}
+
+/* Side modifiers: shape the panel + give the slide a directional from-state. */
+
+/* start / end: a vertical sheet (drawer) hugging a horizontal edge. */
+.zm-sheet__panel.is-start,
+.zm-sheet__panel.is-end {
+  height: 100%;
+  /* width capped by max-width above; the panel hugs its edge. */
+  border-radius: 0;
+}
+.zm-sheet__panel.is-start {
+  border-right: var(--zm-border-width-strong) solid var(--zm-sheet-border);
+  border-top-right-radius: var(--zm-sheet-radius);
+  border-bottom-right-radius: var(--zm-sheet-radius);
+}
+.zm-sheet__panel.is-end {
+  border-left: var(--zm-border-width-strong) solid var(--zm-sheet-border);
+  border-top-left-radius: var(--zm-sheet-radius);
+  border-bottom-left-radius: var(--zm-sheet-radius);
+}
+
+/* top / bottom: a horizontal sheet spanning the full viewport width. */
+.zm-sheet__panel.is-top,
+.zm-sheet__panel.is-bottom {
+  width: 100%;
+  max-width: none;
+  border-radius: 0;
+}
+.zm-sheet__panel.is-bottom {
+  border-top: var(--zm-border-width-strong) solid var(--zm-sheet-border);
+  border-top-left-radius: var(--zm-sheet-radius);
+  border-top-right-radius: var(--zm-sheet-radius);
+}
+.zm-sheet__panel.is-top {
+  border-bottom: var(--zm-border-width-strong) solid var(--zm-sheet-border);
+  border-bottom-left-radius: var(--zm-sheet-radius);
+  border-bottom-right-radius: var(--zm-sheet-radius);
+}
+
+/* Non-dismissible reinforcement. */
+.zm-sheet__panel.is-destructive {
+  border-color: var(--zm-danger);
+}
+
+.zm-sheet__panel:focus {
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .zm-sheet__panel {
+    border: 2px solid CanvasText;
+  }
+  .zm-sheet__panel.is-destructive {
+    border-color: Highlight;
+  }
+  .zm-sheet__panel:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+.zm-sheet__panel.zm-enter {
+  transform: translateZ(0);
+}
+
+/* Reduced motion: collapse the slide to opacity-only. */
+@media (prefers-reduced-motion: reduce) {
+  .zm-sheet__panel {
+    transition: opacity var(--zm-sheet-duration) linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-sheet__panel {
+  transition: opacity var(--zm-sheet-duration) linear;
+  transform: none !important;
+}

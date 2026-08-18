@@ -1,0 +1,88 @@
+/* ZmOfflineIndicator — slim degraded/offline status banner.
+ *
+ * Consumes ONLY --zm-offline-* component tokens (compose semantic roles →
+ * light/dark cascade automatically). No hardcoded hex/oklch. Status is never
+ * color-only: the banner pairs a warning tone with a broken-signal glyph +
+ * Turkish text (VAL-WSH-013 / VAL-DS-029 non-regression).
+ *
+ * The banner is a sticky top bar so it stays visible while the user scrolls a
+ * stale (cached) feed. It renders only when offline (template @if), so the
+ * online state pays zero layout cost.
+ */
+
+:host {
+  display: block;
+}
+
+.offline-indicator {
+  position: sticky;
+  top: 0;
+  z-index: var(--zm-offline-z);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zm-offline-gap);
+
+  padding: var(--zm-offline-pad-y) var(--zm-offline-pad-x);
+
+  background: var(--zm-offline-bg);
+  color: var(--zm-offline-fg);
+  border-bottom: var(--zm-border-width-hair) solid var(--zm-offline-border);
+
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+  text-align: center;
+
+  animation: zm-offline-enter var(--zm-offline-duration) var(--zm-offline-ease);
+}
+
+.offline-indicator__glyph {
+  flex: 0 0 auto;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  color: var(--zm-offline-glyph-fg);
+}
+
+.offline-indicator__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes zm-offline-enter {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ---- Reduced motion: collapse the slide to an opacity-only fade ------- */
+@media (prefers-reduced-motion: reduce) {
+  .offline-indicator {
+    animation: none;
+  }
+}
+
+:host-context([data-reduce-motion]) .offline-indicator {
+  animation: none;
+}
+
+/* ---- Forced colors --------------------------------------------------- */
+@media (forced-colors: active) {
+  .offline-indicator {
+    border-bottom: 2px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  .offline-indicator__glyph {
+    color: CanvasText;
+  }
+}

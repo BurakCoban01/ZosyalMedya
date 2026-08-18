@@ -1,0 +1,220 @@
+/* ZmAppShell — responsive shell layout.
+ *
+ * m2-shell-structure established the 3-region grid (rail + workspace +
+ * context aside) with the same padding as the legacy inline template.
+ * m2-tablet-mobile-navigation introduces the three navigation variants and
+ * their responsive composition (VAL-WSH-007 / VAL-WSH-008):
+ *
+ *   >=1050px (desktop)  : desktop rail + workspace + persistent context aside
+ *   768-1049px (tablet) : compact tablet-rail + workspace (no context aside;
+ *                         the aside becomes an on-demand sheet via the tablet
+ *                         nav's contextToggle output — VAL-WSH-007)
+ *   <680px (mobile-web) : full-width workspace + fixed bottom-nav
+ *                         (VAL-WSH-008)
+ *
+ * All three nav variants render in the DOM (CSS shows exactly one) so each
+ * variant's interactions stay self-contained. The shared ShellNavStateService
+ * de-dupes the unread-counts API call across the variants.
+ *
+ * m2-shell-skip-focus-announce adds the skip-to-content link (VAL-WSH-009),
+ * the route-change announcer live region (VAL-WSH-010), and the focus-reveal
+ * styling for both. Focus visibility under sticky chrome (VAL-WSH-011) is
+ * handled by `scroll-padding` on the document scroller in `styles.css`
+ * (component CSS cannot target `html`).
+ */
+
+:host {
+  display: block;
+  min-height: 100svh;
+}
+
+/* ---- Skip-to-content link (VAL-WSH-009) ------------------------------ *
+ * The first focusable element in the shell. Visually hidden (translated
+ * above the viewport) until it receives keyboard focus, then slides into
+ * view as a brand-treated chip at the top-center. Activating it (Enter /
+ * click) moves focus to `#ana-icerik` — the `<main>` region which carries
+ * `tabindex="-1"` so focus actually lands there (not just scroll). It sits
+ * OUTSIDE the `.shell` grid so it never participates in the grid layout and
+ * stays first in DOM / tab order. */
+.zm-skip-link {
+  position: absolute;
+  top: var(--zm-space-3);
+  left: 50%;
+  z-index: var(--zm-z-sticky);
+  transform: translate(-50%, -300%);
+  display: inline-flex;
+  align-items: center;
+  padding: var(--zm-space-2) var(--zm-space-3);
+  border-radius: var(--zm-radius-md);
+  background: var(--zm-brand);
+  color: var(--zm-brand-on);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--zm-shadow-md);
+  transition: transform var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.zm-skip-link:focus {
+  transform: translate(-50%, calc(var(--zm-space-3) + 0.5rem));
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ---- Route-change announcer (VAL-WSH-010) ---------------------------- *
+ * A visually-hidden (screen-reader-only) live region. It MUST remain in the
+ * DOM and be non-collapsed (not `display:none` / `visibility:hidden` /
+ * `content-visibility:hidden`) so the `aria-live` region is monitored by AT.
+ * Standard clip + 1px box keeps it present without affecting layout. */
+.zm-route-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---- Reduced motion (skip-link slide collapses; state still conveyed
+ *   via the focus ring + position change) — both the OS preference and the
+ *   product [data-reduce-motion] toggle. Matches the motif-component
+ *   pattern: a media query for the OS preference + a host-context rule for
+ *   the product toggle. ------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .zm-skip-link {
+    transition: none;
+  }
+}
+:host-context([data-reduce-motion]) .zm-skip-link {
+  transition: none;
+}
+
+/* ---- Forced colors (Windows high-contrast) ---------------------------- *
+ * No override needed: the base rules reference semantic tokens, and
+ * tokens.css §5 remaps `--zm-brand` -> LinkText, `--zm-brand-on` -> Canvas,
+ * and `--zm-focus` -> Highlight under forced-colors, so the skip-link chip +
+ * focus ring stay clearly visible in high-contrast mode. */
+
+.shell {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: var(--zm-nav-rail-width) minmax(0, 1fr) 20rem;
+  background: var(--zm-canvas);
+}
+
+/* ---- Navigation variants visibility (default = desktop) -------------- *
+ * The shell shows exactly one persistent nav surface at a time. The
+ * tablet + mobile-bottom-nav variants stay in the DOM (so their bindings
+ * remain live and their ngOnInit fires once) but are display:none until
+ * their breakpoint. */
+.shell__nav--tablet,
+.shell__nav--mobile {
+  display: none;
+}
+
+/* The on-demand context sheet lives in the body overlay; the host element
+ * (this class) only anchors the projected content. Hide its inline host
+ * content at desktop + mobile so the static aside is the single desktop
+ * surface and mobile-web stays clean. */
+.shell__context-sheet {
+  display: none;
+}
+
+/* ---- Workspace ------------------------------------------------------- */
+.workspace {
+  min-width: 0;
+  padding: clamp(2rem, 5vw, 5rem);
+}
+
+/* ---- Right contextual rail (desktop persistent container) ------------ *
+ * The aside is the SHELL-owned container: border + padding + sticky
+ * positioning + height. The inner `<zm-context-rail>` (m2-contextual-rail,
+ * VAL-WSH-012) owns ALL of the content + its editorial typography + state
+ * surfaces. The previous static marketing copy + its `.context-label` /
+ * `.context-rule` / `h2` / `p` styles have been removed with that copy. */
+.context {
+  border-left: var(--zm-separator-rule);
+  padding: 3rem 2rem;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow-y: auto;
+  color: var(--zm-text-2);
+}
+
+/* The contextual rail host fills the aside so its content lays out against
+   the container's measure. */
+.context__rail {
+  display: block;
+}
+
+/* The on-demand sheet container takes the same spacing as the aside, plus a
+   top inset so the sheet's label/header is not crashed. The inner
+   `<zm-context-rail>` renders the same live content as the desktop aside. */
+.context--sheet {
+  border-left: 0;
+  padding: 2rem 1.5rem 3rem;
+  height: auto;
+  position: static;
+  color: var(--zm-text-2);
+  overflow: visible;
+}
+
+/* ---- Tablet (768-1049px) — VAL-WSH-007 -------------------------------- *
+ * Drop the persistent context aside (no squeezed-between-sidebars); the
+ * workspace gets the freed space and stays at a comfortable reading measure.
+ * Switch the nav to the compact tablet rail. The on-demand context sheet
+ * becomes reachable via the tablet nav's Bağlam toggle. */
+@media (max-width: 1050px) {
+  .shell {
+    grid-template-columns: var(--zm-nav-tablet-width) minmax(0, 1fr);
+  }
+
+  .shell__nav--desktop {
+    display: none;
+  }
+  .shell__nav--tablet {
+    display: block;
+  }
+
+  /* Hide the persistent aside at tablet; the on-demand sheet (host) shows
+     at tablet because the sheet's CDK overlay is opened from the tablet nav
+     toggle. The host class itself stays display:none (the overlay lives in
+     the document body, not under this host). */
+  .shell__context {
+    display: none;
+  }
+}
+
+/* ---- Mobile-web (<680px) — VAL-WSH-008 -------------------------------- *
+ * Single-column block layout. The tablet rail disappears; the fixed bottom
+ * nav becomes the primary navigation surface. Workspace gets bottom padding
+ * so its content is never obscured by the fixed bottom bar. */
+@media (max-width: 680px) {
+  .shell {
+    display: block;
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .shell__nav--tablet {
+    display: none;
+  }
+  .shell__nav--mobile {
+    /* The mobile bottom-nav host renders its own fixed bar; show the host so
+       its template renders. The bar itself is position:fixed in the child. */
+    display: block;
+    position: static;
+  }
+
+  .workspace {
+    padding: 1.5rem;
+  }
+}

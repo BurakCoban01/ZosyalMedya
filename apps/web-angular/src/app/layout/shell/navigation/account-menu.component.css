@@ -1,0 +1,292 @@
+/* ZmAccountMenu — account trigger + popover.
+ *
+ * Consumes ONLY --zm-account-menu-* component tokens (compose semantic
+ * roles → light/dark cascade automatically). No hardcoded hex/oklch.
+ * The popover panel + items are styled by the ZmMenu primitive's
+ * --zm-menu-* tokens; this file owns the TRIGGER + the projected header /
+ * theme-group / item affordances that sit inside the menu panel.
+ *
+ * Status never color-only (VAL-WSH-029 non-regression): the selected theme
+ * option carries a checkmark glyph (shape) + aria-checked; the logout item
+ * carries a distinct sign-out glyph + danger tone paired with the label.
+ */
+
+:host {
+  display: block;
+}
+
+/* ---- Trigger --------------------------------------------------------- */
+.account-menu__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-account-menu-trigger-gap);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--zm-account-menu-trigger-pad-y) var(--zm-account-menu-trigger-pad-x);
+  min-height: var(--zm-account-menu-trigger-min-height);
+
+  background: var(--zm-account-menu-trigger-bg);
+  color: var(--zm-account-menu-trigger-fg);
+  border: var(--zm-border-width-hair) solid var(--zm-account-menu-trigger-border);
+  border-radius: var(--zm-account-menu-trigger-radius);
+
+  font-family: inherit;
+  font-size: var(--zm-text-sm);
+  text-align: start;
+  cursor: pointer;
+
+  transition:
+    background-color var(--zm-account-menu-duration) var(--zm-account-menu-ease),
+    border-color var(--zm-account-menu-duration) var(--zm-account-menu-ease),
+    color var(--zm-account-menu-duration) var(--zm-account-menu-ease);
+}
+
+.account-menu__trigger:hover {
+  background: var(--zm-account-menu-trigger-bg-hover);
+  border-color: var(--zm-account-menu-trigger-border-hover);
+}
+
+.account-menu__trigger:focus-visible {
+  outline: var(--zm-account-menu-focus-ring) solid var(--zm-focus);
+  outline-offset: var(--zm-account-menu-focus-offset);
+  border-color: var(--zm-focus);
+}
+
+.account-menu__trigger[aria-expanded="true"] {
+  background: var(--zm-account-menu-trigger-bg-hover);
+  border-color: var(--zm-account-menu-trigger-border-hover);
+}
+
+/* Compact (tablet) variant: avatar-only square that matches the rail's
+   44x44 icon buttons. No name, no caret. */
+.account-menu__trigger--compact {
+  width: var(--zm-account-menu-compact-size);
+  height: var(--zm-account-menu-compact-size);
+  min-height: var(--zm-account-menu-compact-size);
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.account-menu__avatar {
+  flex: 0 0 auto;
+}
+
+.account-menu__id {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+}
+
+.account-menu__name {
+  font-weight: 650;
+  color: var(--zm-account-menu-name-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-menu__handle {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-account-menu-handle-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-menu__caret {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  color: var(--zm-account-menu-handle-fg);
+}
+
+.account-menu__trigger--compact .account-menu__caret {
+  display: none;
+}
+
+/* ---- Popover content (projected into ZmMenu panel) ------------------- */
+.account-menu__header {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-account-menu-header-gap);
+  padding: var(--zm-account-menu-header-pad-y) var(--zm-account-menu-item-pad-x);
+}
+
+.account-menu__avatar--lg {
+  flex: 0 0 auto;
+}
+
+.account-menu__header-id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.account-menu__header-name {
+  font-weight: 700;
+  font-size: var(--zm-text-md);
+  color: var(--zm-menu-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-menu__header-handle {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+.account-menu__header-hint {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+.account-menu__separator {
+  height: var(--zm-border-width-hair);
+  margin: var(--zm-account-menu-sep-margin-y) var(--zm-account-menu-sep-margin-x);
+  background: var(--zm-account-menu-sep-bg);
+}
+
+.account-menu__group-label {
+  padding: var(--zm-account-menu-group-pad-y) var(--zm-account-menu-item-pad-x)
+    var(--zm-account-menu-group-pad-y-bottom);
+  font-size: var(--zm-text-xs);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--zm-text-3);
+}
+
+/* Items reuse the menu primitive's row affordance via role=menuitem; we add
+   the leading glyph / check slot + trailing hint. */
+.account-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-account-menu-item-gap);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--zm-account-menu-item-pad-y) var(--zm-account-menu-item-pad-x);
+  border-radius: var(--zm-menu-item-radius);
+
+  font-family: inherit;
+  font-size: var(--zm-text-md);
+  color: var(--zm-menu-fg);
+  background: transparent;
+  border: 0;
+  text-align: start;
+  cursor: pointer;
+
+  transition:
+    background-color var(--zm-account-menu-duration) var(--zm-account-menu-ease),
+    color var(--zm-account-menu-duration) var(--zm-account-menu-ease);
+}
+
+.account-menu__item:hover,
+.account-menu__item:focus-visible {
+  background: var(--zm-menu-item-bg-hover);
+  outline: none;
+}
+
+.account-menu__item:focus-visible::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-brand);
+}
+
+.account-menu__item-label {
+  flex: 1 1 auto;
+  text-align: start;
+}
+
+.account-menu__item-glyph {
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--zm-account-menu-item-glyph-fg);
+}
+
+.account-menu__item-hint {
+  flex: 0 0 auto;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+/* Theme selection: checkmark (shape) + checked tone — never color alone. */
+.account-menu__check {
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zm-brand);
+}
+
+.account-menu__check svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.account-menu__item--theme.is-selected {
+  font-weight: 650;
+  color: var(--zm-account-menu-selected-fg);
+}
+
+/* Logout danger affordance: danger tone PAIRED with the sign-out glyph +
+   label, so the danger is never color-only. */
+.account-menu__item--danger {
+  color: var(--zm-account-menu-danger-fg);
+}
+
+.account-menu__item--danger .account-menu__item-glyph {
+  color: var(--zm-account-menu-danger-fg);
+}
+
+.account-menu__item--danger:hover {
+  background: var(--zm-account-menu-danger-bg-hover);
+}
+
+.account-menu__item--danger[disabled],
+.account-menu__item--danger[aria-disabled="true"] {
+  color: var(--zm-text-3);
+  cursor: progress;
+  pointer-events: none;
+}
+
+/* ---- Reduced motion -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .account-menu__trigger,
+  .account-menu__item {
+    transition-duration: 1ms;
+  }
+}
+
+:host-context([data-reduce-motion]) .account-menu__trigger,
+:host-context([data-reduce-motion]) .account-menu__item {
+  transition-duration: 1ms;
+}
+
+/* ---- Forced colors --------------------------------------------------- */
+@media (forced-colors: active) {
+  .account-menu__trigger {
+    border: 2px solid ButtonText;
+  }
+  .account-menu__trigger:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+  .account-menu__separator {
+    background: CanvasText;
+  }
+}

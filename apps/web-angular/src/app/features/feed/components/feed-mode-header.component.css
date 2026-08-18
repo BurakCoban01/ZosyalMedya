@@ -1,0 +1,185 @@
+:host {
+  display: block;
+}
+
+/* ------------------------------------------------------------------ *
+ * Layout — identity block on the left, mode tablist on the right.
+ * Collapses to a single column under tablet width so neither the title
+ * measure nor the tabs are squeezed.
+ * ------------------------------------------------------------------ */
+.zm-feed-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--zm-space-8, 2rem);
+  margin-bottom: var(--zm-space-8, 2rem);
+}
+
+.zm-feed-header__identity {
+  min-width: 0;
+}
+
+.zm-feed-header__kicker {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  font-weight: 850;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--zm-brand);
+  margin: 0 0 var(--zm-space-2, 0.5rem);
+}
+
+.zm-feed-header__title {
+  font-family: var(--zm-font-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 5vw, 4.7rem);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  color: var(--zm-text-1);
+  max-width: 42rem;
+  margin: 0;
+}
+
+.zm-feed-header__lede {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-text-2);
+  max-width: 38rem;
+  margin: var(--zm-space-3, 0.75rem) 0 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Mode tablist — horizontal, calm. Active = >=3 non-color cues:
+ * signal-arc underline shape + heavier weight + brighter ink.
+ * ------------------------------------------------------------------ */
+.zm-feed-header__modes {
+  display: flex;
+  border-bottom: var(--zm-separator-rule);
+  white-space: nowrap;
+}
+
+.zm-feed-mode {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: var(--zm-space-3, 0.75rem) var(--zm-space-4, 1rem);
+  border: 0;
+  background: transparent;
+  color: var(--zm-text-2);
+  font-family: var(--zm-font-ui);
+  cursor: pointer;
+  transition: color var(--zm-duration-fast) var(--zm-ease-standard);
+  /* Reserve the underline slot so toggling active never causes layout shift. */
+  padding-bottom: calc(var(--zm-space-3, 0.75rem) + 0.35rem);
+}
+
+.zm-feed-mode:hover {
+  color: var(--zm-text-1);
+}
+
+.zm-feed-mode:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: -3px;
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+
+.zm-feed-mode.is-active {
+  color: var(--zm-text-1); /* non-color cue #3: brighter ink */
+}
+
+.zm-feed-mode__label {
+  font-size: var(--zm-text-md);
+  font-weight: 500;
+}
+
+.zm-feed-mode.is-active .zm-feed-mode__label {
+  font-weight: 750; /* non-color cue #2: heavier weight */
+}
+
+.zm-feed-mode__hint {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+  font-weight: 400;
+}
+
+/* Signal-arc active indicator (non-color cue #1: distinct curved shape).
+   Static + opacity-driven under reduced motion (no spatial transform). */
+.zm-feed-mode__arc {
+  position: absolute;
+  left: var(--zm-space-3, 0.75rem);
+  right: var(--zm-space-3, 0.75rem);
+  bottom: -1px; /* sit on top of the tablist rule */
+  height: 0.5rem;
+  display: block;
+  color: var(--zm-brand);
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: center;
+  transition:
+    opacity var(--zm-duration-base) var(--zm-ease-enter),
+    transform var(--zm-duration-base) var(--zm-ease-enter);
+}
+
+.zm-feed-mode__arc svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zm-feed-mode.is-active .zm-feed-mode__arc {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive — stack at tablet/mobile so the title keeps its measure.
+ * ------------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .zm-feed-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--zm-space-5, 1.25rem);
+  }
+  .zm-feed-header__modes {
+    margin-top: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion — collapse the arc entrance to opacity-only.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-feed-mode,
+  .zm-feed-mode__arc {
+    transition-duration: 1ms;
+  }
+  .zm-feed-mode__arc {
+    transform: none;
+  }
+}
+:root[data-reduce-motion] .zm-feed-mode,
+:root[data-reduce-motion] .zm-feed-mode__arc {
+  transition-duration: 1ms;
+}
+:root[data-reduce-motion] .zm-feed-mode__arc {
+  transform: none;
+}
+
+/* Forced colors — keep the active edge + arc visible. */
+@media (forced-colors: active) {
+  .zm-feed-mode {
+    color: ButtonText;
+  }
+  .zm-feed-mode.is-active {
+    color: Highlight;
+  }
+  .zm-feed-mode__arc {
+    color: Highlight;
+  }
+  .zm-feed-header__modes {
+    border-bottom-color: GrayText;
+  }
+}

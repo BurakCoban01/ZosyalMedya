@@ -1,0 +1,165 @@
+/**
+ * ZmAvatar — identity-token avatar (VAL-DS-030 / VAL-DS-031).
+ *
+ * The host reserves dimensions (set inline from the size token) so the image ↔
+ * fallback swap never causes layout shift. The identity color is injected as a
+ * custom property (`--zm-avatar-identity-color`) bound inline from the stable
+ * deterministic palette; the fallback consumes it. The presence dot + unread
+ * badge sit in reserved corner slots separated from the avatar content.
+ *
+ * Consumes ONLY `--zm-avatar-*` component-layer tokens (no hardcoded hex).
+ */
+
+:host {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  border-radius: var(--zm-avatar-radius);
+  /* Default identity color (overridden inline by the deterministic palette). */
+  --zm-avatar-identity-color: var(--zm-avatar-identity-1);
+  flex: 0 0 auto;
+}
+
+.zm-avatar__box {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: visible; /* let presence/unread corner badges sit on the edge */
+  background: var(--zm-avatar-bg);
+  isolation: isolate; /* keep corner halos above identity fill, below page chrome */
+}
+
+/* The image fills the reserved box. While the image is loading, the surface
+ * background shows through; on error it is removed and the fallback renders. */
+.zm-avatar__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  /* Hairline edge so the avatar reads against same-hue surfaces in both themes. */
+  outline: 1px solid var(--zm-avatar-border);
+  outline-offset: -1px;
+}
+
+/* Identity fallback — stable deterministic color + initials. Same name always
+ * resolves to the same color (token bound inline). Never shows a broken-image
+ * glyph: the image node is removed on error and this fills the same box. */
+.zm-avatar__fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: var(--zm-avatar-identity-color);
+  color: var(--zm-avatar-initials-fg);
+  font-family: var(--zm-avatar-initials-font);
+  font-weight: var(--zm-avatar-initials-weight);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  user-select: none;
+  outline: 1px solid var(--zm-avatar-border);
+  outline-offset: -1px;
+  /* Scale initials to the box. Using `cqh` (container query height) would be
+   * ideal but the host is a fixed box; `em` driven by font-size per size works
+   * cleanly. The size variants below tune the font-size. */
+  font-size: calc(var(--zm-avatar-size-md, 2.5rem) * 0.42);
+  text-transform: uppercase;
+}
+
+/* --- Size variants -------------------------------------------------------- */
+:host[data-size='xs'] .zm-avatar__fallback { font-size: 0.625rem; }
+:host[data-size='sm'] .zm-avatar__fallback { font-size: 0.8125rem; }
+:host[data-size='md'] .zm-avatar__fallback { font-size: 1.0625rem; }
+:host[data-size='lg'] .zm-avatar__fallback { font-size: 1.5rem; }
+:host[data-size='xl'] .zm-avatar__fallback { font-size: 2.125rem; }
+
+/* --- Presence dot (SEPARATED from content; VAL-DS-031) ------------------- */
+/* Sits in the bottom-end corner, lifted on a canvas halo so it does not bleed
+ * into the identity color. Color is driven by the presence semantic role
+ * (independent declaration from the identity palette). Shape = round dot
+ * (non-color cue: position + round shape vs the square identity box). */
+.zm-avatar__presence {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--zm-avatar-presence-size-md);
+  height: var(--zm-avatar-presence-size-md);
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-avatar-presence-online);
+  /* Halo separates the dot from the avatar content box edge. */
+  box-shadow:
+    0 0 0 0.125rem var(--zm-avatar-ring-halo),
+    0 0 0 0.0625rem color-mix(in srgb, var(--zm-avatar-border) 80%, transparent);
+  /* Translate slightly into the corner so it reads as a status chip, not an
+   * overlay on the face. */
+  transform: translate(18%, 18%);
+  pointer-events: none;
+}
+.zm-avatar__presence[data-presence='online']  { background: var(--zm-avatar-presence-online); }
+.zm-avatar__presence[data-presence='away']    { background: var(--zm-avatar-presence-away); }
+.zm-avatar__presence[data-presence='busy']    { background: var(--zm-avatar-presence-busy); }
+.zm-avatar__presence[data-presence='offline'] { background: var(--zm-avatar-presence-offline); }
+
+/* Per-size presence dot sizing (keeps the dot proportional + readable). */
+:host[data-size='xs'] .zm-avatar__presence { width: var(--zm-avatar-presence-size-xs); height: var(--zm-avatar-presence-size-xs); }
+:host[data-size='sm'] .zm-avatar__presence { width: var(--zm-avatar-presence-size-sm); height: var(--zm-avatar-presence-size-sm); }
+:host[data-size='lg'] .zm-avatar__presence { width: var(--zm-avatar-presence-size-lg); height: var(--zm-avatar-presence-size-lg); }
+:host[data-size='xl'] .zm-avatar__presence { width: var(--zm-avatar-presence-size-xl); height: var(--zm-avatar-presence-size-xl); }
+
+/* --- Unread count badge (SEPARATED from content; VAL-DS-031) ------------- */
+/* Top-end corner. Distinct shape (rounded count pill) + distinct position
+ * (top-end vs presence bottom-end) + accessible count via the host label.
+ * Brand color is an INDEPENDENT declaration from the identity palette. */
+.zm-avatar__unread {
+  position: absolute;
+  right: 0;
+  top: 0;
+  min-width: var(--zm-avatar-unread-size);
+  height: var(--zm-avatar-unread-size);
+  padding: 0 0.3125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-avatar-unread-bg);
+  color: var(--zm-avatar-unread-fg);
+  font-family: var(--zm-avatar-unread-font);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow:
+    0 0 0 0.125rem var(--zm-avatar-unread-halo),
+    var(--zm-shadow-sm);
+  transform: translate(35%, -35%);
+  pointer-events: none;
+}
+
+/* --- Interactive variant ------------------------------------------------- */
+:host([role='button']) {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+:host([role='button']:focus-visible) .zm-avatar__box {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus-ring-color);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* --- Forced colors (Windows high-contrast) ------------------------------- */
+@media (forced-colors: active) {
+  :host { --zm-avatar-border: CanvasText; }
+  .zm-avatar__image,
+  .zm-avatar__fallback { outline: 1px solid CanvasText; outline-offset: -1px; }
+  .zm-avatar__fallback { background: Canvas; color: CanvasText; }
+  .zm-avatar__presence { background: CanvasText; box-shadow: 0 0 0 0.125rem Canvas; }
+  .zm-avatar__unread { background: LinkText; color: Canvas; box-shadow: 0 0 0 0.125rem Canvas; }
+}
+
+/* --- Reduced motion (token cascade collapses durations; the avatar's only
+ *   motion is the image opacity settle, kept opacity-only here too) -------- */
+.zm-avatar__image { transition: opacity var(--zm-avatar-duration) var(--zm-avatar-ease); }

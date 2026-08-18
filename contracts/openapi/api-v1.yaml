@@ -1,0 +1,1369 @@
+openapi: 3.0.3
+info:
+  title: Enterprise Social & Community Platform API
+  version: v1
+servers:
+  - url: http://localhost:5000
+paths:
+  /api/v1/identity/register:
+    post:
+      operationId: register
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterRequest' } } } }
+      responses:
+        '201': { description: Registered; public demo may also issue an HttpOnly synthetic-mailbox capability cookie, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResult' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/login:
+    post:
+      operationId: login
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LoginRequest' } } } }
+      responses:
+        '200': { description: Logged in, content: { application/json: { schema: { $ref: '#/components/schemas/LoginResult' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/browser/login:
+    post:
+      operationId: browserLogin
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/LoginRequest' } } } }
+      responses:
+        '200': { description: Browser session established; refresh secret is set only as an HttpOnly cookie, content: { application/json: { schema: { $ref: '#/components/schemas/BrowserLoginResult' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/refresh:
+    post:
+      operationId: refresh
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RefreshRequest' } } } }
+      responses:
+        '200': { description: Rotated, content: { application/json: { schema: { $ref: '#/components/schemas/TokenPair' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/logout:
+    post:
+      operationId: logout
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RefreshRequest' } } } }
+      responses: { '204': { description: Logged out } }
+  /api/v1/identity/browser/refresh:
+    post:
+      operationId: browserRefresh
+      tags: [Identity]
+      parameters:
+        - { in: header, name: X-CSRF-Token, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Browser access token rotated; refresh secret remains cookie-only, content: { application/json: { schema: { $ref: '#/components/schemas/BrowserAccessToken' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/browser/logout:
+    post:
+      operationId: browserLogout
+      tags: [Identity]
+      parameters:
+        - { in: header, name: X-CSRF-Token, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Browser session revoked and cookies cleared }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/system/public-demo:
+    get:
+      operationId: getPublicDemoStatus
+      tags: [System]
+      responses:
+        '200': { description: Public demo capability status, content: { application/json: { schema: { $ref: '#/components/schemas/PublicDemoStatus' } } } }
+  /api/v1/identity/demo-mailbox:
+    post:
+      operationId: readPublicDemoMailbox
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EmailRequest' } } } }
+      responses:
+        '200': { description: Active synthetic demo actions owned by the current HttpOnly mailbox capability, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/PublicDemoMailboxMessage' } } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/email-verification/request:
+    post:
+      operationId: requestEmailVerification
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EmailRequest' } } } }
+      responses: { '202': { description: Request accepted regardless of account existence } }
+  /api/v1/identity/email-verification/confirm:
+    post:
+      operationId: confirmEmailVerification
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SecurityTokenRequest' } } } }
+      responses: { '204': { description: Email verified }, '400': { $ref: '#/components/responses/Problem' } }
+  /api/v1/identity/password-reset/request:
+    post:
+      operationId: requestPasswordReset
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EmailRequest' } } } }
+      responses: { '202': { description: Request accepted regardless of account existence } }
+  /api/v1/identity/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      tags: [Identity]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PasswordResetRequest' } } } }
+      responses: { '204': { description: Password changed and sessions revoked }, '400': { $ref: '#/components/responses/Problem' } }
+  /api/v1/identity/mfa/enrollment:
+    post:
+      operationId: beginMfaEnrollment
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Enrollment, content: { application/json: { schema: { $ref: '#/components/schemas/MfaEnrollment' } } } } }
+  /api/v1/identity/mfa/confirmation:
+    post:
+      operationId: confirmMfaEnrollment
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ConfirmMfaRequest' } } } }
+      responses: { '200': { description: Recovery codes, content: { application/json: { schema: { $ref: '#/components/schemas/MfaConfirmation' } } } } }
+  /api/v1/identity/mfa/disable:
+    post:
+      operationId: disableMfa
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MfaCodeRequest' } } } }
+      responses: { '204': { description: MFA disabled } }
+  /api/v1/identity/sessions:
+    get:
+      operationId: listSessions
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Sessions, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/SessionView' } } } } }
+  /api/v1/identity/sessions/{sessionId}:
+    delete:
+      operationId: revokeSession
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: sessionId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '204': { description: Revoked }, '404': { $ref: '#/components/responses/Problem' } }
+  /api/v1/identity/privacy/export:
+    get:
+      operationId: exportMyIdentityData
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Identity-owned personal data export, content: { application/json: { schema: { $ref: '#/components/schemas/IdentityDataExport' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/v1/identity/privacy:
+    delete:
+      operationId: deleteMyIdentityData
+      tags: [Identity]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteMyDataRequest' } } } }
+      responses:
+        '204': { description: Direct identifiers anonymized and all sessions revoked }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/v1/profiles/me:
+    get:
+      operationId: getMyProfile
+      tags: [Profiles]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Profile, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileView' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+    put:
+      operationId: updateMyProfile
+      tags: [Profiles]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateProfileRequest' } } } }
+      responses:
+        '200': { description: Profile, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileView' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/profiles/{handle}:
+    get:
+      operationId: getProfileByHandle
+      tags: [Profiles]
+      parameters: [{ name: handle, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Profile, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/social-graph/{targetId}/follow:
+    post:
+      operationId: follow
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/TargetId' }]
+      responses:
+        '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+    delete:
+      operationId: unfollow
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/TargetId' }]
+      responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } }
+  /api/v1/social-graph/requests/{requesterId}/accept:
+    post:
+      operationId: acceptFollow
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: requesterId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } }
+  /api/v1/social-graph/requests/{requesterId}:
+    delete:
+      operationId: rejectFollow
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: requesterId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Rejected relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } }, '404': { $ref: '#/components/responses/Problem' } }
+  /api/v1/social-graph/requests/incoming:
+    get:
+      operationId: listIncomingFollowRequests
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 50, default: 20 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses: { '200': { description: Incoming follow requests, content: { application/json: { schema: { $ref: '#/components/schemas/SocialGraphPage' } } } } }
+  /api/v1/social-graph/{ownerId}/summary:
+    get:
+      operationId: getSocialGraphSummary
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: ownerId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Social graph summary, content: { application/json: { schema: { $ref: '#/components/schemas/SocialGraphSummaryView' } } } }, '403': { $ref: '#/components/responses/Problem' } }
+  /api/v1/social-graph/{ownerId}/profiles/{kind}:
+    get:
+      operationId: listSocialGraphProfiles
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: ownerId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: kind, in: path, required: true, schema: { type: string, enum: [Followers, Following] } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 50, default: 20 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses: { '200': { description: Social graph profiles, content: { application/json: { schema: { $ref: '#/components/schemas/SocialGraphPage' } } } }, '403': { $ref: '#/components/responses/Problem' } }
+  /api/v1/social-graph/{targetId}:
+    get:
+      operationId: getRelationship
+      tags: [SocialGraph]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/TargetId' }]
+      responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } }
+  /api/v1/social-graph/{targetId}/block:
+    put: { operationId: block, tags: [SocialGraph], security: [{ bearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/TargetId' }], responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } } }
+    delete: { operationId: unblock, tags: [SocialGraph], security: [{ bearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/TargetId' }], responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } } }
+  /api/v1/social-graph/{targetId}/mute:
+    put: { operationId: mute, tags: [SocialGraph], security: [{ bearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/TargetId' }], responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } } }
+    delete: { operationId: unmute, tags: [SocialGraph], security: [{ bearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/TargetId' }], responses: { '200': { description: Relationship, content: { application/json: { schema: { $ref: '#/components/schemas/RelationshipView' } } } } } }
+  /api/v1/questions:
+    post:
+      operationId: askQuestion
+      tags: [Questions]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AskQuestionRequest' } } } }
+      responses: { '201': { description: Question created, content: { application/json: { schema: { $ref: '#/components/schemas/QuestionView' } } } }, '400': { $ref: '#/components/responses/Problem' } }
+  /api/v1/questions/inbox:
+    get:
+      operationId: getQuestionInbox
+      tags: [Questions]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, required: false, schema: { type: string, enum: [Draft, Scheduled, Published, Answered, Archived, Deleted] } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+      responses: { '200': { description: Question inbox, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/QuestionView' } } } } } }
+  /api/v1/questions/by-profile/{targetId}:
+    get:
+      operationId: getProfileQuestions
+      tags: [Questions]
+      parameters:
+        - { $ref: '#/components/parameters/TargetId' }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 12, default: 6 } }
+      responses:
+        '200': { description: Viewer-safe answered profile questions, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/QuestionView' } } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/questions/{id}/answer:
+    post:
+      operationId: answerQuestion
+      tags: [Questions]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/QuestionId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AnswerQuestionRequest' } } } }
+      responses: { '200': { description: Question answered, content: { application/json: { schema: { $ref: '#/components/schemas/QuestionView' } } } }, '403': { $ref: '#/components/responses/Problem' } }
+  /api/v1/questions/{id}/archive:
+    put:
+      operationId: archiveQuestion
+      tags: [Questions]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/QuestionId' }]
+      responses: { '200': { description: Question archived, content: { application/json: { schema: { $ref: '#/components/schemas/QuestionView' } } } } }
+  /api/v1/questions/{id}:
+    get:
+      operationId: getQuestion
+      tags: [Questions]
+      parameters: [{ $ref: '#/components/parameters/QuestionId' }]
+      responses:
+        '200': { description: Viewer-safe answered question, content: { application/json: { schema: { $ref: '#/components/schemas/QuestionView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    delete:
+      operationId: deleteQuestion
+      tags: [Questions]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/QuestionId' }]
+      responses: { '200': { description: Question tombstoned, content: { application/json: { schema: { $ref: '#/components/schemas/QuestionView' } } } } }
+  /api/v1/content:
+    post:
+      operationId: createPost
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreatePostRequest' } } } }
+      responses: { '201': { description: Post created, content: { application/json: { schema: { $ref: '#/components/schemas/PostView' } } } }, '400': { $ref: '#/components/responses/Problem' } }
+  /api/v1/content/{contentId}:
+    get:
+      operationId: getContent
+      tags: [Content]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      responses: { '200': { description: Visible content, content: { application/json: { schema: { $ref: '#/components/schemas/ContentItem' } } } }, '404': { $ref: '#/components/responses/Problem' } }
+    put:
+      operationId: updatePost
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdatePostRequest' } } } }
+      responses: { '200': { description: Post updated, content: { application/json: { schema: { $ref: '#/components/schemas/PostView' } } } } }
+    delete:
+      operationId: deletePost
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      responses: { '200': { description: Post tombstoned, content: { application/json: { schema: { $ref: '#/components/schemas/PostView' } } } } }
+  /api/v1/content/{contentId}/reaction:
+    put:
+      operationId: setReaction
+      tags: [Reactions]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SetReactionRequest' } } } }
+      responses: { '200': { description: Reaction set, content: { application/json: { schema: { $ref: '#/components/schemas/ReactionView' } } } } }
+    delete:
+      operationId: removeReaction
+      tags: [Reactions]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      responses: { '200': { description: Reaction removed, content: { application/json: { schema: { $ref: '#/components/schemas/ReactionView' } } } } }
+  /api/v1/content/{contentId}/poll:
+    get:
+      operationId: getPoll
+      tags: [Content]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      responses:
+        '200': { description: Poll, content: { application/json: { schema: { $ref: '#/components/schemas/PollView' } } } }
+        '204': { description: Visible content has no poll }
+    post:
+      operationId: createPoll
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreatePollRequest' } } } }
+      responses: { '201': { description: Poll created, content: { application/json: { schema: { $ref: '#/components/schemas/PollView' } } } } }
+  /api/v1/content/{contentId}/poll/votes:
+    post:
+      operationId: votePoll
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/VotePollRequest' } } } }
+      responses: { '200': { description: Vote accepted, content: { application/json: { schema: { $ref: '#/components/schemas/PollView' } } } } }
+  /api/v1/content/{contentId}/saved:
+    put:
+      operationId: saveContent
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SaveContentRequest' } } } }
+      responses: { '204': { description: Saved idempotently } }
+    delete:
+      operationId: removeSavedContent
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }, { name: collection, in: query, schema: { type: string, nullable: true } }]
+      responses: { '204': { description: Removed idempotently } }
+  /api/v1/content/saved:
+    get:
+      operationId: listSavedContent
+      tags: [Content]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: collection, in: query, schema: { type: string } }, { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }, { name: cursor, in: query, schema: { type: string } }]
+      responses: { '200': { description: Saved content page, content: { application/json: { schema: { $ref: '#/components/schemas/SavedContentPage' } } } } }
+  /api/v1/content/{contentId}/impressions:
+    post:
+      operationId: recordImpression
+      tags: [Content]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }, { name: X-View-Session, in: header, required: false, schema: { type: string } }]
+      responses: { '200': { description: Daily unique impression result, content: { application/json: { schema: { $ref: '#/components/schemas/ImpressionResult' } } } } }
+  /api/v1/content/{contentId}/reactions:
+    get:
+      operationId: getReactionSummary
+      tags: [Reactions]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      responses: { '200': { description: Reaction summary, content: { application/json: { schema: { $ref: '#/components/schemas/ReactionSummary' } } } } }
+  /api/v1/content/{contentId}/comments:
+    get:
+      operationId: listComments
+      tags: [Comments]
+      security: [{}, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/ContentId' }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 20 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses: { '200': { description: Visible comment page, content: { application/json: { schema: { $ref: '#/components/schemas/CommentPage' } } } }, '400': { $ref: '#/components/responses/Problem' } }
+    post:
+      operationId: createComment
+      tags: [Comments]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ContentId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateCommentRequest' } } } }
+      responses: { '201': { description: Comment created, content: { application/json: { schema: { $ref: '#/components/schemas/CommentView' } } } } }
+  /api/v1/content/{contentId}/comments/{commentId}:
+    put:
+      operationId: updateComment
+      tags: [Comments]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/ContentId' }
+        - { name: commentId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCommentRequest' } } } }
+      responses: { '200': { description: Updated owner comment, content: { application/json: { schema: { $ref: '#/components/schemas/CommentView' } } } }, '403': { $ref: '#/components/responses/Problem' }, '404': { $ref: '#/components/responses/Problem' } }
+    delete:
+      operationId: deleteComment
+      tags: [Comments]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/ContentId' }
+        - { name: commentId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses: { '200': { description: Deleted owner comment tombstone, content: { application/json: { schema: { $ref: '#/components/schemas/CommentView' } } } }, '403': { $ref: '#/components/responses/Problem' }, '404': { $ref: '#/components/responses/Problem' } }
+  /api/v1/feed/{kind}:
+    get:
+      operationId: getFeed
+      tags: [Feed]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: kind, in: path, required: true, schema: { type: string, enum: [Following, Discovery, Profile] } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: profileId, in: query, schema: { type: string, format: uuid } }
+      responses: { '200': { description: Cursor feed page, content: { application/json: { schema: { $ref: '#/components/schemas/FeedPage' } } } } }
+  /api/v1/messaging/conversations:
+    get:
+      operationId: listConversations
+      tags: [Messaging]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 50 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses: { '200': { description: Conversation page, content: { application/json: { schema: { $ref: '#/components/schemas/ConversationPage' } } } } }
+    post:
+      operationId: createConversation
+      tags: [Messaging]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateConversationRequest' } } } }
+      responses:
+        '201': { description: Conversation created, content: { application/json: { schema: { $ref: '#/components/schemas/ConversationView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+  /api/v1/messaging/conversations/{conversationId}/messages:
+    get:
+      operationId: listMessages
+      tags: [Messaging]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/ConversationId' }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Message page, content: { application/json: { schema: { $ref: '#/components/schemas/MessagePage' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: sendMessage
+      tags: [Messaging]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/ConversationId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SendMessageRequest' } } } }
+      responses:
+        '201': { description: Message sent, content: { application/json: { schema: { $ref: '#/components/schemas/MessageView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/messaging/messages/{messageId}:
+    patch:
+      operationId: changeMessage
+      tags: [Messaging]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: messageId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ChangeMessageRequest' } } } }
+      responses:
+        '200': { description: Message changed, content: { application/json: { schema: { $ref: '#/components/schemas/MessageView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/notifications/:
+    get:
+      operationId: listNotifications
+      tags: [Notifications]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses: { '200': { description: Notification inbox, content: { application/json: { schema: { $ref: '#/components/schemas/NotificationPage' } } } } }
+  /api/v1/notifications/{notificationId}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [Notifications]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: notificationId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Notification marked read, content: { application/json: { schema: { $ref: '#/components/schemas/NotificationView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+  /api/v1/communities/:
+    get:
+      operationId: listCommunities
+      tags: [Communities]
+      parameters: [{ name: limit, in: query, schema: { type: integer } }]
+      responses: { '200': { description: Communities, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/CommunityView' } } } } } }
+    post:
+      operationId: createCommunity
+      tags: [Communities]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateCommunityRequest' } } } }
+      responses: { '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/CommunityView' } } } }, '400': { $ref: '#/components/responses/Problem' } }
+  /api/v1/communities/{slug}:
+    get:
+      operationId: getCommunityBySlug
+      tags: [Communities]
+      parameters: [{ name: slug, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Viewer-safe community detail, content: { application/json: { schema: { $ref: '#/components/schemas/CommunityDetailView' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/communities/{id}/change:
+    post:
+      operationId: changeCommunity
+      tags: [Communities]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ChangeCommunityRequest' } } } }
+      responses:
+        '200': { description: Membership or moderation change applied, content: { application/json: { schema: { $ref: '#/components/schemas/CommunityView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/communities/{id}/members:
+    get:
+      operationId: listCommunityMembers
+      tags: [Communities]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: status, in: query, required: false, schema: { type: string, enum: [Pending, Invited, Active, Removed] } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+      responses:
+        '200': { description: Moderator-visible community members, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/CommunityMemberView' } } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/communities/{id}/rules:
+    put:
+      operationId: setCommunityRules
+      tags: [Communities]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SetCommunityRulesRequest' } } } }
+      responses:
+        '200': { description: Rules updated, content: { application/json: { schema: { $ref: '#/components/schemas/CommunityView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/communities/{id}/pins/{contentId}:
+    put:
+      operationId: setCommunityPin
+      tags: [Communities]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: contentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: pinned, in: query, required: false, schema: { type: boolean, default: true } }
+      responses:
+        '200': { description: Pin state updated, content: { application/json: { schema: { $ref: '#/components/schemas/CommunityView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/media/:
+    post:
+      operationId: initiateMedia
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/InitiateMediaRequest' } } } }
+      responses: { '201': { description: Initiated, content: { application/json: { schema: { $ref: '#/components/schemas/InitiatedMedia' } } } } }
+  /api/v1/media/{id}/content:
+    put:
+      operationId: uploadMediaContent
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/octet-stream: { schema: { type: string, format: binary } } } }
+      responses: { '200': { description: Ready, content: { application/json: { schema: { $ref: '#/components/schemas/MediaView' } } } } }
+  /api/v1/media/{id}/download:
+    get:
+      operationId: downloadMedia
+      tags: [Media]
+      security: [{}, { bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: variant, in: query, required: false, schema: { type: string, nullable: true } }
+      responses:
+        '200':
+          description: Authorized JPEG, PNG, WebP or MP4 bytes
+          content:
+            '*/*': { schema: { type: string, format: binary } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/media/{id}:
+    delete:
+      operationId: deleteMedia
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/stories/:
+    get:
+      operationId: listActiveStories
+      tags: [Stories]
+      security: [{}, { bearerAuth: [] }]
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 30, default: 20 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Viewer-safe active Story page, content: { application/json: { schema: { $ref: '#/components/schemas/StoryPage' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: createStory
+      tags: [Stories]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateStoryRequest' } } } }
+      responses:
+        '201': { description: Story created with a server-owned 24-hour expiry, content: { application/json: { schema: { $ref: '#/components/schemas/StoryView' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/stories/profile/{ownerId}:
+    get:
+      operationId: listProfileStories
+      tags: [Stories]
+      security: [{}, { bearerAuth: [] }]
+      parameters:
+        - { name: ownerId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 30, default: 20 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Viewer-safe active profile Stories, content: { application/json: { schema: { $ref: '#/components/schemas/StoryPage' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+  /api/v1/stories/{id}:
+    get:
+      operationId: getStory
+      tags: [Stories]
+      security: [{}, { bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Viewer-safe active Story, content: { application/json: { schema: { $ref: '#/components/schemas/StoryView' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+    delete:
+      operationId: deleteStory
+      tags: [Stories]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '204': { description: Story tombstoned; underlying media is preserved }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/search/:
+    get:
+      operationId: search
+      tags: [Search]
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+        - { name: type, in: query, schema: { $ref: '#/components/schemas/SearchDocumentType' } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses: { '200': { description: Results, content: { application/json: { schema: { $ref: '#/components/schemas/SearchPage' } } } } }
+  /api/v1/search/trending:
+    get:
+      operationId: trending
+      tags: [Search]
+      parameters: [{ name: limit, in: query, schema: { type: integer } }]
+      responses: { '200': { description: Trending tags, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TrendingTagView' } } } } } }
+  /api/v1/moderation/reports:
+    post:
+      operationId: createModerationReport
+      tags: [Moderation]
+      security: [{ bearerAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateModerationReportRequest' } } } }
+      responses: { '201': { description: Reported, content: { application/json: { schema: { $ref: '#/components/schemas/ModerationReportView' } } } } }
+  /api/v1/moderation/cases:
+    get:
+      operationId: listModerationCases
+      tags: [Moderation]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: status, in: query, schema: { type: string } }, { name: limit, in: query, schema: { type: integer } }]
+      responses: { '200': { description: Cases, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ModerationCaseView' } } } } } }
+  /api/v1/administration/configuration/dashboard:
+    get:
+      operationId: operationsDashboard
+      tags: [Administration]
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Dashboard, content: { application/json: { schema: { $ref: '#/components/schemas/OperationsDashboard' } } } } }
+  /api/v1/administration/configuration/flags/{key}:
+    put:
+      operationId: setFeatureFlag
+      tags: [Administration]
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: key, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SetFeatureFlagRequest' } } } }
+      responses: { '200': { description: Flag, content: { application/json: { schema: { $ref: '#/components/schemas/FeatureFlagView' } } } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    TargetId: { name: targetId, in: path, required: true, schema: { type: string, format: uuid } }
+    ConversationId: { name: conversationId, in: path, required: true, schema: { type: string, format: uuid } }
+    QuestionId: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    ContentId: { name: contentId, in: path, required: true, schema: { type: string, format: uuid } }
+  responses:
+    Problem: { description: Problem Details, content: { application/problem+json: { schema: { $ref: '#/components/schemas/ProblemDetails' } } } }
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties: { username: { type: string }, email: { type: string, format: email }, password: { type: string, format: password, minLength: 12 } }
+    RegisterResult:
+      type: object
+      required: [userId, username, email]
+      properties: { userId: { type: string, format: uuid }, username: { type: string }, email: { type: string } }
+    PublicDemoStatus:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+        visitorEmailDomain: { type: string, nullable: true }
+        artifactRetentionHours: { type: integer, format: int32, nullable: true, minimum: 1, maximum: 168 }
+    PublicDemoMailboxMessage:
+      type: object
+      required: [purpose, actionUrl, expiresAtUtc]
+      properties:
+        purpose: { type: string, enum: [EmailVerification, PasswordReset] }
+        actionUrl: { type: string, format: uri }
+        expiresAtUtc: { type: string, format: date-time }
+    LoginRequest:
+      type: object
+      required: [login, password, deviceId, deviceName]
+      properties: { login: { type: string }, password: { type: string, format: password }, deviceId: { type: string }, deviceName: { type: string }, mfaCode: { type: string, nullable: true } }
+    EmailRequest:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email } }
+    SecurityTokenRequest:
+      type: object
+      required: [token]
+      properties: { token: { type: string } }
+    PasswordResetRequest:
+      type: object
+      required: [token, newPassword]
+      properties: { token: { type: string }, newPassword: { type: string, format: password, minLength: 12 } }
+    MfaCodeRequest:
+      type: object
+      required: [code]
+      properties: { code: { type: string } }
+    ConfirmMfaRequest:
+      type: object
+      required: [enrollmentToken, code]
+      properties: { enrollmentToken: { type: string }, code: { type: string } }
+    MfaEnrollment:
+      type: object
+      required: [secret, authenticatorUri, enrollmentToken]
+      properties: { secret: { type: string }, authenticatorUri: { type: string }, enrollmentToken: { type: string } }
+    MfaConfirmation:
+      type: object
+      required: [recoveryCodes]
+      properties: { recoveryCodes: { type: array, items: { type: string } } }
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties: { refreshToken: { type: string } }
+    LoginResult:
+      type: object
+      required: [userId, username, tokens]
+      properties: { userId: { type: string, format: uuid }, username: { type: string }, tokens: { $ref: '#/components/schemas/TokenPair' } }
+    BrowserLoginResult:
+      type: object
+      required: [userId, username, accessToken, accessTokenExpiresAtUtc]
+      properties: { userId: { type: string, format: uuid }, username: { type: string }, accessToken: { type: string }, accessTokenExpiresAtUtc: { type: string, format: date-time } }
+    BrowserAccessToken:
+      type: object
+      required: [accessToken, accessTokenExpiresAtUtc]
+      properties: { accessToken: { type: string }, accessTokenExpiresAtUtc: { type: string, format: date-time } }
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken, accessTokenExpiresAtUtc]
+      properties: { accessToken: { type: string }, refreshToken: { type: string }, accessTokenExpiresAtUtc: { type: string, format: date-time } }
+    SessionView:
+      type: object
+      required: [id, deviceId, deviceName, createdAtUtc, lastUsedAtUtc, expiresAtUtc, isRevoked]
+      properties: { id: { type: string, format: uuid }, deviceId: { type: string }, deviceName: { type: string }, createdAtUtc: { type: string, format: date-time }, lastUsedAtUtc: { type: string, format: date-time }, expiresAtUtc: { type: string, format: date-time }, isRevoked: { type: boolean } }
+    DeleteMyDataRequest:
+      type: object
+      required: [currentPassword]
+      properties: { currentPassword: { type: string, format: password }, mfaCode: { type: string, nullable: true } }
+    ExportedSession:
+      type: object
+      required: [id, deviceId, deviceName, createdAtUtc, lastUsedAtUtc, expiresAtUtc]
+      properties: { id: { type: string, format: uuid }, deviceId: { type: string }, deviceName: { type: string }, createdAtUtc: { type: string, format: date-time }, lastUsedAtUtc: { type: string, format: date-time }, expiresAtUtc: { type: string, format: date-time }, revokedAtUtc: { type: string, format: date-time, nullable: true } }
+    IdentityDataExport:
+      type: object
+      required: [userId, username, email, status, roles, mfaEnabled, createdAtUtc, updatedAtUtc, sessions, exportedAtUtc]
+      properties:
+        userId: { type: string, format: uuid }
+        username: { type: string }
+        email: { type: string, format: email }
+        status: { type: string }
+        roles: { type: array, items: { type: string } }
+        mfaEnabled: { type: boolean }
+        createdAtUtc: { type: string, format: date-time }
+        updatedAtUtc: { type: string, format: date-time }
+        sessions: { type: array, items: { $ref: '#/components/schemas/ExportedSession' } }
+        exportedAtUtc: { type: string, format: date-time }
+    UpdateProfileRequest:
+      type: object
+      required: [handle, displayName, isPrivate, theme, language, reduceMotion]
+      properties:
+        handle: { type: string }
+        displayName: { type: string }
+        biography: { type: string, nullable: true }
+        location: { type: string, nullable: true }
+        organization: { type: string, nullable: true }
+        websiteUrl: { type: string, format: uri, nullable: true }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        coverMediaId: { type: string, format: uuid, nullable: true }
+        isPrivate: { type: boolean }
+        theme: { type: string, enum: [System, Light, Dark] }
+        language: { type: string, enum: [Turkish, English] }
+        reduceMotion: { type: boolean }
+    ProfileView:
+      allOf:
+        - $ref: '#/components/schemas/UpdateProfileRequest'
+        - type: object
+          required: [id, ownerId, completenessPercentage, version, isVerified]
+          properties: { id: { type: string, format: uuid }, ownerId: { type: string, format: uuid }, completenessPercentage: { type: integer }, version: { type: integer, format: int64 }, isVerified: { type: boolean } }
+    RelationshipView:
+      type: object
+      required: [actorId, targetId, followState, isBlocked, isBlockedByTarget, isMuted, isCloseFriend, version]
+      properties:
+        actorId: { type: string, format: uuid }
+        targetId: { type: string, format: uuid }
+        followState: { type: string, enum: [None, Pending, Following] }
+        isBlocked: { type: boolean }
+        isBlockedByTarget: { type: boolean }
+        isMuted: { type: boolean }
+        isCloseFriend: { type: boolean }
+        version: { type: integer, format: int64 }
+    SocialGraphSummaryView:
+      type: object
+      required: [ownerId, followerCount, followingCount, pendingRequestCount, canManageRequests]
+      properties:
+        ownerId: { type: string, format: uuid }
+        followerCount: { type: integer, format: int64 }
+        followingCount: { type: integer, format: int64 }
+        pendingRequestCount: { type: integer, format: int64 }
+        canManageRequests: { type: boolean }
+    SocialGraphProfileView:
+      type: object
+      required: [ownerId, handle, displayName, isVerified]
+      properties:
+        ownerId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+    SocialGraphPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/SocialGraphProfileView' } }
+        nextCursor: { type: string, nullable: true }
+    AskQuestionRequest:
+      type: object
+      required: [targetId, body, isAnonymous, audience, isDraft]
+      properties:
+        targetId: { type: string, format: uuid }
+        body: { type: string, minLength: 4, maxLength: 1000 }
+        isAnonymous: { type: boolean }
+        audience: { type: string, enum: [Profile, Followers, Public] }
+        isDraft: { type: boolean }
+        publishAtUtc: { type: string, format: date-time, nullable: true }
+    AnswerQuestionRequest:
+      type: object
+      required: [answer]
+      properties: { answer: { type: string, minLength: 1, maxLength: 5000 } }
+    QuestionView:
+      type: object
+      required: [id, targetId, body, isAnonymous, audience, status, createdAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        targetId: { type: string, format: uuid }
+        senderId: { type: string, format: uuid, nullable: true, description: Anonymous questions always return null. }
+        sender: { $ref: '#/components/schemas/QuestionSenderSummary', nullable: true, description: Anonymous questions always return null. }
+        body: { type: string }
+        isAnonymous: { type: boolean }
+        audience: { type: string, enum: [Profile, Followers, Public] }
+        status: { type: string, enum: [Draft, Scheduled, Published, Answered, Archived, Deleted] }
+        answer: { type: string, nullable: true }
+        publishAtUtc: { type: string, format: date-time, nullable: true }
+        answeredAtUtc: { type: string, format: date-time, nullable: true }
+        createdAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    QuestionSenderSummary:
+      type: object
+      required: [ownerId, handle, displayName, isVerified]
+      properties:
+        ownerId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+    CreatePostRequest:
+      type: object
+      required: [visibility, shareKind, isSensitive, isDraft]
+      properties:
+        text: { type: string, nullable: true, maxLength: 5000 }
+        mediaIds: { type: array, nullable: true, maxItems: 10, items: { type: string, format: uuid } }
+        visibility: { type: string, enum: [Public, Followers, CloseFriends, Private] }
+        shareKind: { type: string, enum: [Original, Repost, Quote] }
+        originalPostId: { type: string, format: uuid, nullable: true }
+        linkUrl: { type: string, format: uri, nullable: true }
+        contentWarning: { type: string, nullable: true, maxLength: 160 }
+        isSensitive: { type: boolean }
+        isDraft: { type: boolean }
+        publishAtUtc: { type: string, format: date-time, nullable: true }
+    UpdatePostRequest:
+      type: object
+      required: [visibility, isSensitive, expectedVersion]
+      properties:
+        text: { type: string, nullable: true, maxLength: 5000 }
+        mediaIds: { type: array, nullable: true, maxItems: 10, items: { type: string, format: uuid } }
+        visibility: { type: string, enum: [Public, Followers, CloseFriends, Private] }
+        linkUrl: { type: string, format: uri, nullable: true }
+        contentWarning: { type: string, nullable: true, maxLength: 160 }
+        isSensitive: { type: boolean }
+        expectedVersion: { type: integer, format: int64 }
+    PostView:
+      type: object
+      required: [id, authorId, text, mediaIds, mentions, hashtags, isSensitive, visibility, status, shareKind, isPinned, createdAtUtc, version, viewCount]
+      properties:
+        id: { type: string, format: uuid }
+        authorId: { type: string, format: uuid }
+        text: { type: string }
+        mediaIds: { type: array, items: { type: string, format: uuid } }
+        mentions: { type: array, items: { type: string } }
+        hashtags: { type: array, items: { type: string } }
+        linkUrl: { type: string, format: uri, nullable: true }
+        contentWarning: { type: string, nullable: true }
+        isSensitive: { type: boolean }
+        visibility: { type: string, enum: [Public, Followers, CloseFriends, Private] }
+        status: { type: string, enum: [Draft, Scheduled, Published, Archived, Deleted] }
+        shareKind: { type: string, enum: [Original, Repost, Quote] }
+        originalPostId: { type: string, format: uuid, nullable: true }
+        isPinned: { type: boolean }
+        publishAtUtc: { type: string, format: date-time, nullable: true }
+        publishedAtUtc: { type: string, format: date-time, nullable: true }
+        createdAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+        viewCount: { type: integer, format: int64 }
+    ContentItem:
+      type: object
+      required: [id, authorId, text, visibility, status, shareKind, mediaIds, mentions, hashtags, isSensitive, isPinned, publishedAtUtc, version, viewCount]
+      properties:
+        id: { type: string, format: uuid }
+        authorId: { type: string, format: uuid }
+        text: { type: string }
+        visibility: { type: string }
+        status: { type: string }
+        shareKind: { type: string }
+        originalPostId: { type: string, format: uuid, nullable: true }
+        mediaIds: { type: array, items: { type: string, format: uuid } }
+        mentions: { type: array, items: { type: string } }
+        hashtags: { type: array, items: { type: string } }
+        linkUrl: { type: string, nullable: true }
+        contentWarning: { type: string, nullable: true }
+        isSensitive: { type: boolean }
+        isPinned: { type: boolean }
+        publishedAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+        viewCount: { type: integer, format: int64 }
+    CreatePollRequest:
+      type: object
+      required: [question, options, allowMultiple, closesAtUtc]
+      properties: { question: { type: string, maxLength: 240 }, options: { type: array, minItems: 2, maxItems: 6, items: { type: string, maxLength: 120 } }, allowMultiple: { type: boolean }, closesAtUtc: { type: string, format: date-time } }
+    VotePollRequest:
+      type: object
+      required: [optionIds]
+      properties: { optionIds: { type: array, minItems: 1, uniqueItems: true, items: { type: string, format: uuid } } }
+    PollOptionView:
+      type: object
+      required: [id, text, voteCount]
+      properties: { id: { type: string, format: uuid }, text: { type: string }, voteCount: { type: integer, format: int64 } }
+    PollView:
+      type: object
+      required: [id, postId, question, allowMultiple, closesAtUtc, isOpen, options, totalVotes]
+      properties: { id: { type: string, format: uuid }, postId: { type: string, format: uuid }, question: { type: string }, allowMultiple: { type: boolean }, closesAtUtc: { type: string, format: date-time }, isOpen: { type: boolean }, options: { type: array, items: { $ref: '#/components/schemas/PollOptionView' } }, totalVotes: { type: integer, format: int64 } }
+    SaveContentRequest:
+      type: object
+      properties: { collection: { type: string, nullable: true, maxLength: 80 } }
+    SavedContentView:
+      type: object
+      required: [id, collection, content, savedAtUtc]
+      properties: { id: { type: string, format: uuid }, collection: { type: string }, content: { $ref: '#/components/schemas/ContentItem' }, savedAtUtc: { type: string, format: date-time } }
+    SavedContentPage:
+      type: object
+      required: [items]
+      properties: { items: { type: array, items: { $ref: '#/components/schemas/SavedContentView' } }, nextCursor: { type: string, nullable: true } }
+    ImpressionResult:
+      type: object
+      required: [counted, viewCount]
+      properties: { counted: { type: boolean }, viewCount: { type: integer, format: int64 } }
+    SetReactionRequest:
+      type: object
+      required: [kind]
+      properties: { kind: { type: string, enum: [Like, Love, Insightful, Support, Laugh] } }
+    ReactionView:
+      type: object
+      required: [contentId, isActive, version]
+      properties: { contentId: { type: string, format: uuid }, reaction: { type: string, nullable: true }, isActive: { type: boolean }, version: { type: integer, format: int64 } }
+    ReactionSummary:
+      type: object
+      required: [contentId, counts]
+      properties:
+        contentId: { type: string, format: uuid }
+        counts: { type: object, additionalProperties: { type: integer, format: int64 } }
+        viewerReaction: { type: string, nullable: true }
+    CreateCommentRequest:
+      type: object
+      required: [text]
+      properties: { text: { type: string, minLength: 1, maxLength: 2000 }, parentId: { type: string, format: uuid, nullable: true } }
+    UpdateCommentRequest:
+      type: object
+      required: [text]
+      properties: { text: { type: string, minLength: 1, maxLength: 2000 } }
+    CommentAuthorSummary:
+      type: object
+      required: [ownerId, handle, displayName, isVerified]
+      properties:
+        ownerId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+    CommentView:
+      type: object
+      required: [id, contentId, depth, text, mentions, status, createdAtUtc, version, canManage]
+      properties:
+        id: { type: string, format: uuid }
+        contentId: { type: string, format: uuid }
+        authorId: { type: string, format: uuid, nullable: true }
+        parentId: { type: string, format: uuid, nullable: true }
+        depth: { type: integer, minimum: 0, maximum: 5 }
+        text: { type: string }
+        mentions: { type: array, items: { type: string } }
+        status: { type: string }
+        createdAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+        author: { $ref: '#/components/schemas/CommentAuthorSummary', nullable: true }
+        canManage: { type: boolean }
+    CommentPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/CommentView' } }
+        nextCursor: { type: string, nullable: true }
+    FeedAuthorSummary:
+      type: object
+      required: [ownerId, handle, displayName, isVerified]
+      properties:
+        ownerId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+    FeedItem:
+      type: object
+      required: [content, reactions, commentCount, hasPoll, score, rankingReasons]
+      properties:
+        content: { $ref: '#/components/schemas/ContentItem' }
+        author: { $ref: '#/components/schemas/FeedAuthorSummary', nullable: true }
+        reactions: { $ref: '#/components/schemas/ReactionSummary' }
+        commentCount: { type: integer, format: int64 }
+        hasPoll: { type: boolean }
+        score: { type: number, format: double }
+        rankingReasons: { type: array, items: { type: string } }
+    FeedPage:
+      type: object
+      required: [items, strategy]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/FeedItem' } }
+        nextCursor: { type: string, nullable: true }
+        strategy: { type: string }
+    CreateConversationRequest:
+      type: object
+      required: [memberIds]
+      properties:
+        memberIds: { type: array, minItems: 1, maxItems: 249, items: { type: string, format: uuid } }
+        title: { type: string, nullable: true, maxLength: 100 }
+    ConversationMemberView:
+      type: object
+      required: [userId, role, joinedAtUtc, isMuted, isArchived, isPinned]
+      properties:
+        userId: { type: string, format: uuid }
+        role: { type: string, enum: [Owner, Administrator, Member] }
+        joinedAtUtc: { type: string, format: date-time }
+        isMuted: { type: boolean }
+        isArchived: { type: boolean }
+        isPinned: { type: boolean }
+        displayName: { type: string, nullable: true }
+        handle: { type: string, nullable: true }
+    ConversationView:
+      type: object
+      required: [id, kind, title, members, updatedAtUtc, unreadCount, version]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [Direct, Group] }
+        title: { type: string }
+        members: { type: array, items: { $ref: '#/components/schemas/ConversationMemberView' } }
+        updatedAtUtc: { type: string, format: date-time }
+        unreadCount: { type: integer, format: int64 }
+        version: { type: integer, format: int64 }
+    ConversationPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/ConversationView' } }
+        nextCursor: { type: string, nullable: true }
+    SendMessageRequest:
+      type: object
+      required: [text]
+      properties:
+        text: { type: string, maxLength: 5000 }
+        mediaIds: { type: array, nullable: true, maxItems: 10, items: { type: string, format: uuid } }
+        replyToId: { type: string, format: uuid, nullable: true }
+    ChangeMessageRequest:
+      type: object
+      required: [change]
+      properties:
+        change: { type: string, enum: [Edit, Delete, Delivered, Read] }
+        text: { type: string, nullable: true, maxLength: 5000 }
+    MessageView:
+      type: object
+      required: [id, conversationId, senderId, text, mediaIds, status, deliveryState, createdAtUtc, updatedAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        conversationId: { type: string, format: uuid }
+        senderId: { type: string, format: uuid }
+        text: { type: string }
+        mediaIds: { type: array, items: { type: string, format: uuid } }
+        replyToId: { type: string, format: uuid, nullable: true }
+        status: { type: string, enum: [Sent, Deleted] }
+        deliveryState: { type: string, enum: [Sent, Delivered, Read] }
+        createdAtUtc: { type: string, format: date-time }
+        updatedAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    MessagePage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/MessageView' } }
+        nextCursor: { type: string, nullable: true }
+    NotificationView:
+      type: object
+      required: [id, type, titleTemplateKey, bodyTemplateKey, templateVersion, arguments, deepLink, count, isRead, deliveryState, createdAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        actorId: { type: string, format: uuid, nullable: true }
+        type: { type: string, enum: [NewFollower, Reaction, Comment, Message, Moderation, Community, System] }
+        entityId: { type: string, format: uuid, nullable: true }
+        titleTemplateKey: { type: string }
+        bodyTemplateKey: { type: string }
+        templateVersion: { type: integer }
+        arguments: { type: object, additionalProperties: { type: string } }
+        deepLink: { type: string }
+        count: { type: integer }
+        isRead: { type: boolean }
+        deliveryState: { type: string, enum: [Pending, Delivered, RetryScheduled, DeadLetter] }
+        createdAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    NotificationPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/NotificationView' } }
+        nextCursor: { type: string, nullable: true }
+    CreateCommunityRequest:
+      type: object
+      required: [slug, name, description, visibility]
+      properties: { slug: { type: string }, name: { type: string }, description: { type: string }, visibility: { type: string, enum: [Public, Private, Hidden] } }
+    ChangeCommunityRequest:
+      type: object
+      required: [change]
+      properties:
+        change: { type: string, enum: [RequestMembership, Leave, Invite, Approve, Archive] }
+        targetId: { type: string, format: uuid, nullable: true }
+        reason: { type: string, nullable: true }
+    SetCommunityRulesRequest:
+      type: object
+      required: [rules]
+      properties:
+        rules: { type: array, maxItems: 20, items: { type: string, minLength: 2, maxLength: 300 } }
+    CommunityMemberView:
+      type: object
+      required: [userId, handle, displayName, isVerified, role, status, updatedAtUtc]
+      properties:
+        userId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+        role: { type: string, enum: [Owner, Administrator, Moderator, Member] }
+        status: { type: string, enum: [Pending, Invited, Active, Removed] }
+        updatedAtUtc: { type: string, format: date-time }
+    CommunityView:
+      type: object
+      required: [id, slug, name, description, visibility, status, rules, pinnedContentIds, activeMemberCount, updatedAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        visibility: { type: string }
+        status: { type: string }
+        rules: { type: array, items: { type: string } }
+        pinnedContentIds: { type: array, items: { type: string, format: uuid } }
+        activeMemberCount: { type: integer, minimum: 0 }
+        viewerMembershipStatus: { type: string, nullable: true, enum: [Pending, Invited, Active, Removed] }
+        viewerRole: { type: string, nullable: true, enum: [Owner, Administrator, Moderator, Member] }
+        updatedAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    CommunityDetailView:
+      type: object
+      required: [id, slug, name, description, visibility, rules, pinnedContentIds, activeMemberCount, updatedAtUtc]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        visibility: { type: string, enum: [Public, Private, Hidden] }
+        rules: { type: array, items: { type: string } }
+        pinnedContentIds: { type: array, items: { type: string, format: uuid } }
+        activeMemberCount: { type: integer, minimum: 0 }
+        viewerMembershipStatus: { type: string, nullable: true, enum: [Pending, Invited, Active, Removed] }
+        viewerRole: { type: string, nullable: true, enum: [Owner, Administrator, Moderator, Member] }
+        updatedAtUtc: { type: string, format: date-time }
+    InitiateMediaRequest:
+      type: object
+      required: [fileName, contentType, size, visibility]
+      properties: { fileName: { type: string }, contentType: { type: string }, size: { type: integer, format: int64 }, visibility: { type: string, enum: [Private, Followers, Public] } }
+    MediaView:
+      type: object
+      required: [id, fileName, contentType, size, visibility, status, urls, createdAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        fileName: { type: string }
+        contentType: { type: string }
+        size: { type: integer, format: int64 }
+        visibility: { type: string }
+        status: { type: string }
+        urls: { type: object, additionalProperties: { type: string } }
+        createdAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    InitiatedMedia:
+      type: object
+      required: [media, uploadUrl, expiresAtUtc]
+      properties: { media: { $ref: '#/components/schemas/MediaView' }, uploadUrl: { type: string }, expiresAtUtc: { type: string, format: date-time } }
+    CreateStoryRequest:
+      type: object
+      required: [mediaId, audience]
+      properties:
+        mediaId: { type: string, format: uuid }
+        caption: { type: string, nullable: true, maxLength: 500 }
+        audience: { type: string, enum: [Public, Followers, CloseFriends] }
+    StoryAuthorSummary:
+      type: object
+      required: [ownerId, handle, displayName, isVerified]
+      properties:
+        ownerId: { type: string, format: uuid }
+        handle: { type: string }
+        displayName: { type: string }
+        profileMediaId: { type: string, format: uuid, nullable: true }
+        isVerified: { type: boolean }
+    StoryView:
+      type: object
+      required: [id, ownerId, mediaId, caption, audience, status, author, createdAtUtc, expiresAtUtc, version]
+      properties:
+        id: { type: string, format: uuid }
+        ownerId: { type: string, format: uuid }
+        mediaId: { type: string, format: uuid }
+        caption: { type: string }
+        audience: { type: string, enum: [Public, Followers, CloseFriends] }
+        status: { type: string, enum: [Active, Deleted] }
+        author: { $ref: '#/components/schemas/StoryAuthorSummary' }
+        createdAtUtc: { type: string, format: date-time }
+        expiresAtUtc: { type: string, format: date-time }
+        version: { type: integer, format: int64 }
+    StoryPage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/StoryView' } }
+        nextCursor: { type: string, nullable: true }
+    SearchDocumentType: { type: string, enum: [Profile, Content, Question, Hashtag, Community] }
+    SearchHit:
+      type: object
+      required: [id, type, ownerId, title, snippet, deepLink, score, matchedTags]
+      properties: { id: { type: string, format: uuid }, type: { $ref: '#/components/schemas/SearchDocumentType' }, ownerId: { type: string, format: uuid }, title: { type: string }, snippet: { type: string }, deepLink: { type: string }, score: { type: number, format: double }, matchedTags: { type: array, items: { type: string } } }
+    SearchPage:
+      type: object
+      required: [items, limit]
+      properties: { items: { type: array, items: { $ref: '#/components/schemas/SearchHit' } }, limit: { type: integer } }
+    TrendingTagView:
+      type: object
+      required: [tag, score]
+      properties: { tag: { type: string }, score: { type: integer, format: int64 } }
+    CreateModerationReportRequest:
+      type: object
+      required: [subjectType, subjectId, reason, details]
+      properties: { subjectType: { type: string, enum: [User, Content, Question, Message, Community] }, subjectId: { type: string, format: uuid }, reason: { type: string, enum: [Spam, Harassment, Hate, Violence, SexualContent, Impersonation, Privacy, Misinformation, Other] }, details: { type: string }, evidenceReferences: { type: array, items: { type: string } } }
+    ModerationReportView:
+      type: object
+      required: [id, subjectType, subjectId, reason, status, createdAtUtc]
+      properties: { id: { type: string, format: uuid }, subjectType: { type: string }, subjectId: { type: string, format: uuid }, reason: { type: string }, status: { type: string }, createdAtUtc: { type: string, format: date-time } }
+    ModerationCaseView:
+      type: object
+      required: [id, reportId, subjectType, subjectId, targetUserId, status, actions, appealStatus, updatedAtUtc, version]
+      properties: { id: { type: string, format: uuid }, reportId: { type: string, format: uuid }, subjectType: { type: string }, subjectId: { type: string, format: uuid }, targetUserId: { type: string, format: uuid }, assignedModeratorId: { type: string, format: uuid, nullable: true }, status: { type: string }, actions: { type: array, items: { type: string } }, appealStatus: { type: string }, updatedAtUtc: { type: string, format: date-time }, version: { type: integer, format: int64 } }
+    SetFeatureFlagRequest:
+      type: object
+      required: [description, enabled, rolloutPercentage]
+      properties: { description: { type: string }, enabled: { type: boolean }, rolloutPercentage: { type: integer, minimum: 0, maximum: 100 } }
+    FeatureFlagView:
+      type: object
+      required: [key, description, enabled, rolloutPercentage, version]
+      properties: { key: { type: string }, description: { type: string }, enabled: { type: boolean }, rolloutPercentage: { type: integer }, version: { type: integer, format: int64 } }
+    SystemSettingView:
+      type: object
+      required: [key, valueJson, description, version]
+      properties: { key: { type: string }, valueJson: { type: string }, description: { type: string }, version: { type: integer, format: int64 } }
+    OperationsDashboard:
+      type: object
+      required: [flags, settings, metrics, backgroundJobs]
+      properties: { flags: { type: array, items: { $ref: '#/components/schemas/FeatureFlagView' } }, settings: { type: array, items: { $ref: '#/components/schemas/SystemSettingView' } }, metrics: { type: object, additionalProperties: { type: integer, format: int64 } }, backgroundJobs: { type: array, items: { type: string } } }
+    ProblemDetails:
+      type: object
+      properties: { type: { type: string }, title: { type: string }, status: { type: integer }, detail: { type: string }, code: { type: string } }

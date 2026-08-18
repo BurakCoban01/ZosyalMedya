@@ -1,0 +1,96 @@
+/**
+ * ZmDialog — scoped panel styles.
+ *
+ * Styles the overlay CONTENT (the `.zm-dialog__panel` rendered inside the
+ * CDK overlay pane via TemplatePortal). The panel element carries our
+ * `_ngcontent` attribute so these scoped rules reach it even though it lives
+ * inside `document.body`. The backdrop + pane wrapper are styled globally in
+ * overlays-global.css.
+ *
+ * Consumes ONLY the `--zm-dialog-*` component-layer tokens (which compose the
+ * semantic `--zm-canvas-raised` / `--zm-text-1` / `--zm-border-subtle` /
+ * `--zm-scrim` roles). No hardcoded hex. Reduced motion collapses via the
+ * token cascade.
+ */
+
+:host {
+  /* The host itself renders nothing in-place (content is portaled out). */
+  display: contents;
+}
+
+.zm-dialog__panel {
+  /* Surface + ink + edge */
+  background: var(--zm-dialog-bg);
+  color: var(--zm-dialog-fg);
+  border: var(--zm-border-width-strong) solid var(--zm-dialog-border);
+  border-radius: var(--zm-dialog-radius);
+  box-shadow: var(--zm-dialog-shadow);
+
+  /* Sizing: constrain to a comfortable modal width. */
+  width: calc(100vw - 2 * var(--zm-space-5));
+  max-width: var(--zm-dialog-max-width);
+  padding: var(--zm-dialog-padding);
+
+  /* Enter motion: subtle scale-up + fade (transform/opacity only). The
+   * `.zm-enter` base + `is-open` toggle animate from a slightly-scaled,
+   * faded state to the resting state. Reduced motion collapses via the
+   * --zm-dialog-duration token cascade (tokens.css §5). */
+  transition:
+    transform var(--zm-dialog-duration) var(--zm-dialog-ease),
+    opacity var(--zm-dialog-duration) var(--zm-dialog-ease);
+}
+
+/* Density modifiers. */
+.zm-dialog__panel.is-sm {
+  max-width: 24rem;
+}
+.zm-dialog__panel.is-lg {
+  max-width: 42rem;
+}
+
+/* Destructive (non-dismissible) reinforcement: a stronger danger edge so the
+ * blocking intent reads in a static frame (status is never color-only — the
+ * stronger border + the persistent presence are the cues). */
+.zm-dialog__panel.is-destructive {
+  border-color: var(--zm-danger);
+}
+
+/* The panel is a focus target (tabindex=-1) so the trap can land focus on it
+ * when there are no tabbable children. Suppress the default UA focus ring on
+ * the container itself — focus visibility for the panel's interactive
+ * children is owned by their own :focus-visible rules. */
+.zm-dialog__panel:focus {
+  outline: none;
+}
+
+/* Under forced-colors, restore a visible panel edge + a focus outline so the
+ * modal boundary + focus state survive Windows high-contrast. */
+@media (forced-colors: active) {
+  .zm-dialog__panel {
+    border: 2px solid CanvasText;
+  }
+  .zm-dialog__panel.is-destructive {
+    border-color: Highlight;
+  }
+  .zm-dialog__panel:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* The `.zm-enter` class (from motion.css) drives the entrance. We supply the
+ * initial transform/opacity here so the enter transition has a from-state;
+ * motion.css owns the keyframe/transition plumbing. */
+.zm-dialog__panel.zm-enter {
+  /* Final state is identity; the enter class sets the start state via its
+   * animation. This block is a stable anchor for the resting transform. */
+  transform: translateZ(0);
+}
+
+/* Product reduce-motion toggle: collapse the panel transition to opacity-only
+ * (no spatial scale). Honors the data-reduce-motion attribute that
+ * ThemeService applies to <html>. */
+:host-context([data-reduce-motion]) .zm-dialog__panel {
+  transition: opacity var(--zm-dialog-duration) linear;
+  transform: none !important;
+}

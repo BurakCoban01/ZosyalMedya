@@ -1,0 +1,42 @@
+<!--
+  Offline / degraded indicator (VAL-WSH-013). Renders ONLY when the browser
+  reports offline (navigator.onLine === false). The status is a polite live
+  region so AT announces the change; it is conveyed with a shape glyph (a
+  broken-signal arc) + Turkish text, never color alone. Slim sticky bar at the
+  top of the workspace; zero layout cost while online.
+-->
+@if (online.isOffline()) {
+  <div class="offline-indicator" role="status" aria-live="polite">
+    <svg
+      class="offline-indicator__glyph"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M3 13a14 14 0 0 1 18 0"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+      />
+      <path
+        d="M5.5 9.5M11 7.5M16.5 7.5M21 11"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+      />
+      <path
+        d="M4 20L20 4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+    <span class="offline-indicator__text">
+      Bağlantı yok — çevrimdışısın. Geri bağlandığında akış yeniden canlanır.
+    </span>
+  </div>
+}

@@ -1,0 +1,611 @@
+/* ============================================================================
+ * ZmContextRail — right contextual rail (VAL-WSH-012).
+ *
+ * Replaces the static marketing/privacy copy with live, route-relevant
+ * content. Consumes ONLY --zm-context-rail-* component tokens (added to
+ * tokens.css §3) which compose the semantic --zm-* roles, so light + dark +
+ * reduced-motion all cascade automatically. No hardcoded hex/oklch anywhere.
+ *
+ * The host fills whatever its parent gives it: the desktop persistent aside
+ * (sticky, full-height) OR the on-demand tablet sheet (static, auto height).
+ * It does NOT own the parent's positioning, border, or padding — only the
+ * inner layout + the editorial typography of the contextual content.
+ * ========================================================================== */
+
+:host {
+  display: block;
+  color: var(--zm-context-rail-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+}
+
+.ctx {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-4);
+}
+
+/* ---- Header: kicker + title + lede + corner motif ------------------- *
+ * The signal-arc motif lives in the corner (absolute, low-chroma) and never
+ * crosses the title text (VAL-DS-034). The kicker is editorial small-caps. */
+.ctx__head {
+  position: relative;
+  padding: 0 0 var(--zm-space-3);
+  border-bottom: var(--zm-separator-rule);
+}
+
+.ctx__accent {
+  position: absolute;
+  top: -0.25rem;
+  inset-inline-end: -0.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--zm-context-rail-accent-fg);
+  pointer-events: none;
+}
+
+.ctx__kicker {
+  margin: 0 0 var(--zm-space-1);
+  font-size: var(--zm-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--zm-context-rail-kicker-fg);
+}
+
+.ctx__title {
+  margin: 0;
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-lg);
+  font-weight: 700;
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-context-rail-title-fg);
+}
+
+.ctx__lede {
+  margin: var(--zm-space-2) 0 0;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+}
+
+/* ---- Body: loading / states / content ------------------------------- *
+ * The body owns aria-busy + aria-live. Min-height keeps the skeleton visible
+ * during the first fetch and prevents CLS on subsequent route swaps. */
+.ctx__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-3);
+  min-height: 6rem;
+}
+
+/* ---- Loading skeleton (bespoke to fit the narrow rail) -------------- */
+.ctx__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+.ctx__bar {
+  display: block;
+  height: var(--zm-skeleton-text-height, 0.85rem);
+  border-radius: var(--zm-radius-control);
+  background: var(--zm-context-rail-skeleton-bg);
+  background-size: 200% 100%;
+  animation: zm-ctx-shimmer var(--zm-duration-scene) var(--zm-ease-standard) infinite;
+}
+
+.ctx__bar.is-short {
+  width: 65%;
+}
+
+@keyframes zm-ctx-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- Error state ---------------------------------------------------- *
+ * role=alert is set on the element in the template. Danger tone + a
+ * distinct alert-triangle glyph (not color-only). The retry button is a
+ * real focusable button (44px target). */
+.ctx__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-3);
+  border-radius: var(--zm-radius-card);
+  border: 1px solid var(--zm-context-rail-error-border);
+  background: var(--zm-context-rail-error-bg);
+  color: var(--zm-context-rail-error-fg);
+}
+
+.ctx__error-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--zm-context-rail-error-icon-fg);
+}
+
+.ctx__error-text {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+}
+
+.ctx__retry,
+.ctx__empty-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;            /* WCAG 2.2 target minimum */
+  padding: var(--zm-space-2) var(--zm-space-4);
+  border: 1px solid var(--zm-context-rail-action-border);
+  border-radius: var(--zm-radius-control);
+  background: var(--zm-context-rail-action-bg);
+  color: var(--zm-context-rail-action-fg);
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--zm-duration-fast) var(--zm-ease-standard),
+    border-color var(--zm-duration-fast) var(--zm-ease-standard),
+    color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.ctx__retry:hover,
+.ctx__empty-action:hover {
+  background: var(--zm-context-rail-action-bg-hover);
+  border-color: var(--zm-context-rail-action-border-hover);
+}
+
+.ctx__retry:focus-visible,
+.ctx__empty-action:focus-visible {
+  outline: var(--zm-focus-ring-width, 3px) solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+/* ---- Empty state ---------------------------------------------------- *
+ * Honest empty: distinct signal-arc glyph (not the alert triangle), specific
+ * cause + useful next action. role=group set on the element in the template. */
+.ctx__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zm-space-3);
+}
+
+.ctx__empty-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--zm-context-rail-empty-icon-fg);
+}
+
+.ctx__empty-text {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-context-rail-lede-fg);
+}
+
+/* ---- Unknown-route fallback ---------------------------------------- */
+.ctx__fallback {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+}
+
+/* ---- Sub-headings (discovery section splits) ------------------------ */
+.ctx__sub {
+  margin: var(--zm-space-2) 0 0;
+  font-size: var(--zm-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--zm-context-rail-kicker-fg);
+}
+
+/* ---- Trend list ----------------------------------------------------- *
+ * Each row: ordinal (decorative) + tag link + a relative-weight bar. The
+ * bar is aria-hidden (decorative reinforcement of the rank already shown by
+ * position + number). Color is never the sole carrier of meaning. */
+.ctx__trends,
+.ctx__communities,
+.ctx__breakdown,
+.ctx__safety,
+.ctx__explainer {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ctx__explainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  counter-reset: explainer;
+}
+
+.ctx__explainer li {
+  position: relative;
+  padding-inline-start: var(--zm-space-5);
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+  counter-increment: explainer;
+}
+
+.ctx__explainer li::before {
+  content: counter(explainer, decimal-leading-zero);
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--zm-context-rail-accent-fg);
+}
+
+.ctx__trends {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+.ctx__trend {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--zm-space-3);
+}
+
+.ctx__trend-rank {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-context-rail-rank-fg);
+}
+
+.ctx__trend-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  min-width: 0;
+}
+
+.ctx__trend-tag {
+  font-weight: 600;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-title-fg);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.ctx__trend-tag:hover {
+  color: var(--zm-brand-hover);
+}
+
+.ctx__trend-tag:focus-visible {
+  outline: var(--zm-focus-ring-width, 3px) solid var(--zm-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.ctx__trend-bar {
+  display: block;
+  height: 3px;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-context-rail-bar-fg);
+  min-width: 0.5rem;
+  transition: width var(--zm-duration-base) var(--zm-ease-standard);
+}
+
+/* ---- Stat grid (messaging / notifications / questions / saved) ------ *
+ * Two-column <dl> pairs. Tabular numerals so counts align. */
+.ctx__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--zm-space-3);
+  margin: 0;
+}
+
+.ctx__stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  padding: var(--zm-space-3);
+  background: var(--zm-context-rail-stat-bg);
+  border: 1px solid var(--zm-context-rail-stat-border);
+  border-radius: var(--zm-radius-control);
+}
+
+.ctx__stats dt {
+  font-size: var(--zm-text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--zm-context-rail-lede-fg);
+}
+
+.ctx__stats dd {
+  margin: 0;
+  font-size: var(--zm-text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--zm-context-rail-title-fg);
+  line-height: 1;
+}
+
+.ctx__hint {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+  line-height: var(--zm-leading-body);
+}
+
+.ctx__hint strong {
+  color: var(--zm-context-rail-title-fg);
+  font-weight: 600;
+}
+
+.ctx__hint time {
+  color: var(--zm-context-rail-rank-fg);
+}
+
+.ctx__hint-quote {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: italic;
+}
+
+/* ---- Breakdown list (notifications by type / saved collections) ------ */
+.ctx__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+}
+
+.ctx__breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zm-space-3);
+  padding: var(--zm-space-2) 0;
+  border-bottom: var(--zm-separator-rule);
+}
+
+.ctx__breakdown-row:last-child {
+  border-bottom: 0;
+}
+
+.ctx__breakdown-label {
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+}
+
+.ctx__breakdown-count {
+  font-size: var(--zm-text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--zm-context-rail-title-fg);
+}
+
+/* ---- Communities list (connections / discovery) --------------------- */
+.ctx__communities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+.ctx__community {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--zm-space-2) 0;
+  border-bottom: var(--zm-separator-rule);
+}
+
+.ctx__community:last-child {
+  border-bottom: 0;
+}
+
+.ctx__community-name {
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+  color: var(--zm-context-rail-title-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ctx__community-meta {
+  font-size: var(--zm-text-xs);
+  color: var(--zm-context-rail-rank-fg);
+}
+
+/* ---- Profile / settings cards -------------------------------------- */
+.ctx__profile,
+.ctx__settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+  padding: var(--zm-space-4);
+  border: 1px solid var(--zm-context-rail-stat-border);
+  border-radius: var(--zm-radius-card);
+  background: var(--zm-context-rail-stat-bg);
+}
+
+.ctx__profile-name,
+.ctx__settings .ctx__profile-name {
+  margin: 0;
+  font-size: var(--zm-text-md);
+  font-weight: 700;
+  color: var(--zm-context-rail-title-fg);
+}
+
+.ctx__profile-handle {
+  margin: 0;
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-rank-fg);
+}
+
+.ctx__badges {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-1);
+  margin: var(--zm-space-1) 0 0;
+  padding: 0;
+}
+
+.ctx__badge {
+  font-size: var(--zm-text-xs);
+  font-weight: 600;
+  padding: 2px var(--zm-space-2);
+  border-radius: var(--zm-radius-pill);
+  border: 1px solid var(--zm-context-rail-stat-border);
+  color: var(--zm-context-rail-lede-fg);
+  background: var(--zm-canvas);
+}
+
+.ctx__badge--ok {
+  color: var(--zm-success);
+  border-color: var(--zm-context-rail-badge-ok-border);
+}
+
+.ctx__badge--warn {
+  color: var(--zm-warning);
+  border-color: var(--zm-context-rail-badge-warn-border);
+}
+
+.ctx__badge--muted {
+  color: var(--zm-context-rail-rank-fg);
+}
+
+/* Progress bar for completeness percentage. The track + fill are both
+   aria-hidden (decorative); the literal % is announced via the label. */
+.ctx__progress {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-context-rail-stat-border);
+  overflow: hidden;
+}
+
+.ctx__progress-bar {
+  height: 100%;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-brand);
+  transition: width var(--zm-duration-base) var(--zm-ease-standard);
+}
+
+.ctx__progress-label {
+  margin: 0;
+  font-size: var(--zm-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--zm-context-rail-lede-fg);
+}
+
+/* ---- Settings key-value list --------------------------------------- */
+.ctx__kv {
+  list-style: none;
+  margin: var(--zm-space-1) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ctx__kv li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zm-space-3);
+  padding: var(--zm-space-2) 0;
+  border-bottom: var(--zm-separator-rule);
+}
+
+.ctx__kv li:last-child {
+  border-bottom: 0;
+}
+
+.ctx__kv span:first-child {
+  font-size: var(--zm-text-sm);
+  color: var(--zm-context-rail-lede-fg);
+}
+
+.ctx__kv span:last-child {
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+  color: var(--zm-context-rail-title-fg);
+}
+
+/* ---- Admin safety context ------------------------------------------ *
+ * Operational guidance, not marketing. Editorial-cadenced list with leading
+ * thread-line motif (decorative ::before). */
+.ctx__safety {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-3);
+  counter-reset: safety;
+}
+
+.ctx__safety li {
+  position: relative;
+  padding-inline-start: var(--zm-space-5);
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-context-rail-lede-fg);
+  counter-increment: safety;
+}
+
+.ctx__safety li::before {
+  content: counter(safety, decimal-leading-zero);
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--zm-context-rail-accent-fg);
+}
+
+/* ============================================================================
+ * Reduced motion — spatial transitions collapse; state still conveyed by
+ * content swap + aria-live. The shimmer animation stops (no infinite loops).
+ * Handles BOTH the OS preference and the product [data-reduce-motion] toggle.
+ * ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .ctx__bar { animation: none; }
+  .ctx__retry, .ctx__empty-action, .ctx__trend-tag,
+  .ctx__trend-bar, .ctx__progress-bar {
+    transition: none;
+  }
+}
+
+:host-context([data-reduce-motion]) {
+  .ctx__bar { animation: none; }
+  .ctx__retry, .ctx__empty-action, .ctx__trend-tag,
+  .ctx__trend-bar, .ctx__progress-bar {
+    transition: none;
+  }
+}
+
+/* ============================================================================
+ * Forced colors (Windows High Contrast) — map semantic surfaces to system
+ * colors so the rail stays readable when the user overrides the palette.
+ * ========================================================================== */
+@media (forced-colors: active) {
+  .ctx__head { border-bottom: 1px solid CanvasText; }
+  .ctx__stats > div,
+  .ctx__profile,
+  .ctx__settings,
+  .ctx__error { border: 1px solid CanvasText; }
+  .ctx__badge,
+  .ctx__trend-tag,
+  .ctx__retry,
+  .ctx__empty-action { border: 1px solid CanvasText; }
+  .ctx__progress-bar,
+  .ctx__trend-bar { background: Highlight; }
+}

@@ -1,0 +1,154 @@
+/*!
+ * ZosyalMedya Design System — Typography / Font Loading
+ * Direction: Living Editorial Network.
+ *
+ * Self-hosted font loading for the three roles declared in tokens.css:
+ *   --zm-font-ui      -> "Manrope Variable"  (UI / body sans)
+ *   --zm-font-display -> "Newsreader Variable" (editorial / display serif)
+ *   --zm-font-mono    -> system mono stack (no @font-face needed)
+ *
+ * Policy (binding):
+ *   - NO runtime CDN. All files are served same-origin from /fonts/ (Angular
+ *     `public/` -> web root). The fontsource CDN was used ONCE during setup
+ *     to fetch the source woff2 files; it is never contacted by the browser.
+ *   - Variable woff2 only (modern browsers; Angular 20 targets evergreen).
+ *   - Two subsets per family: `latin` (base ASCII + Latin-1 Supplement incl.
+ *     cedillas/dots  c ç C Ç  o ö O Ö  u ü U Ü  dotless-i ı U+0131) and
+ *     `latin-ext` (Latin Extended-A/B incl. Turkish  ğ Ğ  İ  ş Ş). The
+ *     browser fetches each subset lazily based on the codepoints actually
+ *     used on the page, so a Turkish-only page does not download Latin-only
+ *     glyphs and vice versa.
+ *   - font-display: swap — text renders instantly in the fallback family,
+ *     then reflows to the variable font when ready. CLS impact is bounded
+ *     by the matching metric-adjustment in the family stacks below.
+ *   - Both families are SIL Open Font License 1.1; see /fonts/LICENSE-*.txt.
+ *
+ * Fallback metric alignment (avoids layout shift during font swap):
+ *   - Manrope -> Inter, system-ui (sans-serif x-height close to Manrope).
+ *   - Newsreader -> Georgia, serif (serif baseline + x-height close).
+ *   - Mono -> ui-monospace stack (system, no swap).
+ *
+ * Turkish glyph coverage verified for:
+ *   c g i o s u C G I O U + dotted/diacritic
+ *   ç ğ ı İ i ş Ş ö ü Ç Ğ İ Ö Ş Ü  (subset ranges above)
+ */
+
+/* ============================================================================
+ * 1. UI family — Manrope Variable (sans-serif, wght 200..800)
+ * ============================================================================ */
+
+/* Latin subset: ASCII + Latin-1 Supplement (incl. ç, Ç, ö, Ö, ü, Ü, dotless-ı U+0131) */
+@font-face {
+  font-family: "Manrope Variable";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/manrope-latin-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+0304,
+    U+0308,
+    U+0329,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2191,
+    U+2193,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+
+/* Latin Extended subset: Turkish ğ, Ğ, İ (U+0130), ş, Ş + wide Latin diacritics */
+@font-face {
+  font-family: "Manrope Variable";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/manrope-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02AF,
+    U+0304,
+    U+0308,
+    U+0329,
+    U+1E00-1E9F,
+    U+1EF2-1EFF,
+    U+2020,
+    U+20A0-20AB,
+    U+20AD-20C0,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* ============================================================================
+ * 2. Display family — Newsreader Variable (serif, wght 200..800)
+ *    Editorial headlines + long-form reading body. Italic deferred (M-later).
+ * ============================================================================ */
+
+/* Latin subset */
+@font-face {
+  font-family: "Newsreader Variable";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/newsreader-latin-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF,
+    U+0131,
+    U+0152-0153,
+    U+02BB-02BC,
+    U+02C6,
+    U+02DA,
+    U+02DC,
+    U+0304,
+    U+0308,
+    U+0329,
+    U+2000-206F,
+    U+2074,
+    U+20AC,
+    U+2122,
+    U+2191,
+    U+2193,
+    U+2212,
+    U+2215,
+    U+FEFF,
+    U+FFFD;
+}
+
+/* Latin Extended subset (Turkish glyph coverage) */
+@font-face {
+  font-family: "Newsreader Variable";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/newsreader-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02AF,
+    U+0304,
+    U+0308,
+    U+0329,
+    U+1E00-1E9F,
+    U+1EF2-1EFF,
+    U+2020,
+    U+20A0-20AB,
+    U+20AD-20C0,
+    U+2113,
+    U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* ============================================================================
+ * 3. Mono family — system stack only (no @font-face; no network fetch).
+ *    The tokens.css --zm-font-mono stack (ui-monospace, SFMono-Regular,
+ *    Consolas, "Liberation Mono", monospace) covers every shipping desktop
+ *    OS. System mono faces cover Turkish glyphs natively.
+ * ============================================================================ */

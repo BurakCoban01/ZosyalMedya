@@ -1,0 +1,18 @@
+/**
+ * ZmPermissionState — variant accent.
+ *
+ * The shared layout lives in feedback-states-shared.css (imported globally via
+ * styles.css). This scoped file owns ONLY the permission-state variant
+ * accent: the surface adds a subtle discovery-tinted edge so the permission
+ * state reads as distinct from an error (it is an expected condition, not a
+ * failure). The lock icon glyph is the primary non-color cue (VAL-DS-029).
+ */
+
+:host {
+  display: block;
+  /* Subtle discovery edge: a 1px border in the discovery accent. Paired with
+   * the lock icon (never color-only). Discovery, not danger, signals "this is
+   * a gated path, not a broken one". */
+  border: 1px solid var(--zm-state-icon-discovery);
+  background: var(--zm-state-bg);
+}

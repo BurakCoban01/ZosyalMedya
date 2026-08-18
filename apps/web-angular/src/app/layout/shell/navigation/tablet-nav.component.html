@@ -1,0 +1,71 @@
+<aside class="tablet-rail" data-surface="tablet-rail">
+  <!-- Brand: compact mark-only logo. Anchor to /akis; aria-label owns the name. -->
+  <a class="tablet-rail__logo" routerLink="/akis" aria-label="Enterprise Social &amp; Community Platform ana sayfa">
+    <span class="tablet-rail__logo-mark" aria-hidden="true">E</span>
+  </a>
+
+  <!--
+    Compose entry (VAL-WSH-007 composer-reachable). Real <button> so it is
+    keyboard-reachable + keyboard-activatable; navigates to the feed composer.
+    Brand-treated so it is the unmistakable principal action of the rail.
+  -->
+  <button type="button" class="tablet-rail__compose" (click)="compose()" aria-label="Oluştur — yeni gönderi">
+    <zm-nav-icon class="tablet-rail__icon" icon="compose" size="1.5rem" />
+  </button>
+
+  <!--
+    Primary navigation landmark. Every item is a native <a routerLink> with an
+    accessible name = Turkish label. No labels visible at tablet (icon-only);
+    the icon is aria-hidden so AT reads only the link's aria-label.
+    Active item (VAL-WSH-001 carried into tablet): brand left inset bar +
+    raised background tone + brighter icon + aria-current="page" (>=2 NON-color
+    cues). Unread badge on Mesajlar/Bildirimler when real count > 0.
+  -->
+  <nav class="tablet-rail__nav" aria-label="Ana navigasyon">
+    @for (entry of navEntries; track entry.link) {
+      <a
+        class="tablet-rail__item"
+        [routerLink]="entry.link"
+        routerLinkActive="is-active"
+        (isActiveChange)="setActive(entry.link, $event)"
+        [class.is-current]="isCurrent(entry.link)"
+        [attr.aria-current]="isCurrent(entry.link) ? 'page' : null"
+        [attr.aria-label]="ariaLabel(entry)"
+        [attr.data-icon-key]="entry.icon"
+      >
+        <zm-nav-icon class="tablet-rail__icon" [icon]="entry.icon" size="1.5rem" />
+
+        @if (hasUnread(entry)) {
+          <!--
+            Unread badge (VAL-WSH-003 at tablet). Literal count pill in the
+            top-end corner — distinct shape + position + digit, never color-only.
+            aria-hidden: meaning flows through the link aria-label.
+          -->
+          <b class="tablet-rail__badge" aria-hidden="true">{{ badgeFor(entry) }}</b>
+        }
+      </a>
+    }
+  </nav>
+
+  <!--
+    On-demand context drawer toggle (VAL-WSH-007 context-drawer-reachable).
+    Emits `contextToggle`; the shell owns the slide-in sheet (preserved static
+    content; m2-contextual-rail replaces the content).
+  -->
+  <button
+    type="button"
+    class="tablet-rail__context"
+    (click)="onContextToggle()"
+    aria-label="Bağlam panelini aç"
+  >
+    <zm-nav-icon class="tablet-rail__icon" icon="context" size="1.5rem" />
+  </button>
+
+  <!--
+    Account menu (m2-account-theme-status; VAL-WSH-005 / VAL-WSH-006).
+    Compact avatar-only trigger that opens the account popover (profile +
+    theme group + logout). Replaces the legacy standalone signout icon. The
+    component owns its own AuthService / Router / ThemeService wiring.
+  -->
+  <zm-account-menu class="tablet-rail__account" [compact]="true" />
+</aside>

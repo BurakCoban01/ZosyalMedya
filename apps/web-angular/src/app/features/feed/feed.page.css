@@ -1,0 +1,667 @@
+/* Feed page — Living Editorial Network stream.
+ *
+ * Stream density (VAL-FEED-021): NOT every post in a heavy floating card.
+ * Posts live on the calm canvas with subtle separators; only strategic
+ * surfaces (composer, poll-bearing posts) get a raised treatment. An
+ * editorial-cut motif paces the stream every few posts so it reads as a
+ * sequence of moments, not a uniform grid.
+ *
+ * All values consume --zm-* semantic tokens (light + dark cascade). No
+ * hardcoded hex. */
+
+:host {
+  display: block;
+  max-width: var(--zm-measure-feed);
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * Composer — a raised editorial surface (one of the strategic lifts).
+ * ------------------------------------------------------------------ */
+.composer {
+  border-top: var(--zm-separator-rule-strong);
+  border-bottom: var(--zm-separator-rule);
+  padding: var(--zm-space-5, 1.25rem) 0;
+  margin-bottom: var(--zm-space-6, 1.5rem);
+  background: var(--zm-feed-item-bg-raised);
+  border-radius: var(--zm-feed-item-radius);
+  padding-inline: var(--zm-space-5, 1.25rem);
+}
+
+.composer textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  font-family: var(--zm-feed-item-body-font);
+  font-size: var(--zm-feed-item-body-size);
+  line-height: var(--zm-feed-item-body-leading);
+  color: var(--zm-text-1);
+  padding: var(--zm-space-2, 0.5rem) 0;
+}
+
+.composer textarea:focus {
+  outline: 0;
+}
+
+.composer-advanced {
+  margin: var(--zm-space-3, 0.75rem) 0;
+  border-top: var(--zm-separator-rule);
+  border-bottom: var(--zm-separator-rule);
+}
+
+.composer-advanced summary,
+.owner-actions summary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--zm-text-2);
+  cursor: pointer;
+  font: 700 var(--zm-text-sm) var(--zm-font-ui);
+}
+
+.composer-advanced summary:focus-visible,
+.owner-actions summary:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.composer-advanced__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.7fr);
+  gap: var(--zm-space-4, 1rem);
+  padding: 0 0 var(--zm-space-4, 1rem);
+}
+
+.composer-advanced__fields label,
+.owner-edit label {
+  display: grid;
+  gap: var(--zm-space-1, 0.25rem);
+  color: var(--zm-text-1);
+  font: 700 var(--zm-text-sm) var(--zm-font-ui);
+}
+
+.composer-advanced__fields input[type='text'],
+.composer-advanced__fields input:not([type]),
+.owner-edit input:not([type]),
+.owner-edit textarea,
+.owner-edit select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  background: var(--zm-canvas);
+  color: var(--zm-text-1);
+  padding: 0.65rem 0.75rem;
+  font: 500 var(--zm-text-sm) var(--zm-font-ui);
+}
+
+.composer-advanced__fields small,
+.owner-edit small {
+  color: var(--zm-text-3);
+  font-weight: 500;
+  line-height: var(--zm-leading-body);
+}
+
+.composer-sensitive,
+.owner-edit__check {
+  grid-template-columns: auto 1fr !important;
+  align-items: start;
+}
+
+.composer-sensitive input,
+.owner-edit__check input {
+  width: 1.2rem;
+  min-height: 1.2rem;
+  margin-top: 0.1rem;
+}
+
+.composer-sensitive span { display: grid; gap: var(--zm-space-1, 0.25rem); }
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-4, 1rem);
+  flex-wrap: wrap;
+}
+
+.composer-actions select {
+  border: 0;
+  background: transparent;
+  color: var(--zm-text-2);
+  padding: var(--zm-space-2, 0.5rem) 0;
+  font-family: var(--zm-font-ui);
+}
+
+.composer-visibility-note {
+  color: var(--zm-text-3);
+  font: 550 var(--zm-text-xs) var(--zm-font-ui);
+}
+
+.composer-actions span {
+  margin-left: auto;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+.composer-actions button,
+.more {
+  border: 0;
+  background: var(--zm-brand);
+  color: var(--zm-brand-on);
+  padding: 0.72rem 1.1rem;
+  font-weight: 750;
+  font-family: var(--zm-font-ui);
+  cursor: pointer;
+  border-radius: var(--zm-radius-control, 0.5rem);
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.composer-actions button:hover:not(:disabled),
+.more:hover:not(:disabled) {
+  background: var(--zm-brand-hover);
+}
+
+.composer-actions button:disabled,
+.more:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.composer-actions button:focus-visible,
+.more:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Status + degraded banners.
+ * ------------------------------------------------------------------ */
+.message {
+  padding: var(--zm-space-3, 0.75rem) 0;
+  color: var(--zm-brand);
+  font-weight: 650;
+  font-family: var(--zm-font-ui);
+}
+
+.degraded {
+  margin: 0 0 var(--zm-space-4, 1rem);
+  padding: var(--zm-space-2, 0.5rem) var(--zm-space-3, 0.75rem);
+  border-inline-start: 3px solid var(--zm-warning);
+  background: color-mix(in srgb, var(--zm-warning) 10%, transparent);
+  color: var(--zm-text-2);
+  font-size: var(--zm-text-sm);
+  border-radius: 0 var(--zm-radius-control, 0.5rem) var(--zm-radius-control, 0.5rem) 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Client-side filter bar — drives filtered-empty (VAL-FEED-002).
+ * ------------------------------------------------------------------ */
+.feed-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-3, 0.75rem);
+  flex-wrap: wrap;
+  padding: var(--zm-space-3, 0.75rem) 0;
+  margin-bottom: var(--zm-space-2, 0.5rem);
+  border-bottom: var(--zm-separator-rule);
+}
+
+.feed-filter__field {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-2, 0.5rem);
+  flex: 1 1 16rem;
+  min-width: 12rem;
+}
+
+.feed-filter__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.feed-filter__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--zm-border-subtle);
+  background: var(--zm-canvas);
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+
+.feed-filter__input::placeholder {
+  color: var(--zm-text-3);
+}
+
+.feed-filter__input:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+  border-color: var(--zm-brand);
+}
+
+.feed-filter__clear {
+  border: 1px solid var(--zm-border-subtle);
+  background: transparent;
+  color: var(--zm-text-2);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--zm-radius-control, 0.5rem);
+  cursor: pointer;
+  transition: color var(--zm-duration-fast) var(--zm-ease-standard),
+    border-color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.feed-filter__clear:hover {
+  color: var(--zm-text-1);
+  border-color: var(--zm-border-strong);
+}
+
+.feed-filter__clear:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.feed-filter__hint {
+  margin-left: auto;
+  font-size: var(--zm-text-xs);
+  color: var(--zm-text-3);
+}
+
+/* ------------------------------------------------------------------ *
+ * Stream — calm reading surface with rhythm (VAL-FEED-021).
+ * ------------------------------------------------------------------ */
+.stream {
+  border-top: var(--zm-separator-rule);
+}
+
+/* ------------------------------------------------------------------ *
+ * Projected action bar — reactions / comments / save. Projected into
+ * <zm-post-card> via <ng-content>; styled here because it is declared in the
+ * page template (keeps interaction wiring + the later reaction-bar upgrade
+ * in the feature page, not the presentational card).
+ * ------------------------------------------------------------------ */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: var(--zm-space-4, 1rem);
+  flex-wrap: wrap;
+}
+
+.post-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--zm-text-2);
+  padding: 0.45rem 0.55rem;
+  cursor: pointer;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  min-height: 44px;
+  transition: color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.post-actions button:hover:not(:disabled) {
+  color: var(--zm-text-1);
+}
+
+.post-actions button:disabled {
+  color: var(--zm-text-3);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.post-actions button.selected {
+  color: var(--zm-brand);
+  font-weight: 650;
+}
+
+.post-actions button:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.post-actions button span {
+  font-size: var(--zm-text-xs);
+}
+
+.reaction-picker {
+  position: relative;
+}
+
+.owner-actions { position: relative; }
+.owner-actions summary { padding: 0.45rem 0.55rem; list-style: none; }
+.owner-actions summary::-webkit-details-marker { display: none; }
+.owner-actions__menu {
+  position: absolute;
+  z-index: 6;
+  inset-inline-end: 0;
+  bottom: calc(100% + var(--zm-space-2, 0.5rem));
+  display: grid;
+  min-width: 10rem;
+  padding: var(--zm-space-2, 0.5rem);
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+  box-shadow: var(--zm-shadow-md);
+}
+
+.post-actions button.danger,
+.owner-confirm button.danger { color: var(--zm-danger); }
+
+.owner-edit,
+.owner-confirm {
+  display: grid;
+  gap: var(--zm-space-3, 0.75rem);
+  margin-top: var(--zm-space-3, 0.75rem);
+  padding: var(--zm-space-4, 1rem);
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+}
+
+.owner-edit > div,
+.owner-confirm > div { display: flex; justify-content: flex-end; gap: var(--zm-space-2, 0.5rem); }
+.owner-confirm p { margin: 0; color: var(--zm-text-2); }
+.owner-edit button,
+.owner-confirm button {
+  min-height: 44px;
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  background: transparent;
+  color: var(--zm-text-1);
+  padding: 0.55rem 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.owner-edit button[type='submit'] { border-color: var(--zm-brand); background: var(--zm-brand); color: var(--zm-brand-on); }
+.owner-edit button:focus-visible,
+.owner-confirm button:focus-visible { outline: 3px solid var(--zm-focus); outline-offset: 2px; }
+.owner-edit button:disabled,
+.owner-confirm button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.reaction-picker summary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  color: var(--zm-text-2);
+  cursor: pointer;
+  font: var(--zm-text-sm) var(--zm-font-ui);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  list-style: none;
+}
+
+.reaction-picker summary::-webkit-details-marker { display: none; }
+.reaction-picker summary::after { content: ' ▾'; }
+.reaction-picker[open] summary::after { content: ' ▴'; }
+.reaction-picker summary:hover { color: var(--zm-text-1); }
+.reaction-picker summary:focus-visible { outline: 3px solid var(--zm-focus); outline-offset: 2px; }
+
+.reaction-picker__menu {
+  position: absolute;
+  z-index: 5;
+  inset-inline-start: 0;
+  bottom: calc(100% + var(--zm-space-2, 0.5rem));
+  display: grid;
+  min-width: 12rem;
+  padding: var(--zm-space-2, 0.5rem);
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+  box-shadow: var(--zm-shadow-md);
+}
+
+.reaction-picker__menu button {
+  justify-content: flex-start;
+  text-align: start;
+}
+
+@media (max-width: 520px) {
+  .reaction-picker__menu { position: fixed; inset-inline: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); }
+}
+
+.quote-composer {
+  display: grid;
+  gap: var(--zm-space-2, 0.5rem);
+  margin-top: var(--zm-space-3, 0.75rem);
+  padding: var(--zm-space-4, 1rem);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+}
+
+.quote-composer label {
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 700;
+}
+
+.quote-composer textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-field, 0.75rem);
+  background: var(--zm-canvas);
+  color: var(--zm-text-1);
+  padding: var(--zm-space-3, 0.75rem);
+  font-family: var(--zm-font-ui);
+  line-height: var(--zm-leading-body);
+}
+
+.quote-composer textarea::placeholder {
+  color: var(--zm-text-3);
+}
+
+.quote-composer textarea:focus-visible {
+  border-color: var(--zm-focus);
+}
+
+.quote-composer > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--zm-space-2, 0.5rem);
+}
+
+.quote-composer span {
+  margin-right: auto;
+  color: var(--zm-text-3);
+  font-size: var(--zm-text-xs);
+}
+
+.quote-composer button {
+  min-height: 40px;
+  border: 1px solid var(--zm-border-strong);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  background: transparent;
+  color: var(--zm-text-2);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--zm-font-ui);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quote-composer button[type='submit'] {
+  border-color: var(--zm-brand);
+  background: var(--zm-brand);
+  color: var(--zm-brand-on);
+}
+
+.quote-composer button:hover:not(:disabled) {
+  border-color: var(--zm-brand-hover);
+}
+
+.quote-composer button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.quote-composer button:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.comment {
+  display: flex;
+  border-top: var(--zm-separator-rule);
+  margin-top: var(--zm-space-2, 0.5rem);
+  padding-top: var(--zm-space-3, 0.65rem);
+}
+
+.comment-thread {
+  margin-top: var(--zm-space-3, 0.75rem);
+  padding-top: var(--zm-space-3, 0.75rem);
+  border-top: var(--zm-separator-rule);
+}
+
+.comment-thread__list {
+  display: grid;
+  gap: var(--zm-space-2, 0.5rem);
+}
+
+.comment-thread__item {
+  margin-inline-start: min(var(--comment-depth, 0rem), 3.75rem);
+  padding: var(--zm-space-3, 0.75rem);
+  border-inline-start: 2px solid var(--zm-border-subtle);
+  background: var(--zm-surface-1);
+}
+
+.comment-thread__item header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--zm-space-2, 0.5rem);
+  color: var(--zm-text-2);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+}
+.comment-thread__item header a{display:grid;color:inherit;text-decoration:none}.comment-thread__item header a span{color:var(--zm-text-3)}.comment-thread__item header a:hover strong{text-decoration:underline}
+
+.comment-thread__item strong {
+  color: var(--zm-text-1);
+  overflow-wrap: anywhere;
+}
+
+.comment-thread__item p {
+  margin: var(--zm-space-1, 0.25rem) 0 0;
+  color: var(--zm-text-1);
+  line-height: var(--zm-leading-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.comment-thread__item .comment-thread__deleted{color:var(--zm-text-3);font-style:italic}.comment-thread__actions,.comment-thread__edit{display:flex;align-items:center;gap:var(--zm-space-2);margin-top:var(--zm-space-2)}.comment-thread__actions button,.comment-thread__edit button,.comment-thread__replying button,.comment-thread__more{min-height:36px;border:0;background:transparent;color:var(--zm-brand);font:inherit;font-size:var(--zm-text-xs);font-weight:750;cursor:pointer}.comment-thread__actions .danger{color:var(--zm-danger)}.comment-thread__edit input{min-width:0;flex:1;border:1px solid var(--zm-border-subtle);border-radius:var(--zm-radius-control);background:var(--zm-canvas-raised);color:var(--zm-text-1);padding:var(--zm-space-2)}.comment-thread__replying{margin:var(--zm-space-3) 0 0;color:var(--zm-text-2);font-size:var(--zm-text-sm)}.comment-thread__more{margin-top:var(--zm-space-2)}
+
+.comment-thread__state {
+  margin: 0;
+  padding: var(--zm-space-3, 0.75rem) 0;
+  color: var(--zm-text-2);
+  font-size: var(--zm-text-sm);
+}
+
+.comment-thread__state--error {
+  color: var(--zm-danger);
+}
+
+.comment-thread__state button {
+  border: 0;
+  background: transparent;
+  color: var(--zm-brand);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.comment input {
+  border: 0;
+  background: transparent;
+  min-width: 0;
+  flex: 1;
+  padding: 0.5rem;
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+}
+
+.comment input:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+
+.comment button {
+  border: 0;
+  background: transparent;
+  color: var(--zm-brand);
+  font-weight: 750;
+  cursor: pointer;
+  font-family: var(--zm-font-ui);
+  min-height: 44px;
+  padding: 0 0.5rem;
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+
+.comment button:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.more {
+  display: block;
+  margin: var(--zm-space-6, 2rem) auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * Editorial-cut separator — paces the stream every few posts. Decorative
+ * (aria-hidden); a short rule + pulse-node dot. Never crosses body text.
+ * ------------------------------------------------------------------ */
+.stream__cut {
+  display: flex;
+  justify-content: center;
+  padding: var(--zm-space-3, 0.75rem) 0;
+  color: var(--zm-border-strong);
+  border-bottom: var(--zm-separator-rule);
+}
+
+.stream__cut svg {
+  width: 7.5rem;
+  height: 0.5rem;
+  display: block;
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive.
+ * ------------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .composer-actions {
+    gap: var(--zm-space-3, 0.75rem);
+  }
+
+  .composer-advanced__fields { grid-template-columns: 1fr; }
+  .owner-actions__menu { position: fixed; inset-inline: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); }
+  .owner-edit > div,
+  .owner-confirm > div { flex-direction: column-reverse; }
+  .owner-edit button,
+  .owner-confirm button { width: 100%; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Forced colors — keep separators visible.
+ * ------------------------------------------------------------------ */
+@media (forced-colors: active) {
+  .stream {
+    border-top-color: GrayText;
+  }
+  .stream__cut {
+    color: GrayText;
+  }
+}

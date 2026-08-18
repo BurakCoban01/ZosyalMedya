@@ -1,0 +1,169 @@
+/**
+ * ZmChip — compact label token (VAL-DS-032).
+ *
+ * Always carries a textual label. Color categories couple with a distinct
+ * leading glyph (filled dot / diamond / ring / check / triangle / cross / none)
+ * so the category reads in grayscale. Removable chips expose their remove
+ * action with an accessible name.
+ *
+ * Consumes ONLY `--zm-chip-*` component-layer tokens (no hardcoded hex).
+ */
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zm-chip-gap);
+  min-height: var(--zm-chip-min-height);
+  padding: var(--zm-chip-padding-y) var(--zm-chip-padding-x);
+  border-radius: var(--zm-chip-radius);
+  background: var(--zm-chip-bg);
+  color: var(--zm-chip-fg);
+  border: 1px solid var(--zm-chip-border);
+  font-family: var(--zm-chip-font);
+  font-size: var(--zm-chip-font-size);
+  font-weight: var(--zm-chip-weight);
+  line-height: 1.2;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition:
+    background-color var(--zm-chip-duration) var(--zm-chip-ease),
+    border-color var(--zm-chip-duration) var(--zm-chip-ease),
+    color var(--zm-chip-duration) var(--zm-chip-ease);
+}
+
+/* Size variants */
+:host[data-size='sm'] {
+  min-height: 1.5rem;
+  padding: 0.0625rem var(--zm-space-2);
+  font-size: var(--zm-text-xs);
+}
+
+/* Selected state — non-color cue = stronger border + raised surface (position). */
+:host([aria-selected='true']) {
+  background: var(--zm-chip-bg-selected);
+  border-color: var(--zm-chip-border-selected);
+  box-shadow: inset 0 0 0 1px var(--zm-chip-border-selected);
+}
+
+/* --- Leading glyph (distinct shape per variant; non-color cue) ---------- */
+.zm-chip__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zm-chip-glyph-size);
+  height: var(--zm-chip-glyph-size);
+  flex: 0 0 auto;
+  color: var(--zm-chip-fg);
+}
+.zm-chip__glyph svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zm-chip__label {
+  /* The label is the primary carrier of meaning (VAL-DS-032). */
+  display: inline-block;
+}
+
+/* --- Variant accents (color is one cue; glyph shape is the other) ------- */
+:host[data-variant='brand'] {
+  color: var(--zm-chip-brand-fg);
+  background: var(--zm-chip-brand-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-brand-accent) 30%, transparent);
+}
+:host[data-variant='brand'] .zm-chip__glyph { color: var(--zm-chip-brand-accent); }
+
+:host[data-variant='discovery'] {
+  color: var(--zm-chip-discovery-fg);
+  background: var(--zm-chip-discovery-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-discovery-accent) 30%, transparent);
+}
+:host[data-variant='discovery'] .zm-chip__glyph { color: var(--zm-chip-discovery-accent); }
+
+:host[data-variant='info'] {
+  color: var(--zm-chip-info-fg);
+  background: var(--zm-chip-info-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-info-accent) 30%, transparent);
+}
+:host[data-variant='info'] .zm-chip__glyph { color: var(--zm-chip-info-accent); }
+
+:host[data-variant='success'] {
+  color: var(--zm-chip-success-fg);
+  background: var(--zm-chip-success-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-success-accent) 30%, transparent);
+}
+:host[data-variant='success'] .zm-chip__glyph { color: var(--zm-chip-success-accent); }
+
+:host[data-variant='warning'] {
+  color: var(--zm-chip-warning-fg);
+  background: var(--zm-chip-warning-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-warning-accent) 30%, transparent);
+}
+:host[data-variant='warning'] .zm-chip__glyph { color: var(--zm-chip-warning-accent); }
+
+:host[data-variant='danger'] {
+  color: var(--zm-chip-danger-fg);
+  background: var(--zm-chip-danger-bg);
+  border-color: color-mix(in srgb, var(--zm-chip-danger-accent) 30%, transparent);
+}
+:host[data-variant='danger'] .zm-chip__glyph { color: var(--zm-chip-danger-accent); }
+
+/* neutral keeps the default surface treatment; no glyph, no accent. */
+
+/* --- Remove affordance -------------------------------------------------- */
+.zm-chip__remove {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zm-chip-remove-size);
+  height: var(--zm-chip-remove-size);
+  padding: 0;
+  margin-left: calc(var(--zm-chip-gap) * -0.25);
+  border: 0;
+  border-radius: var(--zm-radius-pill);
+  background: transparent;
+  color: currentColor;
+  opacity: 0.7;
+  cursor: pointer;
+  transition:
+    background-color var(--zm-chip-duration) var(--zm-chip-ease),
+    opacity var(--zm-chip-duration) var(--zm-chip-ease);
+}
+.zm-chip__remove svg {
+  width: 0.625em;
+  height: 0.625em;
+  display: block;
+}
+.zm-chip__remove:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+.zm-chip__remove:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-chip-focus-ring);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+/* --- Forced colors ------------------------------------------------------ */
+@media (forced-colors: active) {
+  :host {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  :host([aria-selected='true']) {
+    border-color: Highlight;
+    box-shadow: inset 0 0 0 1px Highlight;
+  }
+  .zm-chip__remove {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+  .zm-chip__remove:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+}

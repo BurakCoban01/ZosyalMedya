@@ -1,0 +1,102 @@
+:host {
+  display: block;
+}
+
+.profile-picker {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem;
+}
+
+header {
+  display: grid;
+  gap: 0.2rem;
+  padding-inline: 0.25rem;
+}
+
+header strong {
+  color: var(--ion-text-color);
+  font-size: 0.95rem;
+}
+
+header p,
+.help {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+form {
+  display: grid;
+  gap: 0.4rem;
+}
+
+ion-searchbar {
+  padding: 0;
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ion-color-medium);
+  --box-shadow: 0 0 0 1px var(--ion-border-color);
+}
+
+form ion-button {
+  min-height: 44px;
+  margin: 0;
+}
+
+form ion-spinner {
+  width: 1rem;
+  margin-inline-end: 0.45rem;
+}
+
+.help,
+.message {
+  display: block;
+  padding-inline: 0.25rem;
+}
+
+.selected-profile,
+.results {
+  margin: 0;
+}
+
+.selected-profile ion-item,
+.results ion-item {
+  --background: var(--ion-item-background);
+  --min-height: 64px;
+}
+
+.avatar {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid var(--ion-border-color);
+  border-radius: 50%;
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+ion-label h2,
+ion-label p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+ion-label h2 {
+  color: var(--ion-text-color);
+  font-weight: 750;
+}
+
+ion-label p {
+  color: var(--ion-color-medium);
+}
+
+@media (forced-colors: active) {
+  .avatar {
+    border-color: CanvasText;
+  }
+}

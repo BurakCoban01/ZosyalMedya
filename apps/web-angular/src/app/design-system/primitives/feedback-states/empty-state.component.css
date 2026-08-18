@@ -1,0 +1,13 @@
+/**
+ * ZmEmptyState — variant accent.
+ *
+ * The shared layout lives in feedback-states-shared.css (imported globally via
+ * styles.css). This scoped file owns ONLY the empty-state variant accent:
+ * the icon uses the info/discovery-neutral tone so it reads as "nothing yet,
+ * not an error". The shared base provides the rest.
+ */
+
+:host {
+  /* No layout here; the .zm-empty-state host class is styled globally. */
+  display: block;
+}

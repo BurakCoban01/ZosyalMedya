@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Domain\ZosyalMedya.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Infrastructure\ZosyalMedya.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Observability\ZosyalMedya.BuildingBlocks.Observability.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Infrastructure\ZosyalMedya.Modules.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Profiles\Infrastructure\ZosyalMedya.Modules.Profiles.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\SocialGraph\Infrastructure\ZosyalMedya.Modules.SocialGraph.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Questions\Infrastructure\ZosyalMedya.Modules.Questions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Content\Infrastructure\ZosyalMedya.Modules.Content.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Reactions\Infrastructure\ZosyalMedya.Modules.Reactions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Comments\Infrastructure\ZosyalMedya.Modules.Comments.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Feed\Infrastructure\ZosyalMedya.Modules.Feed.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Messaging\Infrastructure\ZosyalMedya.Modules.Messaging.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Notifications\Infrastructure\ZosyalMedya.Modules.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Communities\Infrastructure\ZosyalMedya.Modules.Communities.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Media\Infrastructure\ZosyalMedya.Modules.Media.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Stories\Infrastructure\ZosyalMedya.Modules.Stories.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Search\Infrastructure\ZosyalMedya.Modules.Search.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Audit\Infrastructure\ZosyalMedya.Modules.Audit.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Moderation\Infrastructure\ZosyalMedya.Modules.Moderation.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Administration\Infrastructure\ZosyalMedya.Modules.Administration.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" />
+    <!-- SignalR 8'in 2.5 API yüzeyi korunurken güvenlik düzeltmelerini içeren son 2.5 patch'i zorlanır. -->
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"><PrivateAssets>all</PrivateAssets></PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+</Project>

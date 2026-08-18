@@ -1,0 +1,314 @@
+/*!
+ * ZmIconButton styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY `--zm-button-*` component-layer tokens + `--zm-*` semantic
+ * roles. No hardcoded hex (VAL-DS-002).
+ *
+ * Layout:
+ *   <zm-icon-button class="zm-icon-button">         (host: inline-flex)
+ *     <button class="zm-icon-button__btn">          (native control; 44x44 min)
+ *       <span class="zm-icon-button__icon">         (projected glyph, aria-hidden)
+ *       <span class="zm-icon-button__spinner">      (loading overlay, aria-hidden)
+ *       <span class="zm-icon-button__tooltip">      (visual hint, aria-hidden)
+ *
+ * The 44x44 WCAG 2.2 target is enforced on the native button via min-width /
+ * min-height bound to the --zm-button-icon-size token. Even when the visible
+ * glyph is smaller (size="sm"), the transparent padded button still meets the
+ * minimum hit area.
+ */
+
+/* ============================================================================
+ * HOST
+ * ============================================================================ */
+.zm-icon-button {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+/* ============================================================================
+ * BASE CONTROL — 44x44 target, square aspect, centered glyph
+ * ============================================================================ */
+.zm-icon-button__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* WCAG 2.2 target minimum (VAL-DS-020). Tokenized so it is tunable centrally. */
+  min-width: var(--zm-button-icon-size);
+  min-height: var(--zm-button-icon-size);
+  padding: 0;
+  box-sizing: border-box;
+  /* shape + material */
+  border-radius: var(--zm-radius-control);
+  border: var(--zm-border-width-hair) solid transparent;
+  /* typography (the visible glyph is an SVG/string projected via <ng-content>) */
+  font-family: var(--zm-font-ui);
+  color: var(--zm-text-2);
+  /* behavior */
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--zm-button-duration) var(--zm-button-ease),
+    border-color var(--zm-button-duration) var(--zm-button-ease),
+    color var(--zm-button-duration) var(--zm-button-ease),
+    box-shadow var(--zm-button-duration) var(--zm-button-ease);
+}
+
+/* Small density: the visible glyph shrinks but the hit region stays 44x44. */
+.zm-icon-button__btn[data-size='sm'] {
+  font-size: var(--zm-text-md);
+}
+.zm-icon-button__btn[data-size='md'] {
+  font-size: var(--zm-text-lg);
+}
+
+/* ============================================================================
+ * VARIANTS — rest
+ * ============================================================================ */
+.zm-icon-button__btn[data-variant='primary'] {
+  background: var(--zm-button-primary-bg);
+  color: var(--zm-button-primary-fg);
+  border-color: var(--zm-button-primary-bg);
+}
+.zm-icon-button__btn[data-variant='secondary'] {
+  background: var(--zm-button-secondary-bg);
+  color: var(--zm-button-secondary-fg);
+  border-color: var(--zm-button-secondary-border);
+}
+.zm-icon-button__btn[data-variant='quiet'] {
+  background: transparent;
+  color: var(--zm-button-quiet-fg);
+  border-color: transparent;
+}
+.zm-icon-button__btn[data-variant='danger'] {
+  background: var(--zm-button-danger-bg);
+  color: var(--zm-button-danger-fg);
+  border-color: var(--zm-button-danger-bg);
+}
+
+/* ============================================================================
+ * STATE: hover, focus-visible, active
+ * ============================================================================ */
+.zm-icon-button__btn[data-variant='primary']:hover {
+  background: var(--zm-button-primary-bg-hover);
+  border-color: var(--zm-button-primary-bg-hover);
+}
+.zm-icon-button__btn[data-variant='secondary']:hover,
+.zm-icon-button__btn[data-variant='quiet']:hover {
+  background: var(--zm-button-secondary-bg-hover);
+  color: var(--zm-button-secondary-fg);
+}
+.zm-icon-button__btn[data-variant='danger']:hover {
+  background: var(--zm-button-danger-bg-hover);
+  border-color: var(--zm-button-danger-bg-hover);
+}
+
+.zm-icon-button__btn:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-button-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+/* Quiet receives a faint surface behind the ring on focus so it is visible on
+   every canvas (imagery, maps, scrollers). */
+.zm-icon-button__btn[data-variant='quiet']:focus-visible {
+  background: var(--zm-button-secondary-bg-hover);
+  color: var(--zm-button-secondary-fg);
+}
+
+.zm-icon-button__btn:active:not([disabled]) {
+  transform: translateY(1px);
+}
+.zm-icon-button__btn[data-variant='primary']:active:not([disabled]) {
+  background: var(--zm-button-primary-bg-active);
+  border-color: var(--zm-button-primary-bg-active);
+}
+.zm-icon-button__btn[data-variant='secondary']:active:not([disabled]),
+.zm-icon-button__btn[data-variant='quiet']:active:not([disabled]) {
+  background: var(--zm-button-secondary-bg-active);
+  color: var(--zm-button-secondary-fg);
+}
+.zm-icon-button__btn[data-variant='danger']:active:not([disabled]) {
+  background: var(--zm-button-danger-bg-active);
+  border-color: var(--zm-button-danger-bg-active);
+}
+
+/* ============================================================================
+ * STATE: pressed / selected (aria-pressed=true)
+ *    Persistent "on" treatment. Brand inset ring (position cue) + brand tone.
+ * ============================================================================ */
+.zm-icon-button__btn.is-pressed {
+  box-shadow: inset 0 0 0 var(--zm-border-width-strong) var(--zm-button-selected-indicator);
+}
+.zm-icon-button__btn[data-variant='quiet'].is-pressed,
+.zm-icon-button__btn[data-variant='secondary'].is-pressed {
+  background: var(--zm-button-selected-bg);
+  color: var(--zm-button-selected-fg);
+}
+
+/* ============================================================================
+ * STATE: error + high-contrast
+ * ============================================================================ */
+.zm-icon-button__btn.is-error {
+  border-color: var(--zm-button-error-ring);
+}
+.zm-icon-button__btn.is-error:focus-visible {
+  outline-color: var(--zm-button-error-ring);
+}
+.zm-icon-button__btn.is-high-contrast {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+.zm-icon-button__btn[data-variant='quiet'].is-high-contrast,
+.zm-icon-button__btn[data-variant='secondary'].is-high-contrast {
+  background: var(--zm-canvas-raised);
+}
+
+/* ============================================================================
+ * STATE: disabled (explicit or loading)
+ * ============================================================================ */
+.zm-icon-button__btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+.zm-icon-button__btn[disabled]:hover {
+  background: inherit;
+}
+
+/* ============================================================================
+ * PROJECTED ICON + SPINNER
+ *    The projected glyph is wrapped so the button controls its color (currentColor
+ *    lets SVG fills/strokes follow the variant). The spinner replaces the glyph
+ *    under loading (aria-hidden, decorative).
+ * ============================================================================ */
+.zm-icon-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 0;
+  color: inherit;
+}
+.zm-icon-button__icon ::ng-deep svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.zm-icon-button__spinner {
+  width: 1.125em;
+  height: 1.125em;
+  border-radius: var(--zm-radius-pill);
+  border-width: var(--zm-border-width-hair);
+  border-style: solid;
+  border-color: currentColor;
+  border-top-color: transparent;
+  opacity: 0.9;
+  animation: zm-icon-button-spin var(--zm-duration-base) linear infinite;
+  pointer-events: none;
+}
+@keyframes zm-icon-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+ * TOOLTIP — visual hint on hover + keyboard focus (VAL-DS-020)
+ *    aria-hidden=true (duplicates aria-label). Revealed by :hover and
+ *    :focus-within so keyboard users receive the same hint. Positioned below
+ *    the control by default; flips above on viewport collision is a later
+ *    overlay-primitive concern (ZmTooltip); this primitive owns the basic cue.
+ * ============================================================================ */
+.zm-icon-button__tooltip {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%) scale(0.96);
+  z-index: var(--zm-z-popover);
+  padding: 0.25rem 0.5rem;
+  background: var(--zm-surface-3);
+  color: var(--zm-text-1);
+  border: var(--zm-border-width-hair) solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-control);
+  box-shadow: var(--zm-shadow-md);
+  font-size: var(--zm-text-xs);
+  font-weight: 500;
+  line-height: var(--zm-leading-tight);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity var(--zm-duration-fast) var(--zm-ease-standard),
+    transform var(--zm-duration-fast) var(--zm-ease-standard);
+}
+.zm-icon-button__btn:hover .zm-icon-button__tooltip,
+.zm-icon-button__btn:focus-within .zm-icon-button__tooltip {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ============================================================================
+ * REDUCED MOTION + FORCED COLORS
+ *    See button.component.css for the encapsulation note: component-css
+ *    `:root[data-reduce-motion]` selectors never match <html>, so the product
+ *    toggle path uses `:host-context([data-reduce-motion])`. `animation: none
+ *    !important` wins over the global kill-switch for animation-name, parking
+ *    the spinner fully static under reduced motion.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-icon-button__btn {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+  .zm-icon-button__btn:active:not([disabled]) {
+    transform: none;
+  }
+  .zm-icon-button__spinner {
+    animation: none;
+    border-top-color: currentColor;
+    opacity: 0.55;
+  }
+  .zm-icon-button__tooltip {
+    transition: opacity var(--zm-duration-base) linear;
+    transform: translateX(-50%);
+  }
+}
+:host-context([data-reduce-motion]) .zm-icon-button__btn {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+:host-context([data-reduce-motion]) .zm-icon-button__btn:active:not([disabled]) {
+  transform: none;
+}
+:host-context([data-reduce-motion]) .zm-icon-button__spinner {
+  animation: none !important;
+  border-top-color: currentColor;
+  opacity: 0.55;
+}
+:host-context([data-reduce-motion]) .zm-icon-button__tooltip {
+  transition: opacity var(--zm-duration-base) linear;
+  transform: translateX(-50%);
+}
+
+@media (forced-colors: active) {
+  .zm-icon-button__btn,
+  .zm-icon-button__btn.is-high-contrast {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-icon-button__btn:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-icon-button__btn[disabled] {
+    color: GrayText;
+    border-color: GrayText;
+    opacity: 1;
+  }
+  .zm-icon-button__tooltip {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}

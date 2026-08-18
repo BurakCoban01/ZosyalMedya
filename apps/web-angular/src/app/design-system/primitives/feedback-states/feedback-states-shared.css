@@ -1,0 +1,156 @@
+/**
+ * ZmState surfaces — shared base styles for ZmEmptyState / ZmErrorState /
+ * ZmPermissionState.
+ *
+ * The three state surfaces share the same editorial structure (icon + title +
+ * description + action stack), so their layout is defined ONCE here and
+ * imported globally via styles.css. Each component's scoped CSS file adds
+ * only the variant accent (icon color + action button treatment).
+ *
+ * This mirrors the overlays pattern: overlays-global.css styles the shared
+ * CDK-owned backdrop/pane wrapper; the per-overlay scoped CSS owns its own
+ * panel identity. Here, feedback-states-shared.css owns the shared state
+ * layout; the per-state scoped CSS owns the variant accent.
+ *
+ * Consumes ONLY `--zm-state-*` component-layer tokens (which compose the
+ * semantic `--zm-text-*` / `--zm-surface-*` / `--zm-info/success/warning/
+ * danger/discovery` roles). No hardcoded hex.
+ *
+ * Not scoped (global): the `.zm-state` class lives on each component's host
+ * element in the real DOM, so global rules reach it without `_ngcontent`
+ * attributes.
+ */
+
+.zm-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--zm-state-gap);
+  padding: var(--zm-state-padding-y) var(--zm-state-padding-x);
+  background: var(--zm-state-bg);
+  border-radius: var(--zm-state-radius);
+  color: var(--zm-state-fg);
+  max-width: var(--zm-measure-body);
+  margin: 0 auto;
+}
+
+.zm-state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--zm-state-icon-size);
+  height: var(--zm-state-icon-size);
+  /* Default icon color is the muted ink; variants override to their accent. */
+  color: var(--zm-state-icon-info);
+}
+.zm-state__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.zm-state__icon--info {
+  color: var(--zm-state-icon-info);
+}
+.zm-state__icon--success {
+  color: var(--zm-state-icon-success);
+}
+.zm-state__icon--warning {
+  color: var(--zm-state-icon-warning);
+}
+.zm-state__icon--danger {
+  color: var(--zm-state-icon-danger);
+}
+.zm-state__icon--discovery {
+  color: var(--zm-state-icon-discovery);
+}
+
+.zm-state__title {
+  font-family: var(--zm-font-display);
+  font-size: var(--zm-text-xl);
+  line-height: var(--zm-leading-tight);
+  letter-spacing: var(--zm-tracking-tight);
+  color: var(--zm-state-fg);
+  margin: 0;
+}
+
+.zm-state__description {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-leading-body);
+  color: var(--zm-state-fg-meta);
+  margin: 0;
+  max-width: var(--zm-measure-body);
+  overflow-wrap: anywhere;
+}
+
+.zm-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zm-space-3);
+  margin-top: var(--zm-space-2);
+}
+
+/* Primary action button (the "useful next step"). Uses the --zm-button-*
+ * component layer so it matches the real ZmButton primary treatment. */
+.zm-state__action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--zm-button-min-height);
+  padding: var(--zm-button-padding-y) var(--zm-button-padding-x);
+  border-radius: var(--zm-button-radius);
+  border: 1px solid var(--zm-border-subtle);
+  background: var(--zm-surface-2);
+  color: var(--zm-state-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  font-weight: 650;
+  line-height: var(--zm-leading-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--zm-button-duration) var(--zm-button-ease),
+    border-color var(--zm-button-duration) var(--zm-button-ease),
+    color var(--zm-button-duration) var(--zm-button-ease);
+}
+.zm-state__action:hover {
+  background: var(--zm-surface-3);
+}
+.zm-state__action:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus-ring-color);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* Primary variant: brand fill + brand-on ink, the "one obvious action". */
+.zm-state__action--primary {
+  background: var(--zm-brand);
+  border-color: transparent;
+  color: var(--zm-brand-on);
+}
+.zm-state__action--primary:hover {
+  background: var(--zm-brand-hover);
+  border-color: transparent;
+}
+
+/* Under forced-colors, restore a visible edge + accent so the icon + action
+ * survive Windows high-contrast. */
+@media (forced-colors: active) {
+  .zm-state__icon {
+    color: CanvasText;
+  }
+  .zm-state__action {
+    border-color: CanvasText;
+  }
+  .zm-state__action--primary {
+    background: LinkText;
+    color: Canvas;
+    border-color: LinkText;
+  }
+  .zm-state__action:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

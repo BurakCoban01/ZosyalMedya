@@ -1,0 +1,11 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using ZosyalMedya.Modules.Notifications.Domain.Inbox;
+namespace ZosyalMedya.Modules.Notifications.Infrastructure.Persistence.PostgreSql;
+public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbContext>options):DbContext(options)
+{
+ public DbSet<Notification>Notifications=>Set<Notification>();
+ protected override void OnModelCreating(ModelBuilder modelBuilder){modelBuilder.HasDefaultSchema("notifications");var id=new ValueConverter<NotificationId,Guid>(x=>x.Value,x=>new(x));var recipient=new ValueConverter<NotificationRecipientId,Guid>(x=>x.Value,x=>new(x));var argsConverter=new ValueConverter<Dictionary<string,string>,string>(x=>JsonSerializer.Serialize(x,(JsonSerializerOptions?)null),x=>JsonSerializer.Deserialize<Dictionary<string,string>>(x,(JsonSerializerOptions?)null)??new());var argsComparer=new ValueComparer<Dictionary<string,string>>((a,c)=>a!=null&&c!=null&&a.OrderBy(x=>x.Key).SequenceEqual(c.OrderBy(x=>x.Key)),x=>x.Aggregate(0,(hash,item)=>HashCode.Combine(hash,item.Key,item.Value)),x=>x.ToDictionary());var n=modelBuilder.Entity<Notification>();n.ToTable("inbox");n.HasKey(x=>x.Id);n.Property(x=>x.Id).HasConversion(id).ValueGeneratedNever();n.Property(x=>x.RecipientId).HasConversion(recipient);n.Property(x=>x.Kind).HasConversion<string>().HasMaxLength(24);n.Property(x=>x.AggregationKey).HasMaxLength(160);n.Property(x=>x.IdempotencyKey).HasMaxLength(200);n.Property(x=>x.TitleTemplateKey).HasMaxLength(100);n.Property(x=>x.BodyTemplateKey).HasMaxLength(100);n.Property(x=>x.Arguments).HasConversion(argsConverter).Metadata.SetValueComparer(argsComparer);n.Property(x=>x.Arguments).HasColumnType("jsonb");n.Property(x=>x.DeepLink).HasMaxLength(500);n.Property(x=>x.DeliveryState).HasConversion<string>().HasMaxLength(24);n.Property(x=>x.LastError).HasMaxLength(500);n.Property(x=>x.Version).IsConcurrencyToken();n.Ignore(x=>x.DomainEvents);n.HasIndex(x=>new{x.RecipientId,x.CreatedAtUtc});n.HasIndex(x=>new{x.RecipientId,x.AggregationKey,x.ReadAtUtc});n.HasIndex(x=>new{x.RecipientId,x.IdempotencyKey}).IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");n.HasIndex(x=>new{x.DeliveryState,x.NextAttemptAtUtc});}
+}

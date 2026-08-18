@@ -1,0 +1,9 @@
+:host { display: block; }
+.profile-cover { height: clamp(7rem, 18vw, 13rem); overflow: hidden; border-bottom: 1px solid var(--zm-border-subtle); background: var(--zm-surface-2); }
+.profile-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.profile-cover__fallback { width: 100%; height: 100%; background: radial-gradient(circle at 14% 120%,color-mix(in srgb,var(--zm-brand) 28%,transparent) 0 16%,transparent 17%),linear-gradient(115deg,var(--zm-surface-2),var(--zm-surface-1)); }
+.profile-identity { display: grid; grid-template-columns: auto minmax(0,1fr); gap: var(--zm-space-5); align-items: start; padding: 0 var(--zm-space-6) var(--zm-space-6); }
+.profile-identity > zm-authorized-avatar { margin-top: calc(var(--zm-space-8) * -1); outline: var(--zm-space-2) solid var(--zm-canvas-raised); border-radius: 50%; }
+.profile-identity__copy { min-width: 0; }
+@media(max-width:520px){.profile-identity{grid-template-columns:1fr;padding-inline:var(--zm-space-5)}}
+@media(forced-colors:active){.profile-cover{border-color:CanvasText}.profile-cover__fallback{background:Canvas}}

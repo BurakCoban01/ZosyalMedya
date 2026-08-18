@@ -1,0 +1,126 @@
+<!--
+  ZmInput field shell.
+
+  Layout model:
+    <zm-input class="zm-input">                   (host)
+      <div class="zm-input__field">               (state carrier: is-error / is-high-contrast / is-disabled)
+        <label class="zm-input__label" for=id>    (PERSISTENT label — always rendered, VAL-DS-021)
+        <div class="zm-input__control">           (input + optional reveal toggle)
+          <input class="zm-input__input" ...>
+          @if (password) <button class="zm-input__reveal" ...>  (aria-pressed + aria-label, VAL-DS-022)
+        </div>
+        @if (helper) <p class="zm-input__helper" id=helperId>
+        @if (error)  <p class="zm-input__error"  id=errorId>   (aria-invalid + aria-describedby, VAL-DS-021)
+      </div>
+
+  The label is a real <label for=id> so it is associated AND remains visible
+  when the field is populated or in error (placeholder is never the only label).
+-->
+<div
+  class="zm-input__field"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+  [class.is-disabled]="disabled()"
+  [class.is-password]="isPassword()"
+>
+  <label class="zm-input__label" [attr.for]="resolvedId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="zm-input__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <div class="zm-input__control">
+    <input
+      class="zm-input__input zm-feedback"
+      [id]="resolvedId()"
+      [type]="resolvedType()"
+      [value]="value()"
+      [attr.placeholder]="placeholder() && placeholder().length > 0 ? placeholder() : null"
+      [attr.name]="name() && name().length > 0 ? name() : null"
+      [attr.autocomplete]="autocomplete() && autocomplete().length > 0 ? autocomplete() : null"
+      [attr.inputmode]="inputmode() && inputmode().length > 0 ? inputmode() : null"
+      [attr.maxlength]="maxlength() !== null ? maxlength() : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [disabled]="disabled()"
+      [readOnly]="readonly()"
+      [required]="required()"
+      (input)="onInput($event)"
+      (focus)="focused.emit()"
+      (blur)="blurred.emit()"
+    />
+
+    @if (isPassword()) {
+      <!--
+        Password reveal toggle (VAL-DS-022).
+          - type="button" so it never submits a form.
+          - aria-pressed reflects revealed state.
+          - aria-label reflects the action ('Şifreyi göster' / 'Şifreyi gizle').
+          - The button lives INSIDE the field control group; after click,
+            focus stays on it (we do NOT blur), so focus never escapes the
+            field on reveal.
+          - Initial input type is ALWAYS 'password' (no auto-reveal).
+          - The glyph is aria-hidden (the name comes from aria-label).
+      -->
+      <button
+        type="button"
+        class="zm-input__reveal zm-feedback"
+        [attr.aria-pressed]="revealPressed() ? 'true' : 'false'"
+        [attr.aria-label]="revealLabel()"
+        [attr.data-revealed]="revealPressed() ? 'true' : 'false'"
+        [disabled]="disabled()"
+        (click)="toggleReveal()"
+      >
+        @if (revealPressed()) {
+          <svg class="zm-input__reveal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3.5 7 10 7a9.12 9.12 0 0 0 5.39-1.61"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M14.12 14.12A3 3 0 1 1 9.88 9.88"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        } @else {
+          <svg class="zm-input__reveal-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
+        }
+      </button>
+    }
+  </div>
+
+  @if (helper() && helper().trim().length > 0) {
+    <p class="zm-input__helper" [id]="helperId()">{{ helper() }}</p>
+  }
+  @if (hasError()) {
+    <p class="zm-input__error" [id]="errorId()">{{ error() }}</p>
+  }
+</div>

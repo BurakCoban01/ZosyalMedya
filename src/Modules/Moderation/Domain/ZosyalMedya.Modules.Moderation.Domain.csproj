@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="..\Contracts\ZosyalMedya.Modules.Moderation.Contracts.csproj" /><ProjectReference Include="..\..\..\BuildingBlocks\Domain\ZosyalMedya.BuildingBlocks.Domain.csproj" /></ItemGroup></Project>

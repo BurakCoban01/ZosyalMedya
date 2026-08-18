@@ -1,0 +1,57 @@
+/**
+ * ZmTooltip — scoped bubble styles.
+ *
+ * The bubble renders inside the CDK overlay pane (pointer-events: none on the
+ * pane, set globally). The bubble itself never captures pointer events so the
+ * pointer can pass over it without dismissing the tooltip prematurely.
+ *
+ * Consumes ONLY `--zm-tooltip-*` component-layer tokens. The bubble uses an
+ * INVERTED surface (text-1 on canvas) which guarantees >= 4.5:1 contrast in
+ * both themes because text-1 already meets that bar against canvas.
+ */
+
+:host {
+  display: inline-flex;
+}
+
+.zm-tooltip__anchor {
+  /* The anchor wraps the projected trigger and is the hover/focus target. */
+  display: inline-flex;
+  /* Ensure the anchor can receive focusin/focusout from its child trigger. */
+}
+
+.zm-tooltip__bubble {
+  background: var(--zm-tooltip-bg);
+  color: var(--zm-tooltip-fg);
+  border-radius: var(--zm-tooltip-radius);
+  padding: var(--zm-tooltip-padding-y) var(--zm-tooltip-padding-x);
+  box-shadow: var(--zm-tooltip-shadow);
+
+  max-width: var(--zm-tooltip-max-width);
+  font-size: var(--zm-text-sm);
+  line-height: var(--zm-leading-ui);
+
+  /* The bubble must NEVER capture pointer events (the pane is already
+   * pointer-events: none globally); reinforce here for safety. */
+  pointer-events: none;
+  user-select: none;
+
+  transition:
+    transform var(--zm-tooltip-duration) var(--zm-tooltip-ease),
+    opacity var(--zm-tooltip-duration) var(--zm-tooltip-ease);
+}
+
+@media (forced-colors: active) {
+  .zm-tooltip__bubble {
+    background: CanvasText;
+    color: Canvas;
+    outline: 1px solid CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zm-tooltip__bubble {
+    transition: opacity var(--zm-tooltip-duration) linear;
+    transform: none !important;
+  }
+}

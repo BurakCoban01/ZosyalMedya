@@ -1,0 +1,148 @@
+name: zosyalmedya
+services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: [ "core" ]
+    environment:
+      POSTGRES_DB: zosyalmedya
+      POSTGRES_USER: zosyalmedya
+      POSTGRES_PASSWORD: local_only_change_me
+    ports: [ "55432:5432" ]
+    volumes: [ "postgres-data:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U zosyalmedya -d zosyalmedya" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  mongodb:
+    image: mongo:7-jammy
+    profiles: [ "core" ]
+    ports: [ "57017:27017" ]
+    volumes: [ "mongo-data:/data/db" ]
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+  redis:
+    image: redis:7-alpine
+    profiles: [ "core" ]
+    command: [ "redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru" ]
+    ports: [ "56379:6379" ]
+    volumes: [ "redis-data:/data" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  minio:
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+    profiles: [ "object-storage" ]
+    command: [ "server", "/data", "--console-address", ":9001" ]
+    environment:
+      MINIO_ROOT_USER: local_minio
+      MINIO_ROOT_PASSWORD: local_minio_change_me
+    ports: [ "59000:9000", "59001:9001" ]
+    volumes: [ "minio-data:/data" ]
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  clamav:
+    image: clamav/clamav:1.4_base
+    profiles: [ "antivirus" ]
+    ports: [ "53310:3310" ]
+    volumes: [ "clamav-data:/var/lib/clamav" ]
+    healthcheck:
+      test: [ "CMD", "clamdscan", "--ping", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 180s
+  api:
+    init: true
+    build:
+      context: .
+      dockerfile: src/Host/Api/Dockerfile
+    profiles: [ "app" ]
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongodb: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Security__Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      Modules__Identity__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Profiles__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__SocialGraph__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Questions__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Content__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Reactions__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Comments__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Messaging__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Notifications__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Stories__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Communities__Persistence__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Media__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Media__ObjectStorageProvider: ${MEDIA_STORAGE_PROVIDER:-FileSystem}
+      Modules__Media__MinioEndpoint: ${MINIO_ENDPOINT:-minio:9000}
+      Modules__Media__MinioAccessKey: ${MINIO_ACCESS_KEY:-local_minio}
+      Modules__Media__MinioSecretKey: ${MINIO_SECRET_KEY:-local_minio_change_me}
+      Modules__Media__MinioBucket: ${MINIO_BUCKET:-zosyalmedya-media}
+      Modules__Media__AntivirusProvider: ${ANTIVIRUS_PROVIDER:-Local}
+      Modules__Media__ClamAvHost: ${CLAMAV_HOST:-clamav}
+      Modules__Media__ClamAvPort: ${CLAMAV_PORT:-3310}
+      Modules__Media__ClamAvTimeoutSeconds: ${CLAMAV_TIMEOUT_SECONDS:-30}
+      Modules__Media__ClamAvMaxConcurrentScans: ${CLAMAV_MAX_CONCURRENT_SCANS:-4}
+      Modules__Search__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Audit__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Moderation__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Administration__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Modules__Identity__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Identity__BootstrapAdministrator__Enabled: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      Modules__Identity__BootstrapAdministrator__Username: ${ADMIN_BOOTSTRAP_USERNAME:-}
+      Modules__Identity__BootstrapAdministrator__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      Modules__Identity__BootstrapAdministrator__Password: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      Modules__Identity__Delivery__PublicWebBaseUrl: http://localhost:58081
+      Modules__Identity__Delivery__LocalPickupDirectory: .local/email-pickup
+      Modules__Profiles__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__SocialGraph__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Questions__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Content__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Reactions__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Comments__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Messaging__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Notifications__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Modules__Stories__Persistence__MongoConnectionString: mongodb://mongodb:27017
+      Integration__Outbox__PostgreSqlConnectionString: Host=postgres;Port=5432;Database=zosyalmedya;Username=zosyalmedya;Password=local_only_change_me
+      Redis__ConnectionString: redis:6379
+      Security__AllowedOrigins__0: http://localhost:58081
+    ports: [ "58080:8080" ]
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    volumes:
+      - media-data:/app/data/media
+      - protection-keys:/app/.local/data-protection-keys
+      - ./src/Host/Api/.local/email-pickup:/app/.local/email-pickup
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-angular/Dockerfile
+    profiles: [ "app" ]
+    depends_on:
+      api: { condition: service_healthy }
+    ports: [ "58081:8080" ]
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+  minio-data:
+  clamav-data:
+  media-data:
+  protection-keys:

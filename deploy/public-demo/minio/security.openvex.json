@@ -1,0 +1,21 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://enterprise-social-community-platform.invalid/vex/silo-2026-08-06",
+  "author": "Enterprise Social & Community Platform release engineering",
+  "timestamp": "2026-08-18T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2026-39414"
+      },
+      "products": [
+        {
+          "@id": "pkg:golang/github.com/minio/minio@v0.0.0-20260806142117-3be10fcc1a44"
+        }
+      ],
+      "status": "fixed",
+      "status_notes": "The pinned pgsty/silo RELEASE.2026-08-06 source includes fd69c89, which bounds S3 Select JSON Lines records and preserves the intended error path. See https://github.com/pgsty/silo/releases/tag/RELEASE.2026-06-18T00-00-00Z."
+    }
+  ]
+}

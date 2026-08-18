@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Enterprise Social &amp; Community Platform</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151619">
+  <meta name="application-name" content="Enterprise Social &amp; Community Platform">
+  <meta name="description" content="A portfolio demonstration of an enterprise social and community platform.">
+  <link rel="icon" href="favicon.svg">
+  <!--
+    Self-hosted variable font preloads (Turkish-first content).
+    Only the Latin subsets are preloaded (highest-priority path); the
+    Latin-Extended subsets (Turkish ğ Ğ İ ş Ş) are fetched lazily by the
+    browser on first use via the unicode-range @font-face rules in
+    design-system/typography/typography.css. crossorigin is required because
+    fonts are fetched anonymously; without it the preload is double-fetched.
+  -->
+  <link rel="preload" href="/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <!--
+    Pre-paint theme + reduce-motion application (VAL-DS-005, VAL-DS-007).
+    Runs synchronously in <head> BEFORE first paint so the persisted
+    preference is applied with NO light→dark flash. The Angular ThemeService
+    (core/preferences/theme.service.ts) mirrors this exact resolution logic
+    after boot; the localStorage keys (`escp-pref-theme`, `escp-pref-motion`) and
+    the mode vocabulary (`system` | `light` | `dark` / `system` | `reduce` | `full`)
+    are the binding contract between this script and the service. Never change
+    one without the other.
+  -->
+  <script>
+    (function () {
+      try {
+        var root = document.documentElement;
+        var storedTheme = localStorage.getItem('escp-pref-theme');
+        var themeMode = (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system')
+          ? storedTheme : 'system';
+        var prefersDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var theme = themeMode === 'system' ? (prefersDark ? 'dark' : 'light') : themeMode;
+        root.dataset.theme = theme;
+
+        var storedMotion = localStorage.getItem('escp-pref-motion');
+        var motionMode = (storedMotion === 'reduce' || storedMotion === 'full' || storedMotion === 'system')
+          ? storedMotion : 'system';
+        var prefersReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var reduceMotion = motionMode === 'system' ? prefersReduced : (motionMode === 'reduce');
+        if (reduceMotion) {
+          root.dataset.reduceMotion = '';
+        } else {
+          delete root.dataset.reduceMotion;
+        }
+      } catch (e) {
+        // Any failure: fall back to light theme, no reduce-motion. Never block render.
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+</head>
+<body><app-root></app-root></body>
+</html>

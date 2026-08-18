@@ -1,0 +1,268 @@
+<!--
+  ZmContextRail — right contextual rail (VAL-WSH-012).
+
+  Shows live, route-relevant content (trends / conversation summary / profile
+  summary / safety context / honest empty). Replaces the static marketing +
+  privacy copy. The shell keeps this element mounted across child-route
+  navigations; the component listens to router events and re-fetches on every
+  route change.
+
+  Landmark + a11y contract:
+    - `<section aria-labelledby>` so AT users perceive the rail as a named
+      complementary region;
+    - the body carries `aria-busy` during loading + `aria-live="polite"` so
+      content swaps are announced without interrupting;
+    - the error branch is the only `role="alert"` (route context failing to
+      load is worth an assertive announcement);
+    - the decorative signal-arc motif lives in the header CORNER and never
+      crosses the heading text (VAL-DS-034).
+-->
+<section class="ctx" [attr.data-kind]="kind()" aria-labelledby="ctx-title">
+  <header class="ctx__head">
+    <!-- Decorative signal-arc motif in the corner (emanation/reach). aria-hidden
+         so AT skips it; meaning never depends on it. -->
+    <zm-motif class="ctx__accent" name="signal-arc" aria-hidden="true" />
+    <p class="ctx__kicker">{{ section().kicker }}</p>
+    <h2 class="ctx__title" id="ctx-title">{{ section().title }}</h2>
+    <p class="ctx__lede">{{ lede() }}</p>
+  </header>
+
+  <div
+    class="ctx__body"
+    [attr.aria-busy]="status() === 'loading'"
+    [attr.aria-live]="status() === 'error' ? 'assertive' : 'polite'"
+    [attr.aria-atomic]="status() === 'error' ? 'true' : null"
+  >
+    <!-- ---- Loading ------------------------------------------------- -->
+    @if (status() === 'loading') {
+      <div class="ctx__loading" role="presentation">
+        <span class="ctx__bar" aria-hidden="true"></span>
+        <span class="ctx__bar is-short" aria-hidden="true"></span>
+        <span class="ctx__bar" aria-hidden="true"></span>
+        <span class="ctx__bar is-short" aria-hidden="true"></span>
+      </div>
+    }
+
+    <!-- ---- Recoverable error -------------------------------------- -->
+    @else if (status() === 'error') {
+      <div class="ctx__error" role="alert">
+        <svg class="ctx__error-icon" viewBox="0 0 48 48" focusable="false" aria-hidden="true">
+          <path d="M24 6l19 33H5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M24 19v10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="24" cy="34" r="1.8" fill="currentColor"/>
+        </svg>
+        <p class="ctx__error-text">{{ errorMessage() }}</p>
+        <button type="button" class="ctx__retry zm-feedback" (click)="retry()">Tekrar dene</button>
+      </div>
+    }
+
+    <!-- ---- Honest empty ------------------------------------------- -->
+    @else if (status() === 'empty') {
+      <div class="ctx__empty" role="group" [attr.aria-label]="section().title + ' boş'">
+        <svg class="ctx__empty-icon" viewBox="0 0 48 48" focusable="false" aria-hidden="true">
+          <path d="M10 32c6-10 22-10 28 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M16 36c3-5 13-5 16 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+          <circle cx="24" cy="42" r="2.2" fill="currentColor"/>
+        </svg>
+        <p class="ctx__empty-text">{{ emptyText() }}</p>
+        @if (emptyActionLabel(); as actionLabel) {
+          <a class="ctx__empty-action zm-feedback" [routerLink]="emptyActionLink()">{{ actionLabel }}</a>
+        }
+      </div>
+    }
+
+    <!-- ---- Static (admin safety context) -------------------------- -->
+    @else if (status() === 'static' && kind() === 'admin') {
+      <ul class="ctx__safety">
+        <li>Olayları bağlamından ayrı değerlendir; tek bir gönderi tüm kişiyi tanımlamaz.</li>
+        <li>Kararlarını gerekçelendir; kullanıcı sonucu ve itiraz yolunu net görmeli.</li>
+        <li>Özel veriyi asla dışarı taşıma; denetim eylemlerini kayıtlarda bırak.</li>
+        <li>Kuşkunda kaldığın anda daha üst bir ilkkeye danış; acele kapatma.</li>
+      </ul>
+    }
+
+    <!-- ---- Unknown-route fallback (honest, non-marketing) --------- -->
+    @else if (kind() === 'unknown') {
+      <p class="ctx__fallback">Bu sayfa için sağ panelde gösterilecek canlı bir bağlam henüz yok.</p>
+    }
+
+    <!-- ---- Populated: per-kind content ---------------------------- -->
+    @else {
+      <!-- FEED: trending tags -->
+      @if (kind() === 'feed' && asFeed(data()); as feed) {
+        <ul class="ctx__trends">
+          @for (t of feed.trends; track t.tag; let i = $index) {
+            <li class="ctx__trend">
+              <span class="ctx__trend-rank" aria-hidden="true">{{ i + 1 }}</span>
+              <div class="ctx__trend-main">
+                <a class="ctx__trend-tag" routerLink="/kesfet" [queryParams]="{ q: '#' + t.tag }">#{{ t.tag }}</a>
+                <span
+                  class="ctx__trend-bar"
+                  [style.width.%]="trendRatio(t.score, strongestScore(feed.trends)) * 100"
+                  aria-hidden="true"
+                ></span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- DISCOVERY: why-this-feed explainer + trends + communities -->
+      @if (kind() === 'discovery' && asDiscovery(data()); as d) {
+        <ol class="ctx__explainer">
+          <li>Görünürlük — gizli hesaplar ve kapalı sohbetler keşfe karışmaz.</li>
+          <li>İlişki — takip ettiklerin ve aynı topluluklar ağırlıklıdır.</li>
+          <li>Güncellik — son etkileşimler taze içerikle buluşur.</li>
+        </ol>
+        @if (d.trends.length) {
+          <h3 class="ctx__sub">Gündem</h3>
+          <ul class="ctx__trends">
+            @for (t of d.trends; track t.tag; let i = $index) {
+              <li class="ctx__trend">
+                <span class="ctx__trend-rank" aria-hidden="true">{{ i + 1 }}</span>
+                <div class="ctx__trend-main">
+                  <a class="ctx__trend-tag" routerLink="/kesfet" [queryParams]="{ q: '#' + t.tag }">#{{ t.tag }}</a>
+                  <span
+                    class="ctx__trend-bar"
+                    [style.width.%]="trendRatio(t.score, strongestScore(d.trends)) * 100"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+        @if (d.communities.length) {
+          <h3 class="ctx__sub">Topluluklar</h3>
+          <ul class="ctx__communities">
+            @for (c of d.communities; track c.id) {
+              <li class="ctx__community">
+                <span class="ctx__community-name">{{ c.name }}</span>
+                <span class="ctx__community-meta">{{ c.memberCount }} üye · {{ c.visibility }}</span>
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- MESSAGING: conversation summary -->
+      @if (kind() === 'messaging' && asMessaging(data()); as s) {
+        <dl class="ctx__stats">
+          <div><dt>Toplam sohbet</dt><dd>{{ s.total }}</dd></div>
+          <div><dt>Okunmamış</dt><dd>{{ s.unread }}</dd></div>
+          <div><dt>Birebir</dt><dd>{{ s.direct }}</dd></div>
+          <div><dt>Grup</dt><dd>{{ s.group }}</dd></div>
+        </dl>
+        @if (s.mostRecentTitle) {
+          <p class="ctx__hint">
+            En son: <strong>{{ s.mostRecentTitle }}</strong>
+            @if (s.mostRecentUpdatedAt) { <time>· {{ s.mostRecentUpdatedAt | date:'dd MMM' }}</time> }
+          </p>
+        }
+      }
+
+      <!-- NOTIFICATIONS: type breakdown -->
+      @if (kind() === 'notifications' && asNotifications(data()); as s) {
+        <dl class="ctx__stats">
+          <div><dt>Toplam</dt><dd>{{ s.total }}</dd></div>
+          <div><dt>Okunmamış</dt><dd>{{ s.unread }}</dd></div>
+        </dl>
+        @if (s.byType.length) {
+          <ul class="ctx__breakdown">
+            @for (b of s.byType; track b.type) {
+              <li class="ctx__breakdown-row">
+                <span class="ctx__breakdown-label">{{ notificationTypeLabels[b.type] }}</span>
+                <span class="ctx__breakdown-count">{{ b.count }}</span>
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- PROFILE: profile summary -->
+      @if (kind() === 'profile' && asProfile(data()); as p) {
+        <div class="ctx__profile">
+          <p class="ctx__profile-name">{{ p.displayName }}</p>
+          <p class="ctx__profile-handle">@{{ p.handle }}</p>
+          <ul class="ctx__badges">
+            @if (p.isVerified) { <li class="ctx__badge ctx__badge--ok">Doğrulanmış</li> }
+            @else { <li class="ctx__badge ctx__badge--muted">Doğrulanmamış</li> }
+            <li class="ctx__badge" [class.ctx__badge--ok]="!p.isPrivate" [class.ctx__badge--warn]="p.isPrivate">
+              {{ p.isPrivate ? 'Gizli hesap' : 'Herkese açık' }}
+            </li>
+          </ul>
+          <div class="ctx__progress" role="presentation">
+            <div class="ctx__progress-bar" [style.width.%]="p.completenessPercentage" aria-hidden="true"></div>
+          </div>
+          <p class="ctx__progress-label">Profil tamamlama · %{{ p.completenessPercentage }}</p>
+          @if (p.location || p.organization) {
+            <p class="ctx__hint">
+              @if (p.location) { {{ p.location }} }
+              @if (p.location && p.organization) { · }
+              @if (p.organization) { {{ p.organization }} }
+            </p>
+          }
+        </div>
+      }
+
+      <!-- CONNECTIONS: communities -->
+      @if (kind() === 'connections' && asConnections(data()); as list) {
+        <ul class="ctx__communities">
+          @for (c of list; track c.id) {
+            <li class="ctx__community">
+              <span class="ctx__community-name">{{ c.name }}</span>
+              <span class="ctx__community-meta">{{ c.memberCount }} üye · {{ c.visibility }}</span>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- QUESTIONS: inbox summary -->
+      @if (kind() === 'questions' && asQuestions(data()); as s) {
+        <dl class="ctx__stats">
+          <div><dt>Toplam</dt><dd>{{ s.total }}</dd></div>
+          <div><dt>Bekleyen</dt><dd>{{ s.pending }}</dd></div>
+          <div><dt>Yanıtlanan</dt><dd>{{ s.answered }}</dd></div>
+        </dl>
+        @if (s.mostRecentBody) {
+          <p class="ctx__hint">Son soru: <span class="ctx__hint-quote">“{{ s.mostRecentBody }}”</span></p>
+        }
+      }
+
+      <!-- SAVED: collection summary -->
+      @if (kind() === 'saved' && asSaved(data()); as s) {
+        <dl class="ctx__stats">
+          <div><dt>Toplam kayıt</dt><dd>{{ s.total }}</dd></div>
+        </dl>
+        @if (s.collections.length) {
+          <ul class="ctx__breakdown">
+            @for (c of s.collections; track c.name) {
+              <li class="ctx__breakdown-row">
+                <span class="ctx__breakdown-label">{{ c.name }}</span>
+                <span class="ctx__breakdown-count">{{ c.count }}</span>
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- SETTINGS: account context -->
+      @if (kind() === 'settings' && asSettings(data()); as p) {
+        <div class="ctx__settings">
+          <p class="ctx__profile-name">{{ p.displayName }}</p>
+          <p class="ctx__profile-handle">@{{ p.handle }}</p>
+          <ul class="ctx__kv">
+            <li><span>Tema</span><span>{{ themeLabel(p.theme) }}</span></li>
+            <li><span>Dil</span><span>{{ p.language === 'Turkish' ? 'Türkçe' : 'İngilizce' }}</span></li>
+            <li><span>Hareket</span><span>{{ p.reduceMotion ? 'Azaltılmış' : 'Standart' }}</span></li>
+            <li><span>Gizlilik</span><span>{{ p.isPrivate ? 'Gizli' : 'Açık' }}</span></li>
+          </ul>
+          <div class="ctx__progress" role="presentation">
+            <div class="ctx__progress-bar" [style.width.%]="p.completenessPercentage" aria-hidden="true"></div>
+          </div>
+          <p class="ctx__progress-label">Profil tamamlama · %{{ p.completenessPercentage }}</p>
+        </div>
+      }
+    }
+  </div>
+</section>

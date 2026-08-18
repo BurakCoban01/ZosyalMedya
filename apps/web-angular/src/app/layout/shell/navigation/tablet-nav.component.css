@@ -1,0 +1,223 @@
+/* ============================================================================
+ * ZmTabletNav — compact icon-only rail for tablet widths (768-1049px).
+ *
+ * Fulfils VAL-WSH-007. Consumes ONLY --zm-* tokens (no hardcoded hex). The
+ * rail is the SINGLE persistent nav surface at tablet widths; the contextual
+ * right rail is dropped (becomes an on-demand sheet via contextToggle) so the
+ * workspace is never squeezed between two persistent sidebars. Active route =
+ * >=2 NON-color cues: brand left inset bar (position cue) + raised background
+ * tone + brighter icon + aria-current="page". 44x44 targets throughout.
+ * ============================================================================ */
+
+:host {
+  display: block;
+}
+
+.tablet-rail {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--zm-nav-rail-gap);
+  padding: var(--zm-nav-rail-padding-y) var(--zm-space-2);
+  background: var(--zm-nav-rail-bg);
+  border-right: var(--zm-separator-rule);
+  color: var(--zm-nav-rail-fg);
+  font-family: var(--zm-font-ui);
+}
+
+/* ---- Brand (compact mark) --------------------------------------------- */
+.tablet-rail__logo {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-tablet-item-size);
+  height: var(--zm-nav-tablet-item-size);
+  text-decoration: none;
+  font-family: var(--zm-nav-rail-logo-font);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--zm-nav-rail-logo-fg);
+  border-radius: var(--zm-radius-control);
+}
+
+.tablet-rail__logo-mark {
+  color: var(--zm-nav-rail-logo-fg);
+}
+
+/* ---- Compose entry ---------------------------------------------------- */
+.tablet-rail__compose {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-tablet-item-size);
+  height: var(--zm-nav-tablet-item-size);
+  border: 0;
+  border-radius: var(--zm-nav-compose-radius);
+  background: var(--zm-nav-compose-bg);
+  color: var(--zm-nav-compose-fg);
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.tablet-rail__compose:hover {
+  background: var(--zm-nav-compose-bg-hover);
+}
+
+.tablet-rail__compose:active {
+  background: var(--zm-nav-compose-bg-active);
+}
+
+/* ---- Primary navigation ----------------------------------------------- */
+.tablet-rail__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--zm-space-1);
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.tablet-rail__item {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-tablet-item-size);
+  height: var(--zm-nav-tablet-item-size);
+  border-radius: var(--zm-nav-item-radius);
+  background: var(--zm-nav-item-bg);
+  color: var(--zm-nav-item-fg);
+  text-decoration: none;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.tablet-rail__icon {
+  /* Inherits currentColor from the link/button; the icon SVG uses currentColor. */
+  color: inherit;
+}
+
+.tablet-rail__item:hover {
+  background: var(--zm-nav-item-bg-hover);
+  color: var(--zm-nav-item-fg-hover);
+}
+
+.tablet-rail__logo:focus-visible,
+.tablet-rail__compose:focus-visible,
+.tablet-rail__item:focus-visible,
+.tablet-rail__context:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-nav-item-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ---- Active route (VAL-WSH-001 carried into tablet; >=2 NON-color cues)
+   1. brand left inset bar (position cue — a reserved notch in the rail).
+   2. raised background tone (surface-2 lift).
+   3. brighter icon color (text-1 + brand tint via aria-current cascade).
+   4. aria-current="page" (semantic, bound in template). */
+.tablet-rail__item.is-active,
+.tablet-rail__item.is-current {
+  background: var(--zm-nav-item-bg-active);
+  color: var(--zm-nav-item-fg-active);
+}
+
+.tablet-rail__item.is-active::before,
+.tablet-rail__item.is-current::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--zm-space-2) * -1);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--zm-nav-item-indicator-width);
+  height: 60%;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-item-indicator);
+}
+
+/* ---- Unread badge ----------------------------------------------------- *
+ * Literal count pill in the top-end corner of the item. Distinct shape +
+ * position + digit (never color-only). aria-hidden: count flows through the
+ * link aria-label. */
+.tablet-rail__badge {
+  position: absolute;
+  top: 0.125rem;
+  right: 0.125rem;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-unread-bg);
+  color: var(--zm-nav-unread-fg);
+  font-family: var(--zm-font-ui);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ---- On-demand context drawer toggle ---------------------------------- */
+.tablet-rail__context {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-tablet-item-size);
+  height: var(--zm-nav-tablet-item-size);
+  border: 0;
+  border-radius: var(--zm-nav-item-radius);
+  background: transparent;
+  color: var(--zm-nav-item-fg);
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.tablet-rail__context:hover {
+  background: var(--zm-nav-item-bg-hover);
+  color: var(--zm-nav-item-fg-hover);
+}
+
+/* ---- Account menu host (m2-account-theme-status) --------------------- *
+ * Compact avatar-only trigger; the account menu component owns its visuals.
+ * Anchored at the bottom of the rail (margin-top:auto). */
+.tablet-rail__account {
+  margin-top: auto;
+  display: block;
+}
+
+/* ---- Reduced motion --------------------------------------------------- *
+ * State feedback (background/color) survives via the token cascade; no
+ * spatial motion to suppress in this component. */
+@media (prefers-reduced-motion: reduce) {
+  .tablet-rail__compose,
+  .tablet-rail__item,
+  .tablet-rail__context {
+    transition-duration: 1ms;
+  }
+}
+
+/* ---- Forced colors (Windows high-contrast) ---------------------------- *
+ * Active indicator + focus ring + unread badge map to system semantic colors
+ * so the rail remains operable + the current route unmistakable. */
+@media (forced-colors: active) {
+  .tablet-rail {
+    border-right: 1px solid CanvasText;
+  }
+  .tablet-rail__item.is-active,
+  .tablet-rail__item.is-current {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .tablet-rail__item.is-active::before,
+  .tablet-rail__item.is-current::before {
+    background: LinkText;
+  }
+  .tablet-rail__logo-mark {
+    color: LinkText;
+  }
+  .tablet-rail__badge {
+    background: LinkText;
+    color: Canvas;
+  }
+}

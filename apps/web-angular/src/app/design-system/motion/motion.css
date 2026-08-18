@@ -1,0 +1,242 @@
+/*!
+ * ZosyalMedya Motion System — Living Editorial Network (Tier 3 motion).
+ * ----------------------------------------------------------------------------
+ * Engine ownership order (docs/agent/04-MOTION-INTERACTION.md sec.2):
+ *   1. CSS transitions / keyframes              (this file — default owner)
+ *   2. Angular `animate.enter` / `animate.leave` (class aliases below)
+ *   3. Router View Transitions                  (route continuity policy below)
+ *   4. Web Animations API                       (imperative sequences only)
+ *
+ * HARD RULES (binding across the design system):
+ *   - No new `@angular/animations` triggers (package deprecated in 20.2+).
+ *   - One owner per element/property. Never stack two engines on the same
+ *     transform/opacity.
+ *   - Animate only `transform` / `opacity` / color-group properties. Never
+ *     animate layout (`width`/`height`/`top`/`left`) or large blur/filter
+ *     areas (sec.8 performance rules).
+ *   - Every timing references the `--zm-duration-*` / `--zm-ease-*` tokens
+ *     from tokens.css, so the reduced-motion overrides cascade here
+ *     automatically (VAL-DS-016). State feedback survives because color,
+ *     icon, text and opacity cues do not depend on motion (VAL-DS-017).
+ *
+ * Token primitives live in tokens.css (sec. "Motion"):
+ *     --zm-duration-instant 90ms   --zm-ease-standard   cubic-bezier(.2,.8,.2,1)
+ *     --zm-duration-fast    140ms  --zm-ease-enter      cubic-bezier(.16,1,.3,1)
+ *     --zm-duration-base    220ms  --zm-ease-exit       cubic-bezier(.4,0,1,1)
+ *     --zm-duration-slow    360ms  --zm-ease-emphasized cubic-bezier(.2,.9,.15,1.15)
+ *     --zm-duration-scene   520ms
+ * Under reduced motion tokens collapse to 0/80/100ms + linear (tokens.css).
+ */
+
+/* ============================================================================
+ * 1. SCROLL BEHAVIOR
+ *    Native scroll is never hijacked. `smooth` is opt-in for in-page jumps and
+ *    is disabled under reduced motion (sec.6). No global smooth-scroll, no
+ *    scroll-driven decoration behind reading content.
+ * ============================================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================================================
+ * 2. STATE-FEEDBACK TRANSITIONS (routine interactive controls)
+ *    Routine hover/focus/press/selected feedback uses CSS TRANSITIONS, not
+ *    keyframe animations. Transitions are inherently INTERRUPTIBLE: the
+ *    browser interpolates from the current visual state to the new computed
+ *    value, so rapid repeated input never queues a long sequence (VAL-DS-014).
+ *    Apply `.zm-feedback` (or compose the same transition list in a component)
+ *    to any control whose rest/hover/focus/active/disabled states should
+ *    communicate through color/opacity/transform.
+ *
+ *    Under reduced motion the durations collapse to ~0-80ms via the token
+ *    cascade, so feedback becomes near-instant but STILL discriminable via
+ *    color/icon/text in a static frame (VAL-DS-017).
+ * ============================================================================ */
+.zm-feedback {
+  transition:
+    transform var(--zm-duration-fast) var(--zm-ease-standard),
+    opacity var(--zm-duration-fast) var(--zm-ease-standard),
+    background-color var(--zm-duration-fast) var(--zm-ease-standard),
+    border-color var(--zm-duration-fast) var(--zm-ease-standard),
+    color var(--zm-duration-fast) var(--zm-ease-standard),
+    box-shadow var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+/* ============================================================================
+ * 3. ENTER / LEAVE UTILITY CLASSES
+ *    Drop-in CSS classes for elements that enter/leave the viewport. These
+ *    are the CSS-layer counterpart to Angular's framework `animate.enter` /
+ *    `animate.leave` helpers (which add/remove exactly these classes at the
+ *    right lifecycle, without `@angular/animations`). The `.animate-enter` /
+ *    `.animate-leave` aliases below stay in lock-step so a single vocabulary
+ *    describes entrance regardless of engine.
+ *
+ *    Motion model (sec.4 timing guide):
+ *      enter: opacity 0 -> 1, small translateY(8px) -> 0, ease-enter, base ms.
+ *      leave: opacity 1 -> 0, translateY(0 -> -4px),  ease-exit,  fast ms
+ *             (exit ~15-30% faster than enter).
+ *
+ *    Both are SHORT, COMPOSITOR-FRIENDLY (transform + opacity only) and
+ *    INTERRUPTIBLE: re-triggering `.zm-enter` restarts from the current
+ *    visual state, never queuing (VAL-DS-014). Causality is preserved — the
+ *    new content arrives from below (the direction of reading progress).
+ * ============================================================================ */
+.zm-enter,
+.animate-enter {
+  animation: zm-enter var(--zm-duration-base) var(--zm-ease-enter) both;
+}
+
+.zm-leave,
+.animate-leave {
+  animation: zm-leave var(--zm-duration-fast) var(--zm-ease-exit) both;
+}
+
+@keyframes zm-enter {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zm-leave {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-0.25rem); }
+}
+
+/* ============================================================================
+ * 4. ROUTE VIEW TRANSITIONS (continuity between routes)
+ *    `withViewTransitions()` is enabled on the Router (app.config.ts). On
+ *    every navigation Angular snapshots the outgoing root, mounts the new
+ *    route, and exposes `::view-transition-old(root)` / `::view-transition-new(root)`
+ *    pseudo-elements for the crossfade. We drive both halves from tokens so
+ *    reduced motion collapses them (VAL-DS-013, VAL-DS-016).
+ *
+ *    The drift is small (<=6px) so it never reads as parallax, and the
+ *    incoming route arrives from below (causality). The live DOM — not the
+ *    snapshot — owns focus and scroll after the swap, so interrupted
+ *    navigation cannot trap focus or orphan overlays (VAL-DS-015): any
+ *    dialog/menu/sheet that was open belongs to the OLD route's DOM and is
+ *    removed with it; the new route starts with a clean focus target.
+ * ============================================================================ */
+::view-transition-old(root) {
+  animation: zm-route-leave var(--zm-duration-base) var(--zm-ease-exit) both;
+}
+
+::view-transition-new(root) {
+  animation: zm-route-enter var(--zm-duration-slow) var(--zm-ease-enter) both;
+}
+
+@keyframes zm-route-leave {
+  to { opacity: 0; transform: translateY(-0.25rem); }
+}
+
+@keyframes zm-route-enter {
+  from { opacity: 0; transform: translateY(0.375rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================================
+ * 5. REDUCED MOTION — complete alternatives, never "off" (sec.7)
+ *    tokens.css already collapses every `--zm-duration-*` to 0/80/100ms and
+ *    every `--zm-ease-*` to `linear` under BOTH `@media (prefers-reduced-
+ *    motion: reduce)` and the product `:root[data-reduce-motion]` toggle.
+ *    That makes the utilities above resolve to near-instant opacity changes.
+ *
+ *    But the spatial keyframes still CONTAIN transform steps. To guarantee
+ *    that `Element.getAnimations()` never reports a transform/filter/clip-
+ *    path-bearing effect under reduced motion (VAL-DS-016), we swap each
+ *    spatial animation for a PURE-OPACITY counterpart and kill any looping
+ *    decoration. State feedback is preserved because the `.zm-feedback`
+ *    transitions simply become near-instant color/opacity changes — still
+ *    discriminable in a static frame (VAL-DS-017).
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Spatial enter/leave -> opacity-only crossfade, near-instant. */
+  .zm-enter,
+  .zm-leave,
+  .animate-enter,
+  .animate-leave {
+    animation-duration: var(--zm-duration-instant);
+    animation-timing-function: linear;
+  }
+  .zm-enter,
+  .animate-enter { animation-name: zm-enter-rm; }
+  .zm-leave,
+  .animate-leave { animation-name: zm-leave-rm; }
+
+  /* Route view-transition -> pure opacity crossfade, near-instant. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--zm-duration-instant);
+    animation-timing-function: linear;
+  }
+  ::view-transition-old(root) { animation-name: zm-route-leave-rm; }
+  ::view-transition-new(root) { animation-name: zm-route-enter-rm; }
+
+  /* Loop / parallax kill-switch: no infinite decoration, no spring overshoot.
+     Scoped to animations only; transitions keep their (now token-collapsed)
+     durations so state feedback remains reachable. */
+  *,
+  *::before,
+  *::after {
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* Product-level reduce-motion toggle (ThemeService sets [data-reduce-motion]
+   on <html>). Mirrors the OS rule above so the toggle works on devices whose
+   OS does not signal reduce. */
+:root[data-reduce-motion] html,
+:root[data-reduce-motion] {
+  scroll-behavior: auto;
+}
+
+:root[data-reduce-motion] .zm-enter,
+:root[data-reduce-motion] .zm-leave,
+:root[data-reduce-motion] .animate-enter,
+:root[data-reduce-motion] .animate-leave {
+  animation-duration: var(--zm-duration-instant);
+  animation-timing-function: linear;
+}
+:root[data-reduce-motion] .zm-enter,
+:root[data-reduce-motion] .animate-enter { animation-name: zm-enter-rm; }
+:root[data-reduce-motion] .zm-leave,
+:root[data-reduce-motion] .animate-leave { animation-name: zm-leave-rm; }
+
+:root[data-reduce-motion]::view-transition-old(root) {
+  animation-duration: var(--zm-duration-instant);
+  animation-timing-function: linear;
+  animation-name: zm-route-leave-rm;
+}
+:root[data-reduce-motion]::view-transition-new(root) {
+  animation-duration: var(--zm-duration-instant);
+  animation-timing-function: linear;
+  animation-name: zm-route-enter-rm;
+}
+
+:root[data-reduce-motion] *,
+:root[data-reduce-motion] *::before,
+:root[data-reduce-motion] *::after {
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+}
+
+/* Pure-opacity reduced-motion keyframes — no transform/filter/clip-path, so
+   `Element.getAnimations()` only ever reports opacity-only effects. */
+@keyframes zm-enter-rm       { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zm-leave-rm       { from { opacity: 1; } to { opacity: 0; } }
+@keyframes zm-route-leave-rm { to { opacity: 0; } }
+@keyframes zm-route-enter-rm { from { opacity: 0; } to { opacity: 1; } }
+
+/* ============================================================================
+ * 6. FORCED COLORS (Windows high-contrast)
+ *    Motion never carries state in forced-colors mode. The utilities above
+ *    animate only transform/opacity/color-group; the system theme overrides
+ *    color/border/background to CanvasText/Highlight/LinkText (tokens.css),
+ *    so no animation hides the system edge or focus ring. No change needed
+ *    here beyond documenting the policy: do NOT animate properties that the
+ *    forced-colors theme maps, in a way that would suppress the system edge.
+ * ============================================================================ */

@@ -1,0 +1,2 @@
+:root{--ion-font-family:Inter,ui-sans-serif,system-ui,sans-serif;--ion-color-primary:#e85d45;--ion-color-primary-rgb:232,93,69;--ion-color-primary-contrast:#fff;--ion-background-color:#f5f1e9;--ion-text-color:#17191c;--ion-toolbar-background:rgba(245,241,233,.88);--ion-item-background:#fffdf8;--ion-border-color:#ded8cd}
+@media(prefers-color-scheme:dark){:root{--ion-background-color:#151619;--ion-text-color:#f5f1e9;--ion-toolbar-background:rgba(21,22,25,.9);--ion-item-background:#202226;--ion-border-color:#35373d}}

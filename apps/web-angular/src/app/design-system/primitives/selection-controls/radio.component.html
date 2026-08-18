@@ -1,0 +1,55 @@
+<!--
+  ZmRadio row — same layout model as ZmCheckbox. The visible ring + center dot
+  are presentational chrome (aria-hidden); the native <input type=radio> is
+  the AX/click/focus target.
+-->
+<label
+  class="zm-radio__row zm-feedback"
+  [attr.for]="resolvedId()"
+  [class.is-checked]="checked()"
+  [class.is-disabled]="disabled()"
+  [class.is-error]="hasError()"
+  [class.is-high-contrast]="highContrast()"
+>
+  <span class="zm-radio__ring" aria-hidden="true">
+    <input
+      class="zm-radio__input"
+      [id]="resolvedId()"
+      type="radio"
+      [checked]="checked()"
+      [attr.name]="name()"
+      [attr.value]="value()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [disabled]="disabled()"
+      [required]="required()"
+      (change)="onChange($event)"
+      (focus)="focused.emit()"
+      (blur)="blurred.emit()"
+    />
+    <!--
+      Center dot. Distinct shape from the checkbox checkmark so the control
+      type reads in a static frame. Dot is hidden by default; revealed when
+      the row carries is-checked (driven by the native :checked state via the
+      parent's `checked` input).
+    -->
+    <span class="zm-radio__dot"></span>
+  </span>
+
+  <span class="zm-radio__text">
+    <span class="zm-radio__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="zm-radio__required" aria-hidden="true">*</span>
+      }
+    </span>
+    @if (helper() && helper().trim().length > 0) {
+      <span class="zm-radio__helper" [id]="helperId()">{{ helper() }}</span>
+    }
+    @if (hasError()) {
+      <span class="zm-radio__error" [id]="errorId()" role="alert">
+        {{ error() }}
+      </span>
+    }
+  </span>
+</label>

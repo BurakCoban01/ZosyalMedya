@@ -1,0 +1,197 @@
+:host {
+  display: block;
+  color: var(--zm-text-1);
+}
+
+header {
+  max-width: 48rem;
+}
+
+header h1 {
+  margin: var(--zm-space-3) 0 var(--zm-space-4);
+  font-family: var(--zm-font-display);
+  font-size: clamp(3rem, 6vw, 6rem);
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+header > p:last-child {
+  color: var(--zm-text-2);
+  line-height: var(--zm-leading-body);
+}
+
+.kicker {
+  color: var(--zm-brand);
+  font-size: var(--zm-text-xs);
+  font-weight: 800;
+  letter-spacing: var(--zm-tracking-eyebrow);
+}
+
+.lookup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--zm-space-4);
+  margin: var(--zm-space-12) 0 var(--zm-space-8);
+  padding: var(--zm-space-5);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card);
+  background: var(--zm-canvas-raised);
+}
+
+.lookup > button,
+.actions button {
+  min-height: var(--zm-button-min-height);
+  border: 1px solid var(--zm-button-secondary-border);
+  border-radius: var(--zm-button-radius);
+  background: var(--zm-button-secondary-bg);
+  color: var(--zm-button-secondary-fg);
+  padding: var(--zm-button-padding-y) var(--zm-button-padding-x);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.lookup > button {
+  background: var(--zm-button-primary-bg);
+  color: var(--zm-button-primary-fg);
+  border-color: var(--zm-button-primary-bg);
+}
+
+.lookup > button:hover:not(:disabled) {
+  background: var(--zm-button-primary-bg-hover);
+}
+
+.lookup > button:disabled,
+.actions button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.relationship {
+  animation: reveal var(--zm-duration-base) var(--zm-ease-enter) both;
+}
+
+.state-word {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--zm-space-6);
+  padding-bottom: var(--zm-space-6);
+  border-bottom: 1px solid var(--zm-border-subtle);
+}
+
+.state-word span {
+  color: var(--zm-text-2);
+  font-size: var(--zm-text-xs);
+  letter-spacing: var(--zm-tracking-eyebrow);
+  font-weight: 800;
+}
+
+.state-word strong {
+  color: var(--zm-brand);
+  font-family: var(--zm-font-display);
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  line-height: 0.95;
+  text-align: right;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  border-bottom: 1px solid var(--zm-border-subtle);
+}
+
+dl div {
+  padding: var(--zm-space-6) 0;
+}
+
+dt {
+  color: var(--zm-text-3);
+  font-size: var(--zm-text-xs);
+  font-weight: 800;
+}
+
+dd {
+  margin: var(--zm-space-2) 0 0;
+  font-size: var(--zm-text-lg);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zm-space-3);
+  padding-top: var(--zm-space-8);
+}
+
+.actions button:hover:not(:disabled) {
+  border-color: var(--zm-text-3);
+  background: var(--zm-button-secondary-bg-hover);
+}
+
+.actions .danger {
+  border-color: var(--zm-danger);
+  color: var(--zm-danger);
+}
+
+.message {
+  padding: var(--zm-space-3) var(--zm-space-4);
+  border-inline-start: 3px solid var(--zm-info);
+  background: var(--zm-surface-1);
+  color: var(--zm-text-2);
+  font-size: var(--zm-text-sm);
+}
+
+.message-error,
+.block-warning {
+  border-inline-start-color: var(--zm-danger);
+}
+
+.block-warning {
+  max-width: 42rem;
+  margin-top: var(--zm-space-4);
+  padding: var(--zm-space-3) var(--zm-space-4);
+  border-inline-start: 3px solid var(--zm-danger);
+  background: var(--zm-surface-1);
+  color: var(--zm-text-2);
+  line-height: var(--zm-leading-body);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (max-width: 680px) {
+  .lookup {
+    grid-template-columns: 1fr;
+  }
+
+  .state-word {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .state-word strong {
+    text-align: left;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+  }
+
+  dl div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--zm-border-subtle);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relationship {
+    animation: none;
+  }
+}

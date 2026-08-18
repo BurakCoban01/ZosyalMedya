@@ -1,0 +1,81 @@
+<!--
+  Skip-to-content link (VAL-WSH-009). The first focusable element in the
+  shell: Tab reveals it; activating it (Enter / click) moves focus + scroll to
+  the main content region (`#ana-icerik`, `tabindex="-1"` on `<main>` below),
+  past the navigation rails. Visually hidden until focused (CSS). Activation is
+  handled in JS (`onSkipLink`, preventDefault) so the focus move works inside
+  the SPA without a hashchange re-triggering the router / auth guard; the
+  `href` is kept as a no-JS fallback + right-click semantics.
+-->
+<a class="zm-skip-link" [href]="skipHref" (click)="onSkipLink($event)">İçeriğe geç</a>
+
+<!--
+  Route-change announcer (VAL-WSH-010). A visually-hidden `aria-live` region
+  that receives the new page's main heading text on every client-side route
+  navigation so screen-reader users are informed the page changed.
+-->
+<div class="zm-route-announcer" aria-live="assertive" aria-atomic="true">
+  {{ routeAnnouncement() }}
+</div>
+
+<div class="shell">
+  <!--
+    Navigation variants — all three render in the DOM; the shell CSS shows
+    exactly one at a time (>=1050px desktop rail; 768-1049px tablet rail;
+    <680px mobile bottom-nav). Each variant owns its own interactions + calls
+    the shared ShellNavStateService on mount (singleton de-dupes the API call).
+  -->
+  <zm-desktop-rail class="shell__nav shell__nav--desktop" />
+  <zm-tablet-nav
+    class="shell__nav shell__nav--tablet"
+    (contextToggle)="onContextToggle()"
+  />
+
+  <main class="workspace" [id]="mainId" tabindex="-1">
+    <!--
+      Offline / degraded indicator (VAL-WSH-013). Renders ONLY when the
+      browser reports offline (navigator.onLine === false) — zero layout cost
+      while online. Sits at the top of the workspace so it is visible while the
+      user scrolls a stale (cached) feed, and is a polite live region so AT
+      announces the connectivity change.
+    -->
+    <zm-offline-indicator class="workspace__offline" />
+    <router-outlet />
+  </main>
+
+  <!--
+    Right contextual rail. At desktop it is a persistent aside; at tablet it
+    becomes an on-demand sheet (opened from the tablet nav's Bağlam toggle);
+    at mobile-web it is hidden entirely (context is reachable by navigating
+    to the relevant route). m2-contextual-rail replaces the previous static
+    marketing/privacy copy with live, route-aware content (VAL-WSH-012):
+    trends on the feed, conversation summary on messaging, profile summary,
+    safety context on admin, honest empty states — all driven by the real API.
+  -->
+  <aside class="context shell__context">
+    <zm-context-rail class="context__rail" />
+  </aside>
+
+  <!--
+    On-demand context drawer for tablet widths (VAL-WSH-007). The same
+    `<zm-context-rail>` content as the persistent desktop aside; opens as a
+    slide-in sheet from the end edge so the workspace is never squeezed
+    between two persistent sidebars. Hidden by CSS at desktop (where the aside
+    is already visible) and at mobile-web (where the small viewport makes a
+    sheet inappropriate).
+  -->
+  <zm-sheet
+    side="end"
+    label="Bağlam"
+    class="shell__context-sheet"
+    (opened)="onContextOpened()"
+    (closed)="onContextClosed()"
+  >
+    <div class="context context--sheet">
+      <zm-context-rail />
+    </div>
+  </zm-sheet>
+
+  <!-- Mobile-web bottom navigation (shown via CSS below 680px). -->
+  <zm-mobile-bottom-nav class="shell__nav shell__nav--mobile" />
+</div>

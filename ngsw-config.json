@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [{ "name": "app", "installMode": "prefetch", "resources": { "files": ["/favicon.ico", "/index.html", "/*.css", "/*.js"] } }],
+  "dataGroups": [{ "name": "profile-read-cache", "urls": ["/api/v1/profiles/**"], "cacheConfig": { "strategy": "freshness", "maxSize": 50, "maxAge": "1h", "timeout": "3s" } }]
+}

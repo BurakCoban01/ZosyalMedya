@@ -1,0 +1,285 @@
+/*!
+ * ZmSwitch styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-selection-*` + `--zm-switch-*` component layers
+ * (tokens.css §3) which compose the semantic `--zm-brand` / `--zm-text-*` /
+ * `--zm-border-*` / `--zm-focus` / `--zm-danger` roles. No hardcoded hex /
+ * rgb / oklch (VAL-DS-002).
+ *
+ * State coverage (VAL-DS-024): rest, hover, focus-visible, on, off, disabled,
+ * loading/pending, error, high-contrast. The on/off state is conveyed by BOTH
+ * thumb position (slide) AND track fill — never color alone.
+ */
+
+/* ============================================================================
+ * ROW — label-first layout (label left, switch right)
+ * ============================================================================ */
+.zm-switch__row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zm-space-4);
+  min-height: var(--zm-button-icon-size);
+  padding-block: calc(var(--zm-space-1) / 2);
+  font-family: var(--zm-font-ui);
+  color: var(--zm-selection-label-fg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ============================================================================
+ * TRACK — visible pill that holds the thumb + native input
+ * ============================================================================ */
+.zm-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--zm-switch-track-w);
+  height: var(--zm-switch-track-h);
+  border-radius: var(--zm-switch-track-radius);
+  background: var(--zm-switch-track-off);
+  border: var(--zm-border-width-hair) solid var(--zm-border-subtle);
+  display: inline-flex;
+  align-items: center;
+  transition:
+    background-color var(--zm-selection-duration) var(--zm-selection-ease),
+    border-color var(--zm-selection-duration) var(--zm-selection-ease),
+    box-shadow var(--zm-selection-duration) var(--zm-selection-ease);
+}
+
+/* ----------------------------------------------------------------------------
+ * ON — track fills with the brand; thumb slides to the end side (position cue)
+ * ---------------------------------------------------------------------------- */
+.zm-switch__row.is-checked .zm-switch__track {
+  background: var(--zm-switch-track-on);
+  border-color: var(--zm-switch-track-on);
+}
+
+/* ============================================================================
+ * THUMB — slides between start (off) and end (on). Position is the primary
+ * non-color cue; the track fill is the reinforcing cue. Animate transform
+ * only (never left/top — those thrash layout).
+ * ============================================================================ */
+.zm-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--zm-space-1) / 2 + (var(--zm-switch-track-h) - var(--zm-switch-thumb)) / 2 - (var(--zm-switch-track-h) - var(--zm-switch-thumb)) / 2);
+  width: var(--zm-switch-thumb);
+  height: var(--zm-switch-thumb);
+  border-radius: 50%;
+  background: var(--zm-switch-thumb-off);
+  /* The thumb sits 3px in from the start edge; translateX slides it to the
+     opposite edge (track-width - thumb - inset). */
+  transform: translate(0, -50%);
+  box-shadow: var(--zm-shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform var(--zm-selection-duration) var(--zm-selection-ease),
+    background-color var(--zm-selection-duration) var(--zm-selection-ease);
+}
+.zm-switch__row.is-checked .zm-switch__thumb {
+  /* slide distance = track-width - thumb - 2× inset (the inset is symmetric) */
+  transform: translate(
+    calc(var(--zm-switch-track-w) - var(--zm-switch-thumb) - var(--zm-space-1)),
+    -50%
+  );
+  background: var(--zm-switch-thumb-on);
+}
+
+/* Native input — visually hidden but functional (the click target + focus
+   recipient). Sized to overlap the whole track so the hit area is full. */
+.zm-switch__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* ============================================================================
+ * HOVER — track tone lifts (off path only; on path deepens brand)
+ * ============================================================================ */
+.zm-switch__row:hover:not(.is-disabled) .zm-switch__track {
+  background: var(--zm-switch-track-off-hover);
+}
+.zm-switch__row.is-checked:hover:not(.is-disabled) .zm-switch__track {
+  background: var(--zm-switch-track-on-hover);
+  border-color: var(--zm-switch-track-on-hover);
+}
+
+/* ============================================================================
+ * FOCUS-VISIBLE — theme-aware ring on the track (never obscured)
+ * ============================================================================ */
+.zm-switch__row:has(.zm-switch__input:focus-visible) .zm-switch__track {
+  outline: var(--zm-focus-ring-width) solid var(--zm-selection-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ============================================================================
+ * DISABLED — neutral, non-interactive. Track + thumb still visible.
+ * ============================================================================ */
+.zm-switch__row.is-disabled {
+  cursor: not-allowed;
+  color: var(--zm-selection-fg-disabled);
+}
+.zm-switch__row.is-disabled .zm-switch__track {
+  background: var(--zm-switch-track-disabled);
+  border-color: var(--zm-selection-border-disabled);
+}
+.zm-switch__row.is-disabled .zm-switch__thumb {
+  background: var(--zm-switch-thumb-disabled);
+  box-shadow: none;
+}
+
+/* ============================================================================
+ * LOADING — spinner overlays the thumb; row disabled; aria-busy set.
+ *    The thumb stays at the LAST committed position so the user reads the
+ *    current state, not the in-flight target.
+ * ============================================================================ */
+.zm-switch__spinner {
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  border: var(--zm-border-width-strong) solid var(--zm-brand-on);
+  border-top-color: transparent;
+  border-right-color: transparent;
+  animation: zm-switch-spin 0.7s linear infinite;
+}
+@keyframes zm-switch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.zm-switch__row.is-loading:not(.is-checked) .zm-switch__thumb {
+  /* in dark/inverse contexts the spinner needs to read against the off thumb;
+     keep currentColor via the brand-on token which inverts with the track */
+  background: var(--zm-switch-thumb-off);
+}
+
+/* ============================================================================
+ * ERROR — danger ring on the track + message text underneath
+ * ============================================================================ */
+.zm-switch__row.is-error .zm-switch__track {
+  border-color: var(--zm-selection-error-ring);
+}
+.zm-switch__row.is-error:has(.zm-switch__input:focus-visible) .zm-switch__track {
+  outline-color: var(--zm-selection-error-ring);
+}
+
+/* ============================================================================
+ * HIGH-CONTRAST — author-side reinforcement
+ * ============================================================================ */
+.zm-switch__row.is-high-contrast .zm-switch__track {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * LABEL + HELPER + ERROR TEXT
+ * ============================================================================ */
+.zm-switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  /* label sits on the left of the row */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.zm-switch__label {
+  font-size: var(--zm-selection-label-size);
+  font-weight: var(--zm-selection-label-weight);
+  line-height: var(--zm-selection-line-height);
+  color: var(--zm-selection-label-fg);
+}
+.zm-switch__required {
+  margin-left: 0.25ch;
+  color: var(--zm-selection-error-fg);
+}
+.zm-switch__helper {
+  font-size: var(--zm-selection-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-helper-fg);
+}
+.zm-switch__error {
+  font-size: var(--zm-selection-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-selection-error-fg);
+}
+.zm-switch__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+.zm-switch__row.is-disabled .zm-switch__label,
+.zm-switch__row.is-disabled .zm-switch__helper {
+  color: var(--zm-selection-fg-disabled);
+}
+
+/* ============================================================================
+ * REDUCED MOTION — thumb slide collapses to near-instant (token cascade +
+ * explicit fallbacks). The spinner under loading is killed (loop kill-switch
+ * in motion.css) and replaced by the thumb resting at the committed state.
+ * State still discriminable via thumb position + track fill.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-switch__row,
+  .zm-switch__track,
+  .zm-switch__thumb {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+  .zm-switch__spinner {
+    animation-duration: var(--zm-duration-scene);
+  }
+}
+:host-context([data-reduce-motion]) .zm-switch__row,
+:host-context([data-reduce-motion]) .zm-switch__track,
+:host-context([data-reduce-motion]) .zm-switch__thumb {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+:host-context([data-reduce-motion]) .zm-switch__spinner {
+  animation: none;
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Contrast themes)
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-switch__track {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-switch__thumb {
+    background: ButtonText;
+  }
+  .zm-switch__row.is-checked .zm-switch__track {
+    background: Highlight;
+    border-color: Highlight;
+  }
+  .zm-switch__row.is-checked .zm-switch__thumb {
+    background: HighlightText;
+  }
+  .zm-switch__row:has(.zm-switch__input:focus-visible) .zm-switch__track {
+    outline-color: Highlight;
+  }
+  .zm-switch__row.is-disabled .zm-switch__track {
+    border-color: GrayText;
+    background: transparent;
+  }
+  .zm-switch__row.is-disabled .zm-switch__thumb {
+    background: GrayText;
+  }
+  .zm-switch__row.is-disabled .zm-switch__label,
+  .zm-switch__row.is-disabled .zm-switch__helper {
+    color: GrayText;
+  }
+}

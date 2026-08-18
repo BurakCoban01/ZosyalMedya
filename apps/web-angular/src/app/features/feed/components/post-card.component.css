@@ -1,0 +1,439 @@
+/* ZmPostCard — domain-rich post presentation.
+ *
+ * Owns the presentation layer above the projected action bar. Long-form body
+ * measure is 70ch (68-72ch band, VAL-DS-011 / VAL-FEED-019). Media uses a
+ * reserved aspect-ratio box so settle never causes CLS (VAL-FEED-011).
+ *
+ * Consumes --zm-post-frame-* / --zm-post-identity-* + semantic tokens only.
+ * No hardcoded hex. */
+
+:host {
+  display: block;
+}
+
+.zm-post-card__share-kind {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 var(--zm-space-3, 0.75rem);
+  color: var(--zm-discovery);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  font-weight: 700;
+}
+
+.zm-post-card__share-kind svg {
+  flex: none;
+}
+
+/* Header: identity + metadata row. */
+.zm-post-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zm-space-4, 1rem);
+  flex-wrap: wrap;
+}
+
+.zm-post-card__header zm-post-identity {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.zm-post-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-space-3, 0.75rem);
+  flex-wrap: wrap;
+  padding-top: 0.15rem;
+}
+
+.zm-post-card__time {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  color: var(--zm-post-identity-meta-fg);
+  cursor: help;
+}
+
+.zm-post-card__time-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.zm-post-card__time-link:hover .zm-post-card__time,
+.zm-post-card__time-link:focus-visible .zm-post-card__time {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.zm-post-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--zm-post-identity-meta-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.zm-post-card__views svg {
+  flex: none;
+}
+
+/* Audience chip — a glyph + label pair (non-color cue). */
+.zm-post-card__audience {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-post-identity-meta-fg);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--zm-radius-pill, 999px);
+  border: 1px solid var(--zm-border-subtle);
+}
+
+.zm-post-card__audience-glyph {
+  color: var(--zm-text-3);
+  flex: none;
+}
+
+/* Content-warning gate (VAL-FEED-010). */
+.zm-post-card__warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: var(--zm-space-3, 0.75rem);
+  padding: 0.5rem 0.7rem;
+  border-inline-start: 3px solid var(--zm-warning);
+  background: color-mix(in srgb, var(--zm-warning) 14%, transparent);
+  border-radius: 0 var(--zm-radius-control, 0.5rem) var(--zm-radius-control, 0.5rem) 0;
+  color: var(--zm-text-1);
+  font-size: var(--zm-text-sm);
+}
+
+.zm-post-card__warning-glyph {
+  color: var(--zm-warning);
+  flex: none;
+}
+
+.zm-post-card__warning-text {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.zm-post-card__reveal {
+  border: 1px solid var(--zm-border-strong);
+  background: transparent;
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 650;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--zm-radius-control, 0.5rem);
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.zm-post-card__reveal:hover {
+  background: color-mix(in srgb, var(--zm-warning) 10%, transparent);
+}
+
+.zm-post-card__reveal:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+/* Body — long-form reading column (68-72ch). */
+.zm-post-card__body {
+  margin: var(--zm-space-4, 1rem) 0;
+  max-width: var(--zm-post-frame-body-measure);
+}
+
+.zm-post-card__text {
+  font-family: var(--zm-post-frame-body-font);
+  font-size: var(--zm-post-frame-body-size);
+  line-height: var(--zm-post-frame-body-leading);
+  color: var(--zm-text-1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+/* Line clamp until expanded. Uses -webkit-box (Chromium-supported) so the
+   expand reveals the full text without a layout jump above the toggle. */
+.zm-post-card__text.is-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.zm-post-card__expand {
+  display: inline-block;
+  margin-top: 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--zm-brand);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  border-radius: var(--zm-radius-control, 0.5rem);
+}
+
+.zm-post-card__expand:hover {
+  color: var(--zm-brand-hover);
+  text-decoration: underline;
+}
+
+.zm-post-card__expand:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+/* Real source context for reposts and quote posts. */
+.zm-post-card__source {
+  display: grid;
+  gap: var(--zm-space-2, 0.5rem);
+  margin: var(--zm-space-3, 0.75rem) 0;
+  padding: var(--zm-space-4, 1rem);
+  border: 1px solid var(--zm-border-subtle);
+  border-inline-start: 3px solid var(--zm-discovery);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+}
+
+.zm-post-card__source-label {
+  color: var(--zm-discovery);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  font-weight: 750;
+  letter-spacing: var(--zm-tracking-wide);
+  text-transform: uppercase;
+}
+
+.zm-post-card__source-text {
+  margin: 0;
+  color: var(--zm-text-1);
+  font-family: var(--zm-post-frame-body-font);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-leading-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.zm-post-card__source-meta,
+.zm-post-card__source-loading,
+.zm-post-card__source-unavailable {
+  color: var(--zm-text-3);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+}
+
+.zm-post-card__source-loading,
+.zm-post-card__source-unavailable {
+  margin: var(--zm-space-3, 0.75rem) 0;
+  padding: var(--zm-space-3, 0.75rem);
+  border-inline-start: 3px solid var(--zm-border-strong);
+  background: var(--zm-surface-1);
+}
+
+.zm-post-card__source-unavailable {
+  color: var(--zm-text-2);
+}
+
+/* Link preview card (VAL-FEED-011). */
+.zm-post-card__link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: var(--zm-space-3, 0.75rem) 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+  color: var(--zm-text-1);
+  text-decoration: none;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  transition: border-color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.zm-post-card__link:hover {
+  border-color: var(--zm-brand);
+}
+
+.zm-post-card__link:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.zm-post-card__link-glyph {
+  color: var(--zm-discovery);
+  flex: none;
+}
+
+.zm-post-card__link-host {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.zm-post-card__link-action {
+  margin-left: auto;
+  color: var(--zm-brand);
+  white-space: nowrap;
+}
+
+/* Media frame — reserved dimensions (aspect-ratio) so no CLS (VAL-FEED-011). */
+.zm-post-card__media {
+  margin: var(--zm-space-3, 0.75rem) 0 0;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+  display: grid;
+  place-items: center;
+  gap: var(--zm-space-2, 0.5rem);
+  overflow: hidden;
+}
+
+.zm-post-card__media-placeholder {
+  color: var(--zm-text-3);
+}
+
+.zm-post-card__media-caption {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  color: var(--zm-text-3);
+  text-align: center;
+}
+
+/* Hashtags. */
+.zm-post-card__tags {
+  display: flex;
+  gap: var(--zm-space-2, 0.5rem);
+  flex-wrap: wrap;
+  margin: var(--zm-space-3, 0.75rem) 0 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  color: var(--zm-discovery);
+}
+
+.zm-post-card__tag {
+  overflow-wrap: anywhere;
+}
+
+/* Poll (VAL-FEED-011). */
+.zm-post-card__poll {
+  display: grid;
+  gap: var(--zm-space-2, 0.5rem);
+  margin: var(--zm-space-4, 1rem) 0;
+  padding: var(--zm-space-4, 1rem);
+  border: 1px solid var(--zm-border-subtle);
+  border-radius: var(--zm-radius-card, 0.75rem);
+  background: var(--zm-surface-1);
+}
+
+.zm-post-card__poll-question {
+  color: var(--zm-text-1);
+  font-family: var(--zm-font-ui);
+}
+
+.zm-post-card__poll-options {
+  display: grid;
+  gap: var(--zm-space-2, 0.5rem);
+}
+
+.zm-post-card__poll-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--zm-space-2, 0.5rem);
+  border: 1px solid var(--zm-border-subtle);
+  background: var(--zm-canvas);
+  color: var(--zm-text-1);
+  padding: 0.7rem;
+  cursor: pointer;
+  font-family: var(--zm-font-ui);
+  border-radius: var(--zm-radius-control, 0.5rem);
+  min-height: 44px;
+  transition: border-color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.zm-post-card__poll-option:hover:not(:disabled) {
+  border-color: var(--zm-brand);
+}
+.zm-post-card__poll-option.is-selected { border-color:var(--zm-brand); color:var(--zm-text-1); font-weight:700; box-shadow:inset 3px 0 0 var(--zm-brand); }
+.zm-post-card__poll-submit { min-height:44px; justify-self:start; border:1px solid var(--zm-brand); border-radius:var(--zm-radius-control,.5rem); background:var(--zm-button-primary-bg); color:var(--zm-button-primary-fg); padding:.55rem .8rem; cursor:pointer; font:600 var(--zm-text-sm) var(--zm-font-ui); }
+.zm-post-card__poll-submit:disabled { opacity:.55; cursor:not-allowed; }
+.zm-post-card__poll-submit:focus-visible { outline:3px solid var(--zm-focus); outline-offset:2px; }
+
+.zm-post-card__poll-option:focus-visible:not(:disabled) {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.zm-post-card__poll-option-text {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.zm-post-card__poll-option-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--zm-text-3);
+  font-size: var(--zm-text-sm);
+}
+
+.zm-post-card__poll-meta {
+  color: var(--zm-text-3);
+}
+
+/* Discovery reason (VAL-FEED-017). */
+.zm-post-card__reason {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: var(--zm-space-3, 0.75rem);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-xs);
+  color: var(--zm-discovery);
+  font-style: italic;
+}
+
+.zm-post-card__reason-glyph {
+  color: var(--zm-discovery);
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive.
+ * ------------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .zm-post-card__text {
+    font-size: var(--zm-text-md);
+  }
+  .zm-post-card__audience-label {
+    /* Keep the glyph + hide the verbose label on very narrow screens, but the
+       audience remains announced via the visible time + the glyph cue. */
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Forced colors.
+ * ------------------------------------------------------------------ */
+@media (forced-colors: active) {
+  .zm-post-card__link,
+  .zm-post-card__media,
+  .zm-post-card__poll,
+  .zm-post-card__source {
+    border-color: ButtonText;
+  }
+  .zm-post-card__audience {
+    border-color: GrayText;
+  }
+}

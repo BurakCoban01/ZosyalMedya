@@ -1,0 +1,25 @@
+.community-card {
+  display: block;
+  padding: var(--zm-space-4) 0;
+  border-top: 1px solid var(--zm-border-subtle);
+  color: var(--zm-text-1);
+  text-decoration: none;
+}
+
+.community-card:hover {
+  background: var(--zm-surface-1);
+}
+
+.community-card:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-focus);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+.community-card strong {
+  font: 700 var(--zm-text-lg) var(--zm-font-display);
+}
+
+.community-card span {
+  color: var(--zm-text-3);
+  font-size: var(--zm-text-sm);
+}

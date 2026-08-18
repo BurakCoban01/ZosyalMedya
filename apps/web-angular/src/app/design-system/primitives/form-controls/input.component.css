@@ -1,0 +1,307 @@
+/*!
+ * ZmInput styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Consumes ONLY the `--zm-input-*` component layer (tokens.css §3) which itself
+ * composes the semantic `--zm-surface-*` / `--zm-text-*` / `--zm-border-*` /
+ * `--zm-focus` / `--zm-danger` roles. No hardcoded hex / rgb / oklch appears in
+ * this file (VAL-DS-002).
+ *
+ * State coverage (VAL-DS-023): rest, hover, focus-visible, disabled, error,
+ * high-contrast. Under forced-colors the control edge + focus ring remain
+ * visible (never `border: none` without an alternative).
+ */
+
+/* ============================================================================
+ * HOST + FIELD SHELL
+ * ============================================================================ */
+.zm-input {
+  display: block;
+  /* Block so the field takes the full width of its form cell; consumers wrap
+     in a grid/flex when they want inline fields side-by-side. */
+}
+
+.zm-input__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+/* ============================================================================
+ * PERSISTENT LABEL (VAL-DS-021)
+ *    Always rendered, always associated via <label for=id>. Visible at rest,
+ *    when populated, and when in error. Carries the required marker.
+ * ============================================================================ */
+.zm-input__label {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-label-size);
+  font-weight: var(--zm-input-label-weight);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-label-fg);
+  /* Tap target padding so the label itself is easy to click → focuses input. */
+  align-self: flex-start;
+  cursor: pointer;
+}
+.zm-input__required {
+  margin-left: 0.25ch;
+  color: var(--zm-input-error);
+}
+/* Required marker stays meaningful in forced-colors (color never the only cue
+   — the glyph '*' itself is the marker). */
+
+/* ============================================================================
+ * CONTROL ROW (input + reveal toggle)
+ * ============================================================================ */
+.zm-input__control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  /* The control row owns the visible field box so the focus ring + border
+     wrap the input AND the reveal button together (the reveal is part of the
+     field, not a sibling control). */
+}
+
+/* ============================================================================
+ * NATIVE INPUT
+ *    Min-height enforces the WCAG 2.2 44px target. Padding reserves room for
+ *    the trailing reveal button when present (is-password).
+ * ============================================================================ */
+.zm-input__input {
+  flex: 1 1 auto;
+  min-height: var(--zm-input-min-height);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--zm-input-padding-y) var(--zm-input-padding-x);
+  /* shape + material */
+  border-radius: var(--zm-input-radius);
+  border: var(--zm-border-width-hair) solid var(--zm-input-border);
+  background: var(--zm-input-bg);
+  /* typography */
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-fg);
+  /* Placeholder tone — deliberately low-emphasis, never a label substitute. */
+  /* behavior */
+  cursor: text;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--zm-input-duration) var(--zm-input-ease),
+    border-color var(--zm-input-duration) var(--zm-input-ease),
+    box-shadow var(--zm-input-duration) var(--zm-input-ease),
+    outline-offset var(--zm-input-duration) var(--zm-input-ease);
+}
+.zm-input__input::placeholder {
+  color: var(--zm-input-placeholder);
+  opacity: 1;
+}
+/* Browsers that support accent-color inherit the brand on autofill UI; the
+   autofill background is neutralized so the field box keeps its design tone. */
+.zm-input__input:-webkit-autofill {
+  -webkit-text-fill-color: var(--zm-input-fg);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Reserve trailing room for the reveal button so long passwords don't slip
+   under the toggle. */
+.zm-input__field.is-password .zm-input__input {
+  padding-right: calc(var(--zm-input-trailing-pad) + var(--zm-input-icon-size));
+}
+
+/* ============================================================================
+ * STATES — hover, focus-visible, disabled, error, high-contrast
+ * ============================================================================ */
+
+/* Hover — gentle surface lift + stronger border. */
+.zm-input__input:hover:not([disabled]):not(:focus) {
+  background: var(--zm-input-bg-hover);
+  border-color: var(--zm-input-border-hover);
+}
+
+/* Focus-visible — theme-aware ring; never obscured, always present. We use
+   `:focus-visible` so mouse clicks don't paint the ring (keyboard users do),
+   matching the Web contract. The ring sits OUTSIDE the box via outline-offset. */
+.zm-input__input:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-input-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+  border-color: var(--zm-input-border-focus);
+  background: var(--zm-input-bg-focus);
+}
+/* Keep focus when the reveal toggle is the active element inside the control —
+   the field group should read as focused while the user operates the toggle. */
+.zm-input__control:focus-within .zm-input__input {
+  border-color: var(--zm-input-border-focus);
+}
+
+/* Disabled — neutral, non-interactive. Cursor not-allowed. Border stays
+   visible (no border:none) so the control edge survives. */
+.zm-input__field.is-disabled .zm-input__input,
+.zm-input__input:disabled {
+  background: var(--zm-input-bg-disabled);
+  border-color: var(--zm-input-border-disabled);
+  color: var(--zm-input-fg-disabled);
+  cursor: not-allowed;
+  opacity: 1; /* tone carries the disabled state, not opacity */
+}
+.zm-input__field.is-disabled {
+  opacity: 0.7;
+}
+.zm-input__field.is-disabled .zm-input__label,
+.zm-input__field.is-disabled .zm-input__helper {
+  color: var(--zm-input-fg-disabled);
+}
+
+/* Error (VAL-DS-021). The danger ring couples with the error text node so the
+   state is never color-only (the icon-like ring shape + the message text are
+   non-color cues). */
+.zm-input__field.is-error .zm-input__input {
+  border-color: var(--zm-input-error-ring);
+}
+.zm-input__field.is-error .zm-input__input:focus-visible {
+  outline-color: var(--zm-input-error-ring);
+  border-color: var(--zm-input-error-ring);
+}
+
+/* High-contrast (author-side reinforcement). The OS forced-colors path is
+   handled by the `@media (forced-colors: active)` rule below + tokens.css;
+   this input is for author-controlled high-visibility contexts (fields on
+   imagery, overlays). Doubles the structural border. */
+.zm-input__field.is-high-contrast .zm-input__input {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+.zm-input__field.is-high-contrast .zm-input__input:focus-visible {
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * PASSWORD REVEAL TOGGLE (VAL-DS-022)
+ *    Lives inside the control row so focus stays within the field group on
+ *    reveal. aria-pressed + aria-label carry the state to AT; the glyph is
+ *    decorative (aria-hidden). type="button" so it never submits.
+ * ============================================================================ */
+.zm-input__reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--zm-input-trailing-pad) + var(--zm-input-icon-size));
+  min-height: var(--zm-input-min-height);
+  padding: 0 var(--zm-input-padding-x);
+  box-sizing: border-box;
+  background: transparent;
+  border: 0; /* the field border is owned by the input; this is an inner control */
+  border-radius: var(--zm-input-radius);
+  color: var(--zm-input-helper);
+  font-family: var(--zm-font-ui);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--zm-input-duration) var(--zm-input-ease),
+    background-color var(--zm-input-duration) var(--zm-input-ease);
+}
+.zm-input__reveal:hover:not([disabled]) {
+  color: var(--zm-input-label-fg);
+  background: var(--zm-input-bg-hover);
+}
+/* The reveal toggle has its own focus ring so keyboard users see it. */
+.zm-input__reveal:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-input-focus-ring);
+  outline-offset: calc(-1 * var(--zm-focus-ring-offset));
+  border-radius: var(--zm-input-radius);
+}
+.zm-input__reveal[disabled] {
+  cursor: not-allowed;
+  color: var(--zm-input-fg-disabled);
+}
+.zm-input__reveal-icon {
+  width: var(--zm-input-icon-size);
+  height: var(--zm-input-icon-size);
+  display: block;
+  /* currentColor follows the control color (theme + forced-colors aware). */
+}
+
+/* ============================================================================
+ * HELPER + ERROR TEXT (VAL-DS-021)
+ *    Both render below the field. The error node's id is referenced by the
+ *    input's aria-describedby; the field carries aria-invalid when error is
+ *    present. The error text itself is a non-color cue (the message is the
+ *    primary signal; the color is reinforcing).
+ * ============================================================================ */
+.zm-input__helper {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-helper);
+}
+.zm-input__error {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-error);
+  /* The error icon-shape (a leading marker) is a non-color cue so the state
+     survives grayscale conversion. */
+}
+.zm-input__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+  /* The glyph is decorative reinforcement of the text; the text message is the
+     primary signal. Kept inside the error node so it is announced naturally. */
+}
+
+/* ============================================================================
+ * REDUCED MOTION — state feedback without spatial motion
+ *    tokens.css collapses every --zm-duration-* under both OS reduce and the
+ *    [data-reduce-motion] product toggle, so the input's transitions become
+ *    near-instant (state still discriminable in a static frame). See the
+ *    button.component.css encapsulation note: component-css
+ *    `:root[data-reduce-motion]` selectors never match <html>, so the product
+ *    toggle path uses `:host-context([data-reduce-motion])`.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-input__input,
+  .zm-input__reveal {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-input__input,
+:host-context([data-reduce-motion]) .zm-input__reveal {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+
+/* ============================================================================
+ * FORCED COLORS (Windows high-contrast / Windows Contrast themes)
+ *    The control edge + focus ring must remain visible. We force a visible
+ *    border + map the focus ring to the system Highlight color. tokens.css
+ *    already remaps --zm-border-* / --zm-focus / --zm-text-* under
+ *    forced-colors; here we additionally guarantee the edge width and ensure
+ *    the disabled state still reads.
+ * ============================================================================ */
+@media (forced-colors: active) {
+  .zm-input__input,
+  .zm-input__field.is-high-contrast .zm-input__input {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-input__input:focus-visible,
+  .zm-input__reveal:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-input__input:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+  .zm-input__reveal {
+    color: ButtonText;
+  }
+  .zm-input__reveal[disabled] {
+    color: GrayText;
+  }
+}

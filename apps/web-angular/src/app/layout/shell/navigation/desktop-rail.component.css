@@ -1,0 +1,268 @@
+/* ============================================================================
+ * ZmDesktopRail — editorial left rail (Living Editorial Network).
+ *
+ * Fulfils VAL-WSH-001..004. Consumes ONLY --zm-* tokens (no hardcoded hex).
+ * Active route = >=3 NON-color cues: signal-arc indicator (distinct shape in a
+ * reserved leading slot) + raised surface tone + heavier weight + brighter ink
+ * + aria-current="page". Reduced-motion collapses the pulse-node to a static
+ * node; forced-colors maps the active indicator + focus ring to system colors.
+ * ============================================================================ */
+
+:host {
+  display: block;
+}
+
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-nav-rail-gap);
+  padding: var(--zm-nav-rail-padding-y) var(--zm-nav-rail-padding-x);
+  background: var(--zm-nav-rail-bg);
+  border-right: var(--zm-separator-rule);
+  color: var(--zm-nav-rail-fg);
+  font-family: var(--zm-font-ui);
+}
+
+/* ---- Brand -------------------------------------------------------------- */
+.rail-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.1em;
+  text-decoration: none;
+  font-family: var(--zm-nav-rail-logo-font);
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--zm-nav-rail-logo-fg);
+  border-radius: var(--zm-radius-control);
+}
+
+.rail-logo__mark {
+  color: var(--zm-nav-rail-logo-fg);
+}
+
+.rail-logo__dot {
+  color: var(--zm-nav-rail-logo-mark);
+}
+
+/* ---- Compose entry (VAL-WSH-004) ---------------------------------------- */
+.rail-compose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zm-space-2);
+  min-height: var(--zm-nav-compose-min-height);
+  padding: var(--zm-space-2) var(--zm-space-4);
+  border: 0;
+  border-radius: var(--zm-nav-compose-radius);
+  background: var(--zm-nav-compose-bg);
+  color: var(--zm-nav-compose-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  font-weight: var(--zm-nav-compose-weight);
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              transform var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.rail-compose__glyph {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+
+.rail-compose:hover {
+  background: var(--zm-nav-compose-bg-hover);
+}
+
+.rail-compose:active {
+  background: var(--zm-nav-compose-bg-active);
+  transform: scale(0.99);
+}
+
+/* ---- Primary navigation (VAL-WSH-001 / VAL-WSH-002) --------------------- */
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-1);
+  margin-top: auto;       /* push sign-out to the bottom, keep nav centered */
+  margin-bottom: auto;
+}
+
+.rail-nav__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--zm-nav-item-leading-width) 1fr auto;
+  align-items: center;
+  gap: var(--zm-nav-item-gap);
+  min-height: var(--zm-nav-item-min-height);
+  padding: var(--zm-nav-item-padding-y) var(--zm-nav-item-padding-x);
+  border-radius: var(--zm-nav-item-radius);
+  background: var(--zm-nav-item-bg);
+  color: var(--zm-nav-item-fg);
+  font-size: var(--zm-nav-item-label-size);
+  font-weight: var(--zm-nav-item-weight);
+  text-decoration: none;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard),
+              color var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.rail-nav__leading {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zm-nav-item-leading-width);
+  height: 1.5rem;
+  /* Reserve the slot so the signal-arc <-> numeral swap causes no layout shift. */
+}
+
+.rail-nav__numeral {
+  font-family: var(--zm-font-mono);
+  font-size: var(--zm-nav-item-numeral-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--zm-nav-item-numeral-fg);
+  opacity: 0.7;
+}
+
+.rail-nav__signal {
+  width: 0.625rem;
+  height: 1.25rem;
+  color: var(--zm-nav-item-indicator);
+}
+
+.rail-nav__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hover: gentle raised tone, no spatial shift (touch + reduced-motion safe). */
+.rail-nav__item:hover {
+  background: var(--zm-nav-item-bg-hover);
+  color: var(--zm-nav-item-fg-hover);
+}
+
+.rail-nav__item:hover .rail-nav__numeral {
+  color: var(--zm-nav-item-fg-hover);
+}
+
+/* Focus-visible: the WCAG 2.2 focus ring. Never obscured by sticky chrome. */
+.rail-nav__item:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-nav-item-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+.rail-compose:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-nav-item-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+}
+
+/* ---- Active route (VAL-WSH-001: >=3 NON-color cues) ---------------------
+   1. signal-arc indicator — a distinct shape in the leading slot (position).
+   2. raised surface tone — --zm-nav-item-bg-active lifts the item.
+   3. heavier weight + brighter ink — unmistakable typography.
+   4. aria-current="page" (semantic; bound in the template).
+   Grayscale / forced-colors still discriminate the active item. */
+.rail-nav__item.is-active,
+.rail-nav__item.is-current {
+  background: var(--zm-nav-item-bg-active);
+  color: var(--zm-nav-item-fg-active);
+  font-weight: var(--zm-nav-item-weight-active);
+}
+
+.rail-nav__item.is-active .rail-nav__numeral,
+.rail-nav__item.is-current .rail-nav__numeral {
+  color: var(--zm-nav-item-numeral-fg-active);
+  opacity: 1;
+}
+
+/* ---- Unread indicator (VAL-WSH-003) ------------------------------------ */
+.rail-nav__unread {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zm-nav-unread-gap);
+}
+
+.rail-nav__pulse {
+  /* The motif inherits currentColor; tint it with the unread brand role so it
+     reads as a live signal distinct from the editorial numerals. */
+  color: var(--zm-nav-unread-pulse-fg);
+}
+
+.rail-nav__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--zm-nav-unread-size);
+  height: var(--zm-nav-unread-size);
+  padding: 0 0.3rem;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-nav-unread-bg);
+  color: var(--zm-nav-unread-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-nav-unread-font-size);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---- Account menu host (m2-account-theme-status) ---------------------- *
+ * The account menu component owns its trigger + popover visuals; the rail
+ * only anchors it at the bottom of the column (margin-top:auto pushes it
+ * below the nav list) and gives it the full rail width. */
+.rail-account {
+  margin-top: auto;
+  display: block;
+  width: 100%;
+}
+
+/* ---- Reduced motion ---------------------------------------------------- *
+ * The pulse-node motif's own CSS already collapses its ring animation under
+ * both prefers-reduced-motion and the product [data-reduce-motion] toggle.
+ * Here we only ensure the rail's own transitions stay calm: state feedback
+ * (background/color) survives via the token cascade (durations collapse to
+ * 0/80ms in tokens.css §5). No spatial motion to suppress in this component. */
+@media (prefers-reduced-motion: reduce) {
+  .rail-compose,
+  .rail-nav__item {
+    transition-duration: 1ms;
+  }
+}
+
+/* ---- Forced colors (Windows high-contrast) ----------------------------- *
+ * Active indicator + focus ring + unread badge map to system semantic colors
+ * so the rail remains operable + the current route remains unmistakable. */
+@media (forced-colors: active) {
+  .rail {
+    border-right: 1px solid CanvasText;
+  }
+  .rail-nav__item.is-active,
+  .rail-nav__item.is-current {
+    background: Highlight;
+    color: HighlightText;
+    -webkit-text-stroke: none;
+  }
+  .rail-nav__item.is-active .rail-nav__numeral,
+  .rail-nav__item.is-current .rail-nav__numeral {
+    color: HighlightText;
+  }
+  .rail-nav__signal,
+  .rail-nav__pulse,
+  .rail-logo__dot {
+    color: LinkText;
+  }
+  .rail-nav__count {
+    background: LinkText;
+    color: Canvas;
+  }
+}
+
+/* ============================================================================
+ * NOTE: mobile-web bottom-nav recomposition is owned by ZmMobileBottomNav
+ * (`m2-tablet-mobile-navigation`). The legacy inline @media (max-width: 680px)
+ * block that turned this rail into a horizontal bottom bar has been removed;
+ * the shell-level CSS hides this component below 1050px and shows the tablet
+ * (768-1049px) or mobile-bottom-nav (<680px) variant instead.
+ * ============================================================================ */

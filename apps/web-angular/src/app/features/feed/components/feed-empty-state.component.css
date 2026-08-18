@@ -1,0 +1,77 @@
+.zm-feed-empty {
+  display: block;
+}
+
+/* Active-filter context chip — only the filtered variant renders this. It is
+   the strongest visual signal that this empty state is FILTER-induced (the
+   stream has content, the filter hides it), distinct from a true empty. */
+.zm-feed-empty__filter-context {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--zm-space-4, 1rem);
+}
+
+.zm-feed-empty__filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zm-space-2, 0.5rem);
+  padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: var(--zm-chip-bg-info, color-mix(in srgb, var(--zm-info) 14%, transparent));
+  color: var(--zm-chip-fg-info, var(--zm-info));
+  border: 1px solid var(--zm-chip-border-info, color-mix(in srgb, var(--zm-info) 35%, transparent));
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  font-weight: 600;
+}
+
+.zm-feed-empty__filter-chip-label {
+  color: var(--zm-text-3);
+  font-weight: 500;
+}
+
+.zm-feed-empty__filter-chip-value {
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zm-feed-empty__filter-clear {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background var(--zm-duration-fast) var(--zm-ease-standard);
+}
+
+.zm-feed-empty__filter-clear:hover {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.zm-feed-empty__filter-clear:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+.zm-feed-empty__filter-clear svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  display: block;
+}
+
+/* Forced colors — keep the chip edge + clear button visible. */
+@media (forced-colors: active) {
+  .zm-feed-empty__filter-chip {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+  .zm-feed-empty__filter-clear {
+    color: ButtonText;
+  }
+}

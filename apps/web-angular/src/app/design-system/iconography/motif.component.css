@@ -1,0 +1,116 @@
+/* ============================================================================
+ * ZmMotif — signature motif styles.
+ *
+ * All motifs are DECORATIVE (host aria-hidden + role=presentation). They
+ * consume ONLY low-chroma surface/separator tokens so they never compromise
+ * adjacent text contrast (VAL-DS-034: motifs never cross text). The pulse
+ * animation on .zm-motif__ring collapses to static under reduced motion.
+ * ============================================================================ */
+
+:host {
+  /* The motif's own color: a low-chroma separator tone by default so it reads
+     as ornamental, never as a brand/status fill that could confuse the meaning
+     of nearby content. Consumers can override via a parent `color:` rule —
+     motifs inherit currentColor, which is the point: a motif belongs to its
+     surface, not to a status category. */
+  color: var(--zm-motif-fg, var(--zm-border-strong));
+  /* Inline-size is bound from the `size` input via the host binding; the SVG
+     fills it, keeping its intrinsic aspect via preserveAspectRatio. */
+  display: inline-block;
+  width: var(--zm-motif-inline-size, 2.5rem);
+  height: auto;
+  /* Motifs never receive pointer events — they are ornament, not interaction.
+     A click on a motif must pass through to the element behind it. */
+  pointer-events: none;
+  /* Motifs are not announcement targets; prevent any AT from treating the
+     wrapper as meaningful. The host aria-hidden + role=presentation already
+     cover this; the vertical-align keeps motif baselines tidy in inline
+     contexts (e.g. a pulse-node beside a nav label). */
+  vertical-align: middle;
+  /* A motif is static ornament by default. The pulse-node rings animate via
+     their own keyframes; this base transition is a no-op unless a consumer
+     drives a color change (e.g. theme flip), in which case it stays smooth. */
+  transition: color var(--zm-duration-base, 220ms) var(--zm-ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+
+:host svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The editorial-cut spans a full rule: it should fill the inline width its
+   container gives it (preserveAspectRatio="none" lets the rule stretch). */
+:host([data-motif='editorial-cut']) {
+  height: 0.75rem;
+}
+
+:host([data-motif='thread-line']) {
+  /* The thread-line is tall rather than wide; let the consumer set height via
+     a CSS variable and derive width from the motif's intrinsic ratio. */
+  width: var(--zm-motif-thread-width, 1.5rem);
+  height: var(--zm-motif-thread-height, 5.25rem);
+}
+
+/* ----------------------------------------------------------------------------
+ * Pulse-node ring animation (normal motion only).
+ *
+ * Two rings pulse outward in opacity; the solid center never animates so the
+ * "active node" reading is stable. One owner per ring (CSS keyframes only; no
+ * @angular/animations). Reduced-motion collapses this to a static ring via the
+ * blocks below.
+ * -------------------------------------------------------------------------- */
+@keyframes zm-motif-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.zm-motif__ring {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.zm-motif__ring--inner {
+  animation: zm-motif-pulse var(--zm-duration-motif-pulse, 2200ms) var(--zm-ease-standard, cubic-bezier(0.2, 0, 0, 1)) infinite;
+}
+
+.zm-motif__ring--outer {
+  animation: zm-motif-pulse var(--zm-duration-motif-pulse, 2200ms) var(--zm-ease-standard, cubic-bezier(0.2, 0, 0, 1)) infinite 600ms;
+}
+
+/* ----------------------------------------------------------------------------
+ * Reduced motion — both OS preference and the product [data-reduce-motion]
+ * toggle. The rings become fully static; the solid center + ring geometry
+ * still convey the "active node" meaning (state never depends on motion).
+ * -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .zm-motif__ring {
+    animation: none !important;
+  }
+}
+
+:host-context([data-reduce-motion]) .zm-motif__ring {
+  animation: none !important;
+}
+
+/* ----------------------------------------------------------------------------
+ * Forced colors (Windows high-contrast) — motifs map to a subtle system tone.
+ * They remain decorative; the mapping keeps them visible as ornament without
+ * elevating them to a semantic color.
+ * -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  :host {
+    color: GrayText;
+  }
+}

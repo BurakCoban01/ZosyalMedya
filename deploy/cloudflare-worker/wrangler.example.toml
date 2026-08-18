@@ -1,0 +1,10 @@
+name = "enterprise-social-community"
+main = "src/index.ts"
+compatibility_date = "2026-08-17"
+workers_dev = true
+
+[vars]
+# Hostname only, without https:// or a trailing slash.
+PUBLIC_HOST = "enterprise-social-community.example-account.workers.dev"
+# Hidden Coolify HTTPS origin. It must be an origin only, with no path/query.
+ORIGIN_URL = "https://replace-with-hidden-coolify-origin.example"

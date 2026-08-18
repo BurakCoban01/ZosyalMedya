@@ -1,0 +1,96 @@
+/**
+ * ZmSkeleton — shimmer placeholder styles.
+ *
+ * Consumes ONLY `--zm-skeleton-*` tokens (which compose `--zm-surface-*` +
+ * `--zm-duration-scene` + `--zm-radius-control`). No hardcoded hex.
+ *
+ * Motion: the shimmer is a `background-position` sweep on a linear gradient.
+ * This is the canonical skeleton-shimmer pattern; it does not animate layout
+ * properties and is interruptible. Under reduced motion the
+ * `--zm-skeleton-duration` token collapses to 0ms (tokens.css §5) so the
+ * keyframe parks and the block becomes a static tonal surface.
+ *
+ * `background-position` is animated (not `transform`) because the gradient is
+ * a background-image: animating its position is the cheapest way to sweep a
+ * sheen across the bar. This is a deliberate, scoped exception to the
+ * "transform/opacity only" rule for the shimmer case only; it does not thrash
+ * layout and it collapses completely under reduced motion.
+ */
+
+:host {
+  display: block;
+  /* The host is purely structural; it reserves no visual space itself. */
+}
+
+.zm-skeleton__bar {
+  display: block;
+  width: 100%;
+  border-radius: var(--zm-skeleton-radius);
+  background:
+    linear-gradient(
+      90deg,
+      var(--zm-skeleton-base) 0%,
+      var(--zm-skeleton-sheen) 50%,
+      var(--zm-skeleton-base) 100%
+    );
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  /* Single source of truth for the sweep duration. tokens.css collapses this
+   * to 0ms under both reduced-motion triggers, parking the animation. */
+  animation: zm-skeleton-sweep var(--zm-skeleton-duration) var(--zm-ease-standard) infinite;
+}
+
+/* Text variant: stack the line bars with body-text leading. */
+:host([data-variant='text']) .zm-skeleton__bar {
+  margin-bottom: 0.4rem;
+}
+:host([data-variant='text']) .zm-skeleton__bar:last-child {
+  margin-bottom: 0;
+}
+/* The last line of a multi-line block is shortened for a ragged edge. */
+:host([data-variant='text']) .zm-skeleton__bar.is-short {
+  width: 60%;
+}
+
+/* Circle variant: square box rounded to a pill. */
+:host([data-variant='circle']) .zm-skeleton__bar {
+  border-radius: var(--zm-radius-pill);
+  aspect-ratio: 1 / 1;
+  height: auto;
+}
+
+@keyframes zm-skeleton-sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * Reduced motion: collapse the shimmer to a static tonal block. Both the OS
+ * media query and the product [data-reduce-motion] toggle (applied by
+ * ThemeService to <html>) park the animation. The block keeps its tonal
+ * separation so the placeholder is still readable in a static frame.
+ * -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .zm-skeleton__bar {
+    animation: none;
+    background: var(--zm-skeleton-base);
+  }
+}
+:host-context([data-reduce-motion]) .zm-skeleton__bar {
+  animation: none;
+  background: var(--zm-skeleton-base);
+}
+
+/* Under forced-colors, render a visible structural outline so the placeholder
+ * survives Windows high-contrast (a flat tonal block would vanish). */
+@media (forced-colors: active) {
+  .zm-skeleton__bar {
+    background: ButtonFace;
+    border: 1px dashed GrayText;
+    animation: none;
+  }
+}

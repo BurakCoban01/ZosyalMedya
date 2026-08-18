@@ -1,0 +1,120 @@
+/* ZmPostFrame — editorial structural shell for a single post.
+ *
+ * Stream rhythm (VAL-FEED-021): the frame lives on the calm reading surface
+ * with a bottom separator. The `raised` variant lifts strategic content
+ * (media/polls) with a subtle surface + border + padding; ordinary posts stay
+ * flat so the stream reads as a sequence of moments, not a uniform card grid.
+ *
+ * Thread-line motif (VAL-DS-033/034): a dashed vertical rule in a reserved
+ * leading gutter. It is decorative (aria-hidden, pointer-events none) and
+ * never underlays body text — it lives in its own column outside the content
+ * bounding box, so text contrast is never reduced.
+ *
+ * All values consume --zm-post-frame-* tokens (light + dark cascade). No
+ * hardcoded hex. */
+
+:host {
+  display: grid;
+  grid-template-columns: var(--zm-post-frame-gutter) 1fr;
+  gap: var(--zm-post-identity-gap, 0.75rem);
+  padding: var(--zm-post-frame-pad-y) var(--zm-post-frame-pad-x);
+  border-bottom: var(--zm-separator-rule);
+  background: var(--zm-post-frame-bg);
+  border-radius: 0;
+  animation: zm-post-frame-in var(--zm-post-frame-duration) var(--zm-post-frame-ease) both;
+}
+
+/* Strategic raised surface — only for content that should lift (media, polls).
+   NOT every post, so the stream keeps its rhythm. */
+:host(.zm-post-frame--raised) {
+  background: var(--zm-post-frame-bg-raised);
+  border: 1px solid var(--zm-post-frame-border);
+  border-radius: var(--zm-post-frame-radius);
+  padding: var(--zm-post-frame-pad-raised);
+  margin: var(--zm-post-frame-margin-raised) 0;
+}
+
+/* Reserved decorative gutter (thread-line motif). Pointer-events none so it
+   never intercepts interaction; aria-hidden so it never reaches AT. */
+.zm-post-frame__gutter {
+  display: flex;
+  grid-column: 1;
+  justify-content: center;
+  padding-top: 0.4rem;
+  color: var(--zm-post-frame-motif-fg);
+  pointer-events: none;
+  user-select: none;
+}
+
+.zm-post-frame__thread {
+  display: block;
+  width: 2px;
+  height: 100%;
+  min-height: 3rem;
+  max-height: 14rem;
+  opacity: 0.7;
+}
+
+.zm-post-frame__content {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion — enter animation; reduced-motion collapses to opacity-only.
+ * ------------------------------------------------------------------ */
+@keyframes zm-post-frame-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation-duration: 1ms;
+  }
+  @keyframes zm-post-frame-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+:root[data-reduce-motion] :host {
+  animation-duration: 1ms;
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive — collapse the decorative gutter on narrow viewports so the
+ * reading column takes the full width without horizontal scroll.
+ * ------------------------------------------------------------------ */
+@media (max-width: 520px) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .zm-post-frame__gutter {
+    display: none;
+  }
+  .zm-post-frame__content {
+    grid-column: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Forced colors — keep the separator + raised edge + motif visible.
+ * ------------------------------------------------------------------ */
+@media (forced-colors: active) {
+  :host {
+    border-bottom-color: GrayText;
+  }
+  :host(.zm-post-frame--raised) {
+    border-color: ButtonText;
+  }
+  .zm-post-frame__gutter {
+    color: GrayText;
+  }
+}

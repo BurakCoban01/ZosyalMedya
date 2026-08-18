@@ -1,0 +1,73 @@
+/* ZmPostIdentity — avatar + display name + handle cluster.
+ *
+ * The identity reads as a network identity: avatar (stable fallback) + a
+ * display name (link when the profile is reachable) + a muted handle. The
+ * handle uses the discovery accent so it reads as a network handle, not body
+ * text. The name is the dominant identity signal; the handle is secondary.
+ *
+ * Consumes --zm-post-identity-* tokens (light + dark cascade). No hex. */
+
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-post-identity-gap);
+  min-width: 0;
+}
+
+.zm-post-identity__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.zm-post-identity__name {
+  color: var(--zm-post-identity-name-fg);
+  font-family: var(--zm-font-ui);
+  font-weight: 750;
+  font-size: var(--zm-text-md);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.zm-post-identity__link {
+  color: var(--zm-post-identity-link-fg);
+  text-underline-offset: 3px;
+  border-radius: var(--zm-radius-control, 0.5rem);
+  transition: color var(--zm-duration-fast) var(--zm-ease-standard);
+  align-self: start;
+}
+
+.zm-post-identity__link:hover {
+  color: var(--zm-post-identity-link-fg-hover);
+  text-decoration: underline;
+}
+
+.zm-post-identity__link:focus-visible {
+  outline: 3px solid var(--zm-focus);
+  outline-offset: 2px;
+}
+
+/* Unresolved identity: slightly muted so the honest fallback reads as
+   "unknown author" without looking like a broken/missing control. */
+.zm-post-identity__name[data-resolved='false'] {
+  color: var(--zm-post-identity-handle-fg);
+  font-weight: 600;
+  font-style: italic;
+}
+
+.zm-post-identity__handle {
+  color: var(--zm-post-identity-handle-fg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-sm);
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .zm-post-identity__link {
+    color: LinkText;
+  }
+  .zm-post-identity__handle {
+    color: GrayText;
+  }
+}

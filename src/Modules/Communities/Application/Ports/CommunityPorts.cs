@@ -1,0 +1,1 @@
+using ZosyalMedya.BuildingBlocks.Application.Persistence;using ZosyalMedya.Modules.Communities.Domain.Communities;namespace ZosyalMedya.Modules.Communities.Application.Ports;public interface ICommunityRepository:IRepository<Community,CommunityId>{}

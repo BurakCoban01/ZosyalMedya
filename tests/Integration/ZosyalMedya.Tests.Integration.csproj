@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Host\Api\ZosyalMedya.Host.Api.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Infrastructure\ZosyalMedya.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Infrastructure\ZosyalMedya.Modules.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Profiles\Infrastructure\ZosyalMedya.Modules.Profiles.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Profiles\Application\ZosyalMedya.Modules.Profiles.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Profiles\Domain\ZosyalMedya.Modules.Profiles.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\SocialGraph\Infrastructure\ZosyalMedya.Modules.SocialGraph.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\SocialGraph\Application\ZosyalMedya.Modules.SocialGraph.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\SocialGraph\Domain\ZosyalMedya.Modules.SocialGraph.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Questions\Infrastructure\ZosyalMedya.Modules.Questions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Questions\Application\ZosyalMedya.Modules.Questions.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Questions\Domain\ZosyalMedya.Modules.Questions.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Content\Infrastructure\ZosyalMedya.Modules.Content.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Content\Application\ZosyalMedya.Modules.Content.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Content\Domain\ZosyalMedya.Modules.Content.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Reactions\Infrastructure\ZosyalMedya.Modules.Reactions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Comments\Infrastructure\ZosyalMedya.Modules.Comments.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Messaging\Infrastructure\ZosyalMedya.Modules.Messaging.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\Infrastructure\ZosyalMedya.Modules.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\Application\ZosyalMedya.Modules.Notifications.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\Contracts\ZosyalMedya.Modules.Notifications.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\Domain\ZosyalMedya.Modules.Notifications.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Communities\Infrastructure\ZosyalMedya.Modules.Communities.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Communities\Application\ZosyalMedya.Modules.Communities.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Communities\Domain\ZosyalMedya.Modules.Communities.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Media\Infrastructure\ZosyalMedya.Modules.Media.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Media\Application\ZosyalMedya.Modules.Media.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Media\Domain\ZosyalMedya.Modules.Media.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Stories\Infrastructure\ZosyalMedya.Modules.Stories.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Stories\Application\ZosyalMedya.Modules.Stories.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Stories\Domain\ZosyalMedya.Modules.Stories.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Search\Infrastructure\ZosyalMedya.Modules.Search.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Search\Application\ZosyalMedya.Modules.Search.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Search\Domain\ZosyalMedya.Modules.Search.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Audit\Infrastructure\ZosyalMedya.Modules.Audit.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Audit\Application\ZosyalMedya.Modules.Audit.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Audit\Domain\ZosyalMedya.Modules.Audit.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Moderation\Infrastructure\ZosyalMedya.Modules.Moderation.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Moderation\Application\ZosyalMedya.Modules.Moderation.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Moderation\Domain\ZosyalMedya.Modules.Moderation.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Administration\Infrastructure\ZosyalMedya.Modules.Administration.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Administration\Application\ZosyalMedya.Modules.Administration.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Administration\Domain\ZosyalMedya.Modules.Administration.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
+  </ItemGroup>
+</Project>

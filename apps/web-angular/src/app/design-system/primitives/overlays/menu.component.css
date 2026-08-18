@@ -1,0 +1,116 @@
+/**
+ * ZmMenu — scoped panel + item styles.
+ *
+ * Styles the overlay CONTENT (`.zm-menu__panel` + projected menu items).
+ * The backdrop (transparent, outside-click) + pane wrapper are global
+ * (overlays-global.css).
+ *
+ * Consumes ONLY `--zm-menu-*` component-layer tokens. No hardcoded hex.
+ *
+ * Status never color-only (VAL-DS-029 non-regression): the hovered item gains
+ * a background tint AND a left-position brand indicator pip so the
+ * keyboard/pointer focus reads in a static frame.
+ */
+
+:host {
+  display: contents;
+}
+
+.zm-menu__panel {
+  background: var(--zm-menu-bg);
+  color: var(--zm-menu-fg);
+  border: var(--zm-border-width-hair) solid var(--zm-menu-border);
+  border-radius: var(--zm-menu-radius);
+  box-shadow: var(--zm-menu-shadow);
+
+  min-width: var(--zm-menu-min-width);
+  max-width: var(--zm-menu-max-width);
+  padding: var(--zm-menu-padding-y) var(--zm-menu-padding-x);
+
+  transition:
+    transform var(--zm-menu-duration) var(--zm-menu-ease),
+    opacity var(--zm-menu-duration) var(--zm-menu-ease);
+}
+
+.zm-menu__panel:focus {
+  outline: none;
+}
+
+/* --- Menu items ---------------------------------------------------------
+ * Projected children opt into styling via `.zm-menu__item` OR `role="menuitem"`.
+ * Both are valid targets; the keydown walker recognizes either. The base
+ * affordance is an interactive row; consumers can also use real <button>s
+ * which inherit these visuals. */
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item) {
+  display: flex;
+  align-items: center;
+  gap: var(--zm-menu-item-gap);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: var(--zm-menu-item-padding-y) var(--zm-menu-item-padding-x);
+  border-radius: var(--zm-menu-item-radius);
+
+  font-family: inherit;
+  font-size: var(--zm-text-md);
+  color: var(--zm-menu-fg);
+  background: transparent;
+  border: 0;
+  text-align: start;
+  cursor: pointer;
+
+  transition:
+    background-color var(--zm-menu-duration) var(--zm-menu-ease),
+    color var(--zm-menu-duration) var(--zm-menu-ease);
+}
+
+/* Hover / keyboard-focus affordance: background tint + a brand pip at the
+ * leading edge (position cue — never color alone). */
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item):hover,
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item):focus-visible {
+  background: var(--zm-menu-item-bg-hover);
+  outline: none;
+}
+
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item):focus-visible::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: var(--zm-radius-pill);
+  background: var(--zm-brand);
+}
+
+/* Disabled item: muted foreground + no pointer + no hover/focus tint. */
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item)[aria-disabled="true"],
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item)[disabled],
+.zm-menu__panel :where([role="menuitem"], .zm-menu__item).is-disabled {
+  color: var(--zm-menu-item-fg-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .zm-menu__panel {
+    border: 2px solid CanvasText;
+  }
+  .zm-menu__panel :where([role="menuitem"], .zm-menu__item):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+.zm-menu__panel.zm-enter {
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zm-menu__panel,
+  .zm-menu__panel :where([role="menuitem"], .zm-menu__item) {
+    transition-duration: 1ms;
+  }
+}

@@ -1,0 +1,136 @@
+<!--
+  Mobile-web bottom navigation bar (VAL-WSH-008).
+  Fixed to the bottom of the viewport; safe-area-aware so iOS Safari home
+  indicator + Android gesture nav never obstruct targets. 5 primary items +
+  center compose FAB + Daha fazla (More) button. Active route carries >=2
+  NON-color cues (brand top inset bar + filled bg + brighter icon +
+  aria-current="page"). Unread badges on Mesajlar/Bildirimler when count > 0.
+-->
+<nav class="bottom-nav" aria-label="Ana navigasyon" data-surface="bottom-nav">
+  @for (entry of primaryEntries; track entry.link) {
+    <a
+      class="bottom-nav__item"
+      [routerLink]="entry.link"
+      routerLinkActive="is-active"
+      (isActiveChange)="setActive(entry.link, $event)"
+      [class.is-current]="isCurrent(entry.link)"
+      [attr.aria-current]="isCurrent(entry.link) ? 'page' : null"
+      [attr.aria-label]="ariaLabel(entry)"
+      [attr.data-icon-key]="entry.icon"
+    >
+      <zm-nav-icon class="bottom-nav__icon" [icon]="entry.icon" size="1.5rem" />
+
+      <span class="bottom-nav__label">{{ entry.label }}</span>
+
+      @if (hasUnread(entry)) {
+        <!-- Unread badge (VAL-WSH-003 at mobile-web). Literal count pill in
+             the top-end corner of the icon — distinct shape + position +
+             digit. aria-hidden: count flows through the link aria-label. -->
+        <b class="bottom-nav__badge" aria-hidden="true">{{ badgeFor(entry) }}</b>
+      }
+    </a>
+  }
+
+  <!--
+    Center compose FAB (VAL-WSH-008 composer-reachable). Real <button> so it
+    is keyboard-reachable + keyboard-activatable; primary brand treatment so
+    it is the unmistakable principal action. 44x44 minimum target.
+  -->
+  <button
+    type="button"
+    class="bottom-nav__compose"
+    (click)="compose()"
+    aria-label="Oluştur — yeni gönderi"
+  >
+    <zm-nav-icon class="bottom-nav__compose-icon" icon="compose" size="1.75rem" />
+  </button>
+
+  <!--
+    Daha fazla (More) — opens a bottom sheet with the 5 secondary destinations
+    + Sign-out. Becomes `is-active` when the current route is one of those
+    secondary destinations so the user can see where they are.
+  -->
+  <button
+    type="button"
+    class="bottom-nav__item bottom-nav__item--more"
+    (click)="openMore()"
+    [class.is-active]="isMoreActive()"
+    [attr.aria-current]="isMoreActive() ? 'page' : null"
+    aria-label="Daha fazla — diğer sayfalar"
+    aria-haspopup="dialog"
+  >
+    <zm-nav-icon class="bottom-nav__icon" icon="more" size="1.5rem" />
+    <span class="bottom-nav__label">Daha fazla</span>
+  </button>
+</nav>
+
+<!--
+  More sheet (secondary destinations + theme group + sign-out). ZmSheet owns
+  the a11y contract: focus trap + Escape + outside-click dismiss + scroll
+  lock + return focus to the trigger. side="bottom" + dismissible=true. Each
+  secondary routerLink calls closeMore() on click; theme options call
+  chooseTheme() (applies immediately + closes the sheet); signout calls
+  signOut() which closes the sheet then runs the real logout flow.
+-->
+<zm-sheet
+  #moreSheet
+  side="bottom"
+  label="Daha fazla"
+  class="bottom-nav__sheet"
+>
+  <ul class="bottom-nav__more-list" role="list">
+    @for (entry of secondaryEntries; track entry.link) {
+      <li class="bottom-nav__more-item">
+        <a
+          class="bottom-nav__more-link"
+          [routerLink]="entry.link"
+          (click)="closeMore()"
+          [attr.aria-label]="entry.label"
+          [attr.data-icon-key]="entry.icon"
+        >
+          <zm-nav-icon class="bottom-nav__more-icon" [icon]="entry.icon" size="1.5rem" />
+          <span class="bottom-nav__more-label">{{ entry.label }}</span>
+        </a>
+      </li>
+    }
+
+    <!--
+      Theme group (m2-account-theme-status; VAL-WSH-006). Mobile surfaces the
+      theme options inline in the More sheet (rather than a nested account
+      popover overlay). Each option is a real button with a checkmark (shape)
+      + aria-pressed reflecting selection; choosing one applies the theme
+      immediately (persisted + no flash on reload) and closes the sheet.
+    -->
+    <li class="bottom-nav__more-item bottom-nav__more-item--group" aria-hidden="true">
+      <span class="bottom-nav__more-group-label">Görünüm</span>
+    </li>
+    @for (opt of themeOptions; track opt.value) {
+      <li class="bottom-nav__more-item">
+        <button
+          type="button"
+          class="bottom-nav__more-link bottom-nav__more-link--theme"
+          (click)="chooseTheme(opt.value)"
+          [class.is-selected]="isTheme(opt.value)"
+          [attr.aria-pressed]="isTheme(opt.value) ? 'true' : 'false'"
+          [attr.aria-label]="opt.label + (isTheme(opt.value) ? ' — seçili' : '')"
+        >
+          <span class="bottom-nav__more-check" aria-hidden="true">
+            @if (isTheme(opt.value)) {
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12.5l4 4 10-10" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            }
+          </span>
+          <span class="bottom-nav__more-label">{{ opt.label }}</span>
+        </button>
+      </li>
+    }
+    <li class="bottom-nav__more-item bottom-nav__more-item--signout">
+      <button type="button" class="bottom-nav__more-link" (click)="signOut()" aria-label="Çıkış yap">
+        <zm-nav-icon class="bottom-nav__more-icon" icon="signout" size="1.5rem" />
+        <span class="bottom-nav__more-label">Çıkış</span>
+      </button>
+    </li>
+  </ul>
+</zm-sheet>

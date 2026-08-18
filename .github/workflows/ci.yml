@@ -1,0 +1,105 @@
+name: doğrulama
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: 9.0.x
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - name: Public release boundary
+        shell: pwsh
+        run: |
+          ./scripts/public-release/validate-publication-boundary.ps1
+          docker compose --env-file .env.public-demo.example -f compose.public-demo.yaml config --quiet
+      - name: Altyapıyı başlat
+        run: docker compose --profile core --profile object-storage up -d --wait
+      - name: Backend derle ve test et
+        env:
+          RUN_INFRASTRUCTURE_TESTS: 'true'
+          RUN_OBJECT_STORAGE_TESTS: 'true'
+        run: |
+          dotnet restore ZosyalMedya.sln
+          pwsh -NoProfile -File ./scripts/public-release/assert-dotnet-vulnerabilities.ps1
+          dotnet build ZosyalMedya.sln --configuration Release --no-restore
+          dotnet test ZosyalMedya.sln --configuration Release --no-build --logger "console;verbosity=minimal"
+      - name: İstemcileri doğrula
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          npm test
+          npm run build
+      - name: Runtime dependency SBOM
+        run: npm sbom --package-lock-only --omit=dev --sbom-format cyclonedx > npm-runtime.sbom.cdx.json
+      - name: SBOM artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-runtime-sbom
+          path: npm-runtime.sbom.cdx.json
+          retention-days: 7
+      - name: Container günlükleri
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Altyapıyı kapat
+        if: always()
+        run: docker compose --profile core --profile object-storage down
+
+  owned-image-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            dockerfile: src/Host/Api/Dockerfile
+          - name: web
+            dockerfile: apps/web-angular/Dockerfile
+          - name: minio
+            dockerfile: deploy/public-demo/minio/Dockerfile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Build owned image
+        run: docker build --file "${{ matrix.dockerfile }}" --tag "enterprise-social-community-platform-${{ matrix.name }}:ci" .
+      - name: Reject high or critical container vulnerabilities
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        env:
+          TRIVY_VEX: deploy/public-demo/minio/security.openvex.json
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: enterprise-social-community-platform-${{ matrix.name }}:ci
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: 'false'
+          exit-code: '1'
+          timeout: 15m
+      - name: Generate container SBOM
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          version: v0.74.0
+          scan-type: image
+          image-ref: enterprise-social-community-platform-${{ matrix.name }}:ci
+          format: cyclonedx
+          output: container-${{ matrix.name }}.cdx.json
+          exit-code: '0'
+          timeout: 15m
+      - name: Upload container SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: container-${{ matrix.name }}-sbom
+          path: container-${{ matrix.name }}.cdx.json
+          retention-days: 7

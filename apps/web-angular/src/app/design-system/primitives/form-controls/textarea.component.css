@@ -1,0 +1,172 @@
+/*!
+ * ZmTextarea styles — Living Editorial Network.
+ * ----------------------------------------------------------------------------
+ * Shares the `--zm-input-*` component layer with ZmInput so the field language
+ * is identical across single-line and multi-line controls. No hardcoded hex
+ * (VAL-DS-002). State coverage mirrors ZmInput (VAL-DS-023): rest, hover,
+ * focus-visible, disabled, error, high-contrast.
+ */
+
+.zm-textarea {
+  display: block;
+}
+
+.zm-textarea__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zm-space-2);
+}
+
+/* ============================================================================
+ * PERSISTENT LABEL (VAL-DS-021)
+ * ============================================================================ */
+.zm-textarea__label {
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-label-size);
+  font-weight: var(--zm-input-label-weight);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-label-fg);
+  align-self: flex-start;
+  cursor: pointer;
+}
+.zm-textarea__required {
+  margin-left: 0.25ch;
+  color: var(--zm-input-error);
+}
+
+/* ============================================================================
+ * NATIVE TEXTAREA
+ * ============================================================================ */
+.zm-textarea__input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  /* min-height scales with rows(); 44px floor guarantees the WCAG 2.2 target. */
+  min-height: var(--zm-input-min-height);
+  padding: var(--zm-input-padding-y) var(--zm-input-padding-x);
+  border-radius: var(--zm-input-radius);
+  border: var(--zm-border-width-hair) solid var(--zm-input-border);
+  background: var(--zm-input-bg);
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-text-md);
+  line-height: var(--zm-input-line-height);
+  color: var(--zm-input-fg);
+  /* The textarea owns its own vertical rhythm; inherit leading for legibility
+     of long-form input. */
+  cursor: text;
+  resize: vertical;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--zm-input-duration) var(--zm-input-ease),
+    border-color var(--zm-input-duration) var(--zm-input-ease),
+    box-shadow var(--zm-input-duration) var(--zm-input-ease),
+    outline-offset var(--zm-input-duration) var(--zm-input-ease);
+}
+.zm-textarea__input::placeholder {
+  color: var(--zm-input-placeholder);
+  opacity: 1;
+}
+
+/* Honor the resize input (none / vertical / both). Default is vertical above. */
+.zm-textarea__input[resize='none'] {
+  resize: none;
+}
+.zm-textarea__input[resize='both'] {
+  resize: both;
+}
+
+/* ============================================================================
+ * STATES
+ * ============================================================================ */
+.zm-textarea__input:hover:not([disabled]):not(:focus) {
+  background: var(--zm-input-bg-hover);
+  border-color: var(--zm-input-border-hover);
+}
+.zm-textarea__input:focus-visible {
+  outline: var(--zm-focus-ring-width) solid var(--zm-input-focus-ring);
+  outline-offset: var(--zm-focus-ring-offset);
+  border-color: var(--zm-input-border-focus);
+  background: var(--zm-input-bg-focus);
+}
+.zm-textarea__field.is-disabled .zm-textarea__input,
+.zm-textarea__input:disabled {
+  background: var(--zm-input-bg-disabled);
+  border-color: var(--zm-input-border-disabled);
+  color: var(--zm-input-fg-disabled);
+  cursor: not-allowed;
+  resize: none;
+}
+.zm-textarea__field.is-disabled {
+  opacity: 0.7;
+}
+.zm-textarea__field.is-disabled .zm-textarea__label,
+.zm-textarea__field.is-disabled .zm-textarea__helper {
+  color: var(--zm-input-fg-disabled);
+}
+
+/* Error (VAL-DS-021). */
+.zm-textarea__field.is-error .zm-textarea__input {
+  border-color: var(--zm-input-error-ring);
+}
+.zm-textarea__field.is-error .zm-textarea__input:focus-visible {
+  outline-color: var(--zm-input-error-ring);
+  border-color: var(--zm-input-error-ring);
+}
+
+/* High-contrast (author-side). */
+.zm-textarea__field.is-high-contrast .zm-textarea__input {
+  border-width: var(--zm-border-width-strong);
+  border-color: var(--zm-border-strong);
+}
+
+/* ============================================================================
+ * HELPER + ERROR
+ * ============================================================================ */
+.zm-textarea__helper {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-helper-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-helper);
+}
+.zm-textarea__error {
+  margin: 0;
+  font-family: var(--zm-font-ui);
+  font-size: var(--zm-input-error-size);
+  line-height: var(--zm-leading-tight);
+  color: var(--zm-input-error);
+}
+.zm-textarea__error::before {
+  content: '⚠';
+  display: inline-block;
+  margin-right: 0.35ch;
+}
+
+/* ============================================================================
+ * REDUCED MOTION + FORCED COLORS (see input.component.css for the rationale)
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .zm-textarea__input {
+    transition-duration: var(--zm-duration-base);
+    transition-timing-function: linear;
+  }
+}
+:host-context([data-reduce-motion]) .zm-textarea__input {
+  transition-duration: var(--zm-duration-base);
+  transition-timing-function: linear;
+}
+
+@media (forced-colors: active) {
+  .zm-textarea__input,
+  .zm-textarea__field.is-high-contrast .zm-textarea__input {
+    border-color: ButtonText;
+    border-width: var(--zm-border-width-strong);
+  }
+  .zm-textarea__input:focus-visible {
+    outline-color: Highlight;
+  }
+  .zm-textarea__input:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\ZosyalMedya.Modules.Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Application\ZosyalMedya.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\Audit\Contracts\ZosyalMedya.Modules.Audit.Contracts.csproj" />
+  </ItemGroup>
+</Project>

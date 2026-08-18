@@ -1,0 +1,48 @@
+.portrait {
+  position: relative;
+}
+
+.story-count {
+  position: absolute;
+  inset-inline-end: -.3rem;
+  inset-block-end: -.2rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding-inline: .2rem;
+  border: 2px solid var(--ion-background-color);
+  border-radius: 999px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font: 900 .62rem/1 system-ui;
+}
+
+.stage {
+  position: relative;
+}
+
+.story-segments {
+  position: absolute;
+  z-index: 2;
+  inset: .55rem .7rem auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(1rem, 1fr));
+  gap: 4px;
+  pointer-events: none;
+}
+
+.story-segments span {
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 35%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+}
+
+.story-segments span.viewed {
+  background: rgb(255 255 255 / 70%);
+}
+
+.story-segments span.active {
+  background: var(--ion-color-primary);
+}

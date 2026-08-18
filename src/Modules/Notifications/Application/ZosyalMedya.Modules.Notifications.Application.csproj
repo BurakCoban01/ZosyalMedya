@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="..\Domain\ZosyalMedya.Modules.Notifications.Domain.csproj" /><ProjectReference Include="..\Contracts\ZosyalMedya.Modules.Notifications.Contracts.csproj" /><ProjectReference Include="..\..\..\BuildingBlocks\Application\ZosyalMedya.BuildingBlocks.Application.csproj" /></ItemGroup></Project>

@@ -1,0 +1,4 @@
+using ZosyalMedya.Modules.Notifications.Domain.Inbox;using Xunit;
+namespace ZosyalMedya.Tests.Unit.Notifications;
+public sealed class NotificationDomainTests
+{private static readonly DateTimeOffset Now=new(2026,7,12,15,0,0,TimeSpan.Zero);[Fact]public void AggregationReadAndDeadLetterTransitionsAreProtected(){var recipient=new NotificationRecipientId(Guid.NewGuid());var item=Notification.Create(NotificationId.New(),recipient,Guid.NewGuid(),NotificationKind.Message,Guid.NewGuid(),"message:thread","title","body",1,new Dictionary<string,string>{{"preview","ilk"}},"/mesajlar",Now);item.Aggregate(Guid.NewGuid(),new Dictionary<string,string>{{"preview","ikinci"}},Now.AddMinutes(1));Assert.Equal(2,item.Count);for(var attempt=0;attempt<5;attempt++)item.ScheduleRetry("yerel kanal hatası",Now.AddMinutes(attempt+2),Now.AddMinutes(attempt+1));Assert.Equal(NotificationDeliveryState.DeadLetter,item.DeliveryState);item.MarkRead(Now.AddMinutes(10));Assert.NotNull(item.ReadAtUtc);}}

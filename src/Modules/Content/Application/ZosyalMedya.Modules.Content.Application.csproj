@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\ZosyalMedya.Modules.Content.Domain.csproj" />
+    <ProjectReference Include="..\Contracts\ZosyalMedya.Modules.Content.Contracts.csproj" />
+    <ProjectReference Include="..\..\SocialGraph\Contracts\ZosyalMedya.Modules.SocialGraph.Contracts.csproj" />
+    <ProjectReference Include="..\..\Search\Contracts\ZosyalMedya.Modules.Search.Contracts.csproj" />
+    <ProjectReference Include="..\..\Moderation\Contracts\ZosyalMedya.Modules.Moderation.Contracts.csproj" />
+    <ProjectReference Include="..\..\Media\Contracts\ZosyalMedya.Modules.Media.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Application\ZosyalMedya.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>
