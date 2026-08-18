@@ -26,11 +26,13 @@ API çağrılarıyla çalışır.
 - [Lisans ve bildirimler](#lisans-ve-bildirimler)
 
 ---
+<img width="1824" height="920" alt="Ekran görüntüsü 2026-08-18 212154" src="https://github.com/user-attachments/assets/c8922fb9-a372-4833-b69b-7e35ff856bbe" />
+
 <img width="390" height="844" alt="v5-29-post-change-390-dark-feed" src="https://github.com/user-attachments/assets/f2ae24c0-c74c-4ed5-a935-adec41b273c5" />
 
-<img width="1299" height="861" alt="v5-story-viewer-attempt-1440" src="https://github.com/user-attachments/assets/4f8488c3-7a76-474d-820b-8af5e5a14008" />
-
 <img width="390" height="844" alt="v5-25-ionic-feed-pagination-390" src="https://github.com/user-attachments/assets/4dace7fc-ddbe-4fa6-9530-b7e67fa0a30b" />
+
+<img width="1299" height="861" alt="v5-story-viewer-attempt-1440" src="https://github.com/user-attachments/assets/4f8488c3-7a76-474d-820b-8af5e5a14008" />
 
 <img width="390" height="844" alt="v5-20-story-viewer-dark-phone" src="https://github.com/user-attachments/assets/da9ed28b-a550-4f2c-bbb7-8b08e080971f" />
 
