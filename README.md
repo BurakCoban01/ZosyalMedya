@@ -5,14 +5,13 @@
 iletişim ve topluluk platformudur.
 
 Uygulamadaki her görünür özellik gerçek bir arka uç servisine ve veri tabanı
-kaydına bağlıdır; sahte veri, sabit kodlanmış akış satırları veya taklit
-işlem bulunmaz. Gönderiler, reaksiyonlar, anketler, yorumlar, mesajlaşma,
+kaydına bağlıdır. Gönderiler, reaksiyonlar, anketler, yorumlar, mesajlaşma,
 bildirimler, soru-cevap, topluluklar, sosyal grafik ve Stories uçtan uca gerçek
 API çağrılarıyla çalışır.
 
 ---
 
-## İçindekiler
+## Bu Sayfanın İçindekiler
 
 - [Özellikler](#özellikler)
 - [Teknoloji yığını](#teknoloji-yığını)
@@ -26,6 +25,16 @@ API çağrılarıyla çalışır.
 - [Dokümantasyon](#dokümantasyon)
 - [Lisans ve bildirimler](#lisans-ve-bildirimler)
 
+---
+<img width="390" height="844" alt="v5-29-post-change-390-dark-feed" src="https://github.com/user-attachments/assets/f2ae24c0-c74c-4ed5-a935-adec41b273c5" />
+
+<img width="1299" height="861" alt="v5-story-viewer-attempt-1440" src="https://github.com/user-attachments/assets/4f8488c3-7a76-474d-820b-8af5e5a14008" />
+
+<img width="390" height="844" alt="v5-25-ionic-feed-pagination-390" src="https://github.com/user-attachments/assets/4dace7fc-ddbe-4fa6-9530-b7e67fa0a30b" />
+
+<img width="390" height="844" alt="v5-20-story-viewer-dark-phone" src="https://github.com/user-attachments/assets/da9ed28b-a550-4f2c-bbb7-8b08e080971f" />
+
+<img width="390" height="844" alt="v5-13-notifications-dark-phone" src="https://github.com/user-attachments/assets/c2f16acf-5b2a-43a2-8ab3-9705f46196dd" />
 ---
 
 ## Özellikler
@@ -68,17 +77,6 @@ API çağrılarıyla çalışır.
 - Rol tabanlı yönetim paneli (`/yonetim`) ve moderasyon vakaları
 - Medya için virüs tarama (ClamAV), boyut/kota sınırları ve sahip doğrulaması
 - JWT tabanlı kimlik doğrulama, izin kontrolleri ve güvenli oturum yönetimi
-
-<img width="390" height="844" alt="v5-29-post-change-390-dark-feed" src="https://github.com/user-attachments/assets/f2ae24c0-c74c-4ed5-a935-adec41b273c5" />
-
-<img width="1299" height="861" alt="v5-story-viewer-attempt-1440" src="https://github.com/user-attachments/assets/4f8488c3-7a76-474d-820b-8af5e5a14008" />
-
-<img width="390" height="844" alt="v5-25-ionic-feed-pagination-390" src="https://github.com/user-attachments/assets/4dace7fc-ddbe-4fa6-9530-b7e67fa0a30b" />
-
-<img width="390" height="844" alt="v5-20-story-viewer-dark-phone" src="https://github.com/user-attachments/assets/da9ed28b-a550-4f2c-bbb7-8b08e080971f" />
-
-<img width="390" height="844" alt="v5-13-notifications-dark-phone" src="https://github.com/user-attachments/assets/c2f16acf-5b2a-43a2-8ab3-9705f46196dd" />
-
 
 ---
 
